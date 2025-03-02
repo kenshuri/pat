@@ -166,7 +166,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = "admin@petites-annonces-theatre.fr"  # Use an email associated with your domain
+DEFAULT_FROM_EMAIL = "ne-pas-repondre@petites-annonces-theatre.fr"
 
 
 # HTMX
