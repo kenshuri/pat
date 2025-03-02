@@ -1,5 +1,8 @@
-<div class="card bg-base-100 shadow-md hover:shadow-xl  transition-all duration-300 hover:-translate-y-1 cursor-pointer" x-data="{ offerUrl: '{% url 'offer' offer.id %}' }">
-    <div class="card-body" x-on:click="window.location.href = offerUrl">
+<div class="card bg-base-100 shadow-md hover:shadow-xl  transition-all duration-300 hover:-translate-y-1 cursor-pointer select-none"
+     x-data="{ offerUrl: '{% url 'offer' offer.id %}' }"
+     x-on:click="window.location.href = offerUrl"
+>
+    <div class="card-body">
         <h2 class="card-title flex justify-between">
             {{ offer.title|capfirst}}
             {% if offer.recent %}
