@@ -30,7 +30,8 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG") == 'True'
 
-ALLOWED_HOSTS = ['pat-production-b5b4.up.railway.app', '127.0.0.1']
+ALLOWED_HOSTS = ['pat-production-b5b4.up.railway.app', '127.0.0.1',
+                 'petites-annonces-theatre.fr']
 
 
 # Application definition
@@ -166,4 +167,4 @@ DEFAULT_FROM_EMAIL = "admin@petites-annonces-theatre.fr"  # Use an email associa
 
 
 # HTMX
-CSRF_TRUSTED_ORIGINS = ['https://pat-production-b5b4.up.railway.app']
+CSRF_TRUSTED_ORIGINS = ['https://pat-production-b5b4.up.railway.app', 'https://petites-annonces-theatre.fr/']
