@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG") == 'True'
 
-ALLOWED_HOSTS = ['pat-production-b5b4.up.railway.app']
+ALLOWED_HOSTS = ['pat-production-b5b4.up.railway.app', '127.0.0.1']
 
 
 # Application definition
@@ -162,7 +162,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = "blog@kenshuri.com"  # Use an email associated with your domain
+DEFAULT_FROM_EMAIL = "admin@petites-annonces-theatre.fr"  # Use an email associated with your domain
 
 
 # HTMX
