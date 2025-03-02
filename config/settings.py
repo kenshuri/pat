@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG") == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['pat-production-b5b4.up.railway.app']
 
 
 # Application definition
@@ -130,6 +130,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -155,3 +162,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "ae4c65e678852d15a578dceaa6e5b7cf"  # Replace with your API Key
 EMAIL_HOST_PASSWORD = "dea2f66f564b2008a2cf077edb30c7b6"  # Replace with your Secret Key
 DEFAULT_FROM_EMAIL = "blog@kenshuri.com"  # Use an email associated with your domain
+
+
+# HTMX
+CSRF_TRUSTED_ORIGINS = ['https://pat-production-b5b4.up.railway.app']

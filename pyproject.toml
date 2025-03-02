@@ -14,4 +14,5 @@ dependencies = [
     "psycopg[binary,pool]>=3.2.5",
     "python-dotenv>=1.0.1",
     "pytz>=2025.1",
+    "whitenoise>=6.9.0",
 ]
