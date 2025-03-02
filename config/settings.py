@@ -171,5 +171,5 @@ DEFAULT_FROM_EMAIL = "admin@petites-annonces-theatre.fr"  # Use an email associa
 
 # HTMX
 CSRF_TRUSTED_ORIGINS = ['https://pat-production-b5b4.up.railway.app',
-                        'https://petites-annonces-theatre.fr/',
+                        'https://petites-annonces-theatre.fr',
                         'https://pat-dev.up.railway.app']
