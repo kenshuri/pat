@@ -1,0 +1,64 @@
+{% extends "core/base.html" %}
+
+{% block title %}
+Petites Annonces Théâtre
+{% endblock title %}
+
+{% block main %}
+<div class="bg-base-100 rounded p-4 mt-2">
+    {% if form.errors %}
+    <div class="bg-error flex p-2 rounded items-center gap-3">
+        <div>
+            <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="flex flex-col gap-0.5">
+            {{ form.errors.username }}
+            {{ form.errors.email }}
+            {{ form.errors.password1 }}
+            {{ form.errors.password2 }}
+        </div>
+    </div>
+    {% endif %}
+    <form action="{% url 'signup' %}" class="form-control" method="post">
+        {% csrf_token %}
+        <fieldset class="fieldset bg-base-200 border border-base-300 p-4 rounded-box">
+            <legend class="fieldset-legend">S'inscrire</legend>
+
+            <label for="id_email" class="fieldset-label">Email</label>
+            <div class="flex">
+                <input class="input grow" type="email" id="id_email" name="email"
+                       autofocus autocapitalize="none" autocomplete="username"
+                       maxlength="254" required placeholder="abcde@xyz.fr"/>
+            </div>
+
+            <label class="fieldset-label mt-2" for="id_password1">Mot de passe</label>
+            <div class="flex">
+                <input class="input grow" type="password"  id="id_password1" name="password1"
+                       autocomplete="new-password" required placeholder="*************"
+                       aria-describedby="id_password1_helptext"
+                />
+            </div>
+            <p class="fieldset-label" id="id_password1_helptext">Le mot doit faire plus de 8 caractères, ne pas être un mot de passe trop commun et ne pas être entièrement numérique.</p>
+
+            <label class="fieldset-label mt-2" for="id_password2">Confirmation du Mot de passe</label>
+            <div class="flex">
+                <input class="input grow" type="password"  id="id_password2" name="password2"
+                       autocomplete="new-password" required placeholder="*************"
+                       aria-describedby="id_password2_helptext"
+                />
+            </div>
+
+            <button class="btn btn-primary mt-2"
+                    type="submit">S'inscrire</button>
+            <input type="hidden" name="next" value="{% url 'index'%}">
+        </fieldset>
+
+    </form>
+    <div class="mt-4">
+        Déjà inscrit ?
+    <a href="{% url 'login' %}" class="btn btn-soft btn-block mt-2">
+        Se connecter
+    </a>
+    </div>
+</div>
+{% endblock %}

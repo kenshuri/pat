@@ -1,0 +1,122 @@
+{% extends "core/base.html" %}
+
+{% block title %}
+Petites Annonces Théâtre
+{% endblock title %}
+
+{% block main %}
+<div class="bg-base-100 rounded p-4 mt-2 prose max-w-none">
+    <h2 class="text-xl">
+        Bienvenue sur <a href="{% url 'index' %}" class="link">petites-annonces-theatre</a>, votre site dédié aux petites annonces pour le théâtre amateur !
+    </h2>
+
+    <h2 class="text-lg font-bold mt-2">
+        Notre mission
+    </h2>
+    <p>
+        Nous avons créé ce site pour répondre à un besoin essentiel : permettre aux passionnés, comédiens amateurs, troupes et metteurs en scène de se rencontrer et collaborer.
+        Que vous cherchiez des comédiens pour votre prochaine production ou que vous soyez un acteur en quête d'une troupe, notre plateforme est là pour vous.
+    </p>
+
+    <h2 class="text-lg font-bold mt-2">
+        Pourquoi nous existons
+    </h2>
+    <p>
+        Tout a commencé avec la fermeture de la page "Annonces" du site <a class="link" href="https://www.theatre-contemporain.net/annonces/">theatre-contemporain.net</a>, une ressource précieuse pour les annonces théâtrales.
+        La migration vers <a class="link" href="https://www.artcena.fr/annonces">Artcena</a>, qui se concentre uniquement sur les emplois professionnels, a laissé un vide pour les amateurs.
+        En tant que comédien amateur moi-même, j'ai ressenti ce manque.
+        C'est pourquoi j'ai décidé de créer un espace dédié aux amateurs, pour que la passion du théâtre puisse continuer à prospérer et à s'épanouir.
+    </p>
+
+    <h2 class="text-lg font-bold mt-2">
+        Comment ça marche
+    </h2>
+    <p>
+        Sur <a href="{% url 'index' %}" class="link">petites-annonces-theatre</a>, vous pouvez :
+    <ul>
+        <li>
+            <span><i class="fa-solid fa-check"></i></span> <span class="font-semibold">Publier des annonces</span> : Que vous soyez à la recherche de comédiens pour un projet spécifique ou que vous offriez vos talents de comédien, notre site vous permet de publier et de consulter des annonces gratuitement.
+        </li>
+        <li>
+            <span><i class="fa-solid fa-check"></i></span> <span class="font-semibold">Répondre à des annonces</span>
+        </li>
+    </ul>
+    <p>
+        Et c'est tout ! Pas besoin de faire compliqué quand on peut faire simple : nous nous sommes inspiré du fonctionnement de <a class="link" href="https://www.theatre-contemporain.net/annonces/">theatre-contemporain.net</a>.
+    </p>
+    <h2 class="text-lg font-bold mt-2">Un site gratuit et hébergé en Europe</h2>
+    <p>
+        Au départ, <a href="{% url 'index' %}" class="link">petites-annonces-theatre</a>
+        était hébergé par <strong>O2Switch</strong>, un hébergeur français.
+        Cependant, face à la croissance du site et à certains problèmes techniques liés à la
+        gestion du trafic, j'ai décidé de migrer vers de nouvelles solutions d'hébergement pour
+        garantir une expérience plus fluide et rapide.
+    </p>
+    <p>
+        Désormais, le site fonctionne avec des services modernes et performants, répartis sur
+        plusieurs plateformes :
+    <ul>
+        <li>
+            <strong>Moteur du site : Railway.com</strong>, une plateforme cloud qui assure une gestion simple et efficace des ressources du site. Le serveur est situé à Amsterdam, garantissant rapidité et proximité pour nos utilisateurs européens.
+        </li>
+        <li>
+            <strong>Base de données : NeonDB</strong>, un service cloud performant, localisé à Francfort, assurant une faible latence pour une navigation rapide.
+        </li>
+        <li>
+            <strong>Serveur Mail : MailJet</strong>, pour une gestion fiable des emails transactionnels.
+        </li>
+    </ul>
+    Cette migration permet de maintenir le site sans publicité et accessible à tous, tout en offrant une meilleure stabilité. Toutefois, ces services génèrent des coûts, et pour continuer à vous offrir une plateforme gratuite, j'ai mis en place une page de soutien où vous pouvez contribuer au financement des frais de fonctionnement.
+    </p>
+    <h2 class="text-lg font-bold mt-2">
+        Soutenez le site
+    </h2>
+    <p>
+        Si vous appréciez <a href="{% url 'index' %}" class="link">petites-annonces-theatre</a>
+        et souhaitez participer à son maintien, vous pouvez désormais soutenir
+        l'initiative via une page dédiée.
+        Je n'ai pas encore énormément de recul sur les frais de fonctionnement mensuels du site
+        mais je pense qu'ils s’élèveront environ à une trentaine d'euros.
+        Votre contribution permettra de couvrir ces coûts tout en conservant le site sans publicité
+        et totalement gratuit.
+    </p>
+    <h2 class="text-lg font-bold mt-2">
+        Rejoignez-nous
+    </h2>
+    <p>
+        Nous vous invitons à rejoindre notre plateforme et à faire partie de cette aventure théâtrale.
+        Ensemble, nous pouvons créer un espace où la passion du théâtre amateur peut continuer à vivre et à inspirer.
+    </p>
+
+    <p class="mt-2 italic text-lg">
+        Merci de votre visite et bienvenue dans notre communauté théâtrale !
+    </p>
+
+    <h2 class="text-lg font-bold mt-6">Quelques ressources supplémentaires</h2>
+    <p>
+    <ul>
+        <li>
+            <span><i class="fa-solid fa-link"></i></span> <a href="https://www.artcena.fr/annonces" class="link">Artcena</a>
+        </li>
+        <li>
+            <span><i class="fa-solid fa-link"></i></span> Groupe Facebook : <a href="https://www.facebook.com/groups/1938098569737654/" class="link">Théâtre : annonces auditions</a>
+        </li>
+        <li>
+            <span><i class="fa-solid fa-link"></i></span> Groupe Facebook : <a href="https://www.facebook.com/groups/2469130543348250/" class="link">Théâtre et dramaturgie</a>
+        </li>
+        <li>
+            <span><i class="fa-solid fa-link"></i></span> Groupe Facebook : <a href="https://www.facebook.com/groups/176327691960144/" class="link">Annonce pour theâtre amateur et bénévole, sur Paris et l'Île de France</a>
+        <li>
+            <span><i class="fa-solid fa-link"></i></span> <a href="https://www.theatrotheque.com/biz/annonces.php?pge=0&option=moteur&Region_rech=&Recherche=&SRub_rech=37#gsc.tab=0" class="link">TheatroBiz</a>
+        </li>
+        <li>
+            <span><i class="fa-solid fa-link"></i></span> <a href="https://www.spectable.com/Th%C3%A9%C3%A2tre-amateur/petites-annonces/cherche/acteur-actrice/n_2095.php" class="link">Spectable</a>
+        </li>
+        <li>
+            <span><i class="fa-solid fa-link"></i></span> <a href="https://www.ici-azimut.fr/" class="link">Azimut</a>
+        </li>
+    </ul>
+    </p>
+
+</div>
+{% endblock main %}

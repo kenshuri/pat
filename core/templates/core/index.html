@@ -1,0 +1,37 @@
+{% extends "core/base.html" %}
+
+{% block title %}
+Petites annonces dédiées au théâtre amateur pour connecter troupes et comédiens à la recherche d'un projet théatral
+{% endblock title %}
+
+{% block main %}
+<div class="p-2 md:p-0 md:mt-2">
+    <!--        Annonce temporaire-->
+    <a href="{% url 'announcement' %}">
+        <div role="alert" class="alert alert-info my-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span class="font-semibold">Annonce : Quelques changements sur le site !</span>
+        </div>
+    </a>
+
+    <!--Search Bar-->
+    <div class="flex">
+        <label class="input input-bordered grow items-center gap-2">
+            <input type="text" placeholder="Rechercher des offres"
+                   name="search"
+                   hx-post="{% url 'offer_search' %}"
+                   hx-target="#id_offers"
+                   hx-trigger = "keyup changed delay:ms"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 opacity-70"><path fill-rule="evenodd" d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clip-rule="evenodd" /></svg>
+        </label>
+    </div>
+
+    <!--Offers cards-->
+    <div id="id_offers">
+        {% include "core/partials/offers_partials.html" %}
+    </div>
+</div>
+
+{% endblock main %}

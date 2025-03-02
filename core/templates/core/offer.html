@@ -1,0 +1,104 @@
+{% extends "core/base.html" %}
+
+{% block title %}
+    Petites Annonces Théâtre
+{% endblock title %}
+
+{% block main %}
+    <div class="bg-base-100 rounded p-4 mt-2 flex flex-col gap-2">
+        <div class="flex flex-col gap-1">
+            <div class="flex flex-wrap items-center justify-between tracking-wide">
+                <h1 class="font-bold text-xl">{{ offer.title|capfirst }}</h1>
+                <div>{{ offer.created_on }}</div>
+            </div>
+            <div class="flex flex-row flex-wrap gap-2">
+                {% if offer.category == 'paid' %}
+                    <div class="badge badge-primary">Rémunéré</div>
+                {% else %}
+                    <div class="badge badge-primary badge-soft">Bénévole</div>
+                {% endif %}
+                {% if offer.type == 'offer' %}
+                    <div class="badge badge-secondary badge-soft flex gap-0.5"><i class="fa-solid fa-people-group"></i><i class="fa-solid fa-magnifying-glass-arrow-right"></i><i class="fa-solid fa-person-half-dress"></i></div>
+                {% else %}
+                    <div class="badge badge-secondary flex gap-0.5"><i class="fa-solid fa-person-half-dress"></i><i class="fa-solid fa-magnifying-glass-arrow-right"></i><i class="fa-solid fa-people-group"></i></div>
+                {% endif %}
+                {% if offer.city %}
+                    <div class="badge badge-neutral badge-soft">
+                        <i class="fa-solid fa-house"></i>
+                        <span class="ml-2">{{ offer.city }}</span>
+                    </div>
+                {% endif %}
+                {% if offer.min_age or offer.max_age %}
+                    <div class="badge badge-outline">
+                        <i class="fa-solid fa-user"></i>
+                        {% if offer.min_age and offer.max_age %}
+                            <span class="ml-1">
+                            {{ offer.min_age }}
+                        </span>
+                            <span>-</span>
+                            <span>
+                        {{ offer.max_age }}
+                        </span>
+                        {% endif %}
+                        {% if offer.min_age and not offer.max_age%}
+                            <span class="ml-1">+ de {{ offer.min_age }}</span>
+                        {% endif %}
+                        {% if offer.max and not offer.min_age %}
+                            <span class="ml-1">- de {{ offer.max_age }}</span>
+                        {% endif %}
+                        <span class="ml-1">ans</span>
+                    </div>
+                {% endif %}
+                {% if offer.gender %}
+                    <div class="badge badge-neutral badge-dash">
+                        <i class="fa-solid fa-person-half-dress"></i>
+                        <span class="ml-2">
+                    {% if offer.gender == 'female' %}
+                        Femme
+                    {% elif offer.gender == 'male' %}
+                        Homme
+                    {% else %}
+                        Non-Binaire
+                    {% endif %}
+                        </span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <p class="italic text-lg">{{ offer.summary }}</p>
+        <p class="overflow-hidden text-ellipsis">{{ offer.description|linebreaksbr}}</p>
+        {% if offer.author and offer.show_author_mail %}
+            <div class="flex flex-row justify-end">
+                <p class="italic">Contact: <a href="mailto:{{ offer.author.email }}" class="link">{{ offer.author.email }}</a></p>
+            </div>
+        {% endif %}
+        {% if offer.author == request.user %}
+            <div class="flex gap-2 flex-wrap">
+                <div>
+                    <a href="{% url 'update_offer' offer.id %}" class="btn btn-soft">
+                        <i class="fa-solid fa-pen"></i>
+                        <span class="ml-2">
+                    Modifier l'annonce
+                    </span>
+                    </a>
+                </div>
+                <div>
+                    <a href="{% url 'delete_offer' offer.id %}" class="btn btn-success">
+                        <i class="fa-solid fa-handshake-simple"></i>
+                        <span class="ml-2">
+                    Annonce pourvue
+                    </span>
+                    </a>
+                </div>
+                <div>
+                    <a href="{% url 'delete_offer' offer.id %}" class="btn btn-error">
+                        <i class="fa-solid fa-trash"></i>
+                        <span class="ml-2">
+                    Supprimer l'annonce
+                    </span>
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock main %}

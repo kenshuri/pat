@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5.0, minimum-scale=0.86">
+    <meta name="description" content="Le site de petites annonces pour théâtre amateur destiné à la mise en relation de troupes à la recherche de comédiens et de comédiens à la recherche de leur nouveau projet théâtral. Complétement gratuit et hébergé en France !">
+    <link rel="stylesheet" href="{% static "css/output.css" %}">
+    <link rel="icon" type="image/png" href="{% static 'mask.svg' %}"/>
+    <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+    <script src="https://unpkg.com/htmx.org@1.8.0" integrity="sha384-cZuAZ+ZbwkNRnrKi05G/fjBX+azI9DNOkNYysZ0I/X5ZFgsmMiBXgDZof30F5ofc" crossorigin="anonymous" defer></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <title>
+        {% block title %}
+        {% endblock title %}
+    </title>
+</head>
+<body class="bg-base-200">
+<header>
+    <div class="flex bg-base-100 max-w-3xl mx-auto lg:max-w-4xl xl:max-w-6xl justify-between gap-2">
+        <div class="flex ">
+            <a class="gap-1 flex items-center" href="{% url 'index' %}">
+                <div class="avatar">
+                    <div class="w-16 md:w-24 rounded">
+                        <img alt="logo" src="{% static 'mask.svg' %}" />
+                    </div>
+                </div>
+                <span class="flex font-bold text-base md:text-xl">Petites Annonces Théâtre</span>
+            </a>
+        </div>
+        <div class="flex gap-2 items-center mr-2">
+            <a href="{% url 'add_offer' %}" class='btn btn-accent' aria-label="déposer une annonce"><i class='fa-solid fa-plus'></i><span class="hidden ml-2 sm:inline-flex">Déposer une annonce</span><span class="ml-2 sm:ml-0 sm:hidden">Annonce</span></a>
+            <a href="{% url 'about' %}" class="btn btn-soft btn-info" aria-label="à propos"><i class="fa-solid fa-circle-info"></i><span class="hidden md:inline ml-2">À propos</span></a>
+            {% if user.is_authenticated %}
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-sm btn-circle btn-neutral" aria-label="utilisateur">
+                        <i class="fa-regular fa-user"></i>
+                    </div>
+                    <ul tabindex="0" class="mt-3 z-[1] p-2 shadow-2xl menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                        <li class="p-2 underline">
+                            {{ user.email }}
+                        </li>
+                        <form method="post" action="{% url 'logout' %}">
+                            <li>
+                                {% csrf_token %}
+                                <button type="submit" aria-label="se déconnecter">
+                                    <i class="fa-solid fa-right-from-bracket"></i>
+                                    Se déconnecter
+                                </button>
+                                <input type="hidden" name="next" value="{% url 'index'%}">
+                            </li>
+                        </form>
+                    </ul>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-sm btn-circle" aria-label="se connecter">
+                    <i class="fa-regular fa-user"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+<main class="min-h-screen max-w-3xl mx-auto lg:max-w-4xl xl:max-w-6xl place-content-start">
+    {%  block main %}
+    {%  endblock main %}
+</main>
+<footer class="footer items-center p-4 bg-neutral text-neutral-content max-w-3xl mx-auto lg:max-w-4xl xl:max-w-6xl mt-2">
+    <aside class="items-center grid-flow-col">
+        <div class="avatar">
+            <div class="w-16 rounded">
+                <img alt="logo" src="{% static 'mask.svg' %}" />
+            </div>
+        </div>
+        <div>
+            Vous pouvez contacter le créateur de ce site web à 
+            <a class="link" href="mailto:admin@petites-annonces-theatre.fr">cette adresse</a> et le soutenir à
+            <a class="link" href="https://ko-fi.com/petitesannoncestheatre">celle-ci</a> !
+        </div>
+    </aside>
+</footer>
+<script>
+    document.body.addEventListener('htmx:configRequest', (event) => {
+        event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    })
+</script>
+</body>
+</html>

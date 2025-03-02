@@ -1,0 +1,67 @@
+{% if offer_id == -1 %}
+<form action="{% url 'add_offer' %}" method="post">
+{% else %}
+<form action="{% url 'update_offer' offer_id %}" method="post">
+{% endif %}
+{% csrf_token %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div class="form-control">
+            <label class="label" for="id_type">{{ form.type.label }}*</label>
+            <select class="select select-bordered" name="type" id="id_type">
+                <option value="offer" {% if form.instance.type == 'offer' %}selected{% elif form.instance.type == 'demand' %} {% else %}selected{% endif %}>Troupe cherche comédien.ne</option>
+                <option value="demand" {% if form.instance.type == 'demand' %}selected{% endif %}>Comédien.ne cherche troupe</option>
+            </select>
+        </div>
+        <div class="form-control">
+            <label class="label" for="id_category">{{ form.category.label }}*</label>
+            <select class="select select-bordered" name="category" id="id_category">
+                <option value="unpaid" {% if form.instance.category == 'unpaid' %}selected{% elif form.instance.category == 'paid' %} {% else %}selected{% endif %}>Bénévole</option>
+                <option value="paid" {% if form.instance.category == 'paid' %} selected{% endif %}>Rémunéré</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-control">
+        <label class="label" for="id_title">{{ form.title.label }}*</label>
+        <input class="input input-bordered" type="text" name="title" maxlength="50" required id="id_title" value="{{ form.instance.title }}">
+    </div>
+    <div class="form-control">
+        <label class="label" for="id_summary">{{ form.summary.label }}*</label>
+        <input class="input input-bordered" type="text" name="summary" maxlength="255" required id="id_summary" value="{{ form.instance.summary }}">
+    </div>
+    <div class="form-control">
+        <label class="label" for="id_description">{{ form.description.label }}</label>
+        <textarea class="textarea textarea-bordered" name="description" rows="5" maxlength="5000" id="id_description">
+                {{ form.instance.description }}
+            </textarea>
+    </div>
+    <div class="form-control">
+        <label class="label" for="id_city">{{ form.city.label }}</label>
+        <input class="input input-bordered" type="text" name="city" maxlength="255" id="id_city" value="{{ form.instance.city }}">
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <div class="form-control">
+            <label class="label" for="id_min_age">{{ form.min_age.label }}</label>
+            <input class="input input-bordered" type="number" name="min_age" min="0" id="id_min_age" value="{{ form.instance.min_age }}">
+            {{ form.min_age.errors }}
+        </div>
+        <div class="form-control">
+            <label class="label" for="id_max_age">{{ form.max_age.label }}</label>
+            <input class="input input-bordered" type="number" name="max_age" min="0" id="id_max_age"  value="{{ form.instance.max_age }}">
+            <p>{{ form.max_age.errors }}</p>
+        </div>
+        <div class="form-control col-span-2 md:col-span-1">
+            <label class="label" for="id_gender">{{ form.gender.label }}</label>
+            <select class="select select-bordered" name="gender" id="id_gender">
+                <option value="" {% if form.instance.gender == '' %}selected{% elif form.instance.type == 'other' %} {% elif form.instance.type == 'female' %} {% elif form.instance.type == 'male' %} {% else %}selected{% endif %}>---------</option>
+                <option value="other" {% if form.instance.gender == 'other' %}selected{% else %} {% endif %}>Non-Binaire</option>
+                <option value="female" {% if form.instance.gender == 'female' %}selected{% else %} {% endif %}>Femme</option>
+                <option value="male" {% if form.instance.gender == 'male' %}selected{% else %} {% endif %}>Homme</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-control flex flex-row gap-2 items-center">
+        <label class="label" for="id_show_author_mail">{{ form.show_author_mail.label }}</label>
+        <input class="toggle" name="show_author_mail" id="id_show_author_mail" type="checkbox" {% if form.instance.show_author_mail %}checked{% else %}{% endif %}>
+    </div>
+    <input class="btn btn-block mt-2" type="submit" value="{% if offer_id == -1 %}Déposer{% else %}Modifier{% endif %} mon annonce">
+</form>
