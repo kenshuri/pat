@@ -159,8 +159,8 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "in-v3.mailjet.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "ae4c65e678852d15a578dceaa6e5b7cf"  # Replace with your API Key
-EMAIL_HOST_PASSWORD = "dea2f66f564b2008a2cf077edb30c7b6"  # Replace with your Secret Key
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = "blog@kenshuri.com"  # Use an email associated with your domain
 
 
