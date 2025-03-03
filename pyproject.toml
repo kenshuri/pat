@@ -3,7 +3,7 @@ name = "pat"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dependencies = [
     "dj-database-url>=2.3.0",
     "django-browser-reload>=1.18.0",
