@@ -2,7 +2,7 @@
      x-data="{ offerUrl: '{% url 'offer' offer.id %}', clicked: false, touched: false }"
      :class="{
         'shadow-md hover:shadow-xl translate-y-0 hover:-translate-y-1 ': !clicked && !touched,
-        'opacity-50 shadow-sm hover:shadow-sm translate-y-1 hover:translate-y-0.5': (clicked && !touched),
+        'opacity-50 shadow-sm hover:shadow-sm translate-y-1 hover:translate-y-0.5': clicked && !touched,
         'opacity-50 shadow-none hover:shadow-none translate-y-1 hover:translate-y-1': !clicked && touched,
      }"
      @click="window.location.href = offerUrl"
@@ -14,12 +14,6 @@
      @touchcancel="clicked = false"
 >
     <div class="card-body">
-        <div x-text="clicked"></div>
-        <div x-text="touched"></div>
-        <div x-text="!clicked && !touched"></div>
-        <div x-text="clicked && !touched"></div>
-        <div x-text="!clicked && touched"></div>
-        <div x-text="clicked && touched"></div>
         <h2 class="card-title flex justify-between">
             {{ offer.title|capfirst}}
             {% if offer.recent %}
