@@ -1,25 +1,15 @@
 <div class="card bg-base-100 transition-all duration-300 cursor-pointer select-none"
-     x-data="{ offerUrl: '{% url 'offer' offer.id %}', clicked: false, touched: false }"
+     x-data="{ offerUrl: '{% url 'offer' offer.id %}', clicked: false }"
      :class="{
-        'shadow-md hover:shadow-xl translate-y-0 hover:-translate-y-1 ': !clicked && !touched,
-        'opacity-50 shadow-sm hover:shadow-sm translate-y-1 hover:translate-y-0.5': (clicked && !touched),
-        'opacity-50 shadow-none hover:shadow-none translate-y-1 hover:translate-y-1': !clicked && touched,
+        'shadow-md hover:shadow-xl translate-y-0 hover:-translate-y-1 ': !clicked,
+        'opacity-50 shadow-sm hover:shadow-sm translate-y-1 hover:translate-y-0.5': clicked,
      }"
      @click="window.location.href = offerUrl"
      @mousedown="clicked = true"
      @mouseup="clicked = false"
      @mouseleave="clicked = false"
-     @touchstart="clicked = true"
-     @touchend="clicked = false"
-     @touchcancel="clicked = false"
 >
     <div class="card-body">
-        <div x-text="clicked"></div>
-        <div x-text="touched"></div>
-        <div x-text="!clicked && !touched"></div>
-        <div x-text="clicked && !touched"></div>
-        <div x-text="!clicked && touched"></div>
-        <div x-text="clicked && touched"></div>
         <h2 class="card-title flex justify-between">
             {{ offer.title|capfirst}}
             {% if offer.recent %}
