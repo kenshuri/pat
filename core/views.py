@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -29,6 +31,7 @@ def signup(request):
 
 @login_required
 def add_offer(request):
+    MAPBOX_ACCESS_TOKEN = os.environ.get("MAPBOX_ACCESS_TOKEN")
     # with open('blogApp/static/fr_cities.json') as f:
     #     fr_cities = json.load(f)
     if request.method == 'POST':
@@ -42,11 +45,14 @@ def add_offer(request):
             return redirect('index')
     else:
         form = OfferForm()
-    return render(request, 'core/add_offer.html', {'form': form, 'offer_id': -1})
+    return render(request,
+                  'core/add_offer.html',
+                  {'form': form, 'offer_id': -1, 'MAPBOX_ACCESS_TOKEN': MAPBOX_ACCESS_TOKEN})
 
 
 @login_required
 def update_offer(request, offer_id: int):
+    MAPBOX_ACCESS_TOKEN = os.environ.get("MAPBOX_ACCESS_TOKEN")
     if request.method == 'POST':
         offer = get_object_or_404(Offer, id=offer_id)
         if offer.author != request.user:
@@ -60,7 +66,9 @@ def update_offer(request, offer_id: int):
         if offer.author != request.user:
             return redirect('index')
         form = OfferForm(instance=offer)
-    return render(request, 'core/add_offer.html', {'form': form, 'offer_id': offer_id})
+    return render(request,
+                  'core/add_offer.html',
+                  {'form': form, 'offer_id': offer_id, 'MAPBOX_ACCESS_TOKEN': MAPBOX_ACCESS_TOKEN})
 
 
 @login_required
