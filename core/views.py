@@ -113,6 +113,10 @@ def offer_search(request):
 
 
 
+def offer_contact_info(request, offer_id: int):
+    offer = get_object_or_404(Offer, pk=offer_id)
+    return render(request, 'core/partials/offer_contact_info.html', {'offer': offer})
+
 
 def about(request):
     return render(request, 'core/about.html')

@@ -15,7 +15,13 @@ class OfferForm(ModelForm):
                   'min_age',
                   'max_age',
                   'gender',
-                  'show_author_mail']
+                  'show_author_mail',
+                  'contact_name',
+                  'contact_email',
+                  'contact_phone',
+                  'contact_website',
+                  'contact_details',
+                  ]
         labels = {
             'type': "Type d'annonce",
             'category': 'Catégorie',
@@ -25,8 +31,14 @@ class OfferForm(ModelForm):
             'min_age': 'Âge apparent minimal',
             'max_age': 'Âge apparent maximal',
             'gender': 'Genre',
-            'show_author_mail': 'Afficher email'
+            'show_author_mail': 'Afficher Email utilisateur',
+            'contact_name': 'Nom du contact',
+            'contact_email': 'Email',
+            'contact_phone': 'Numéro de téléphone',
+            'contact_website': 'Site internet',
+            'contact_details': 'Infos supplémentaires',
         }
+
 
 class SignUpForm(UserCreationForm):
     class Meta:
