@@ -67,13 +67,14 @@
         </div>
         <p class="italic text-lg">{{ offer.summary }}</p>
         <p class="overflow-hidden text-ellipsis">{{ offer.description|linebreaksbr}}</p>
-        {% if offer.author and offer.show_author_mail %}
-            <div class="flex flex-row justify-end">
-                <p class="italic">Contact: <a href="mailto:{{ offer.author.email }}" class="link">{{ offer.author.email }}</a></p>
-            </div>
-        {% endif %}
+        <div class="mt-4" id="contact_info">
+            <button class="btn btn-info"
+                    hx-post="{% url 'offer_contact_info' offer.id %}" hx-swap="outerHTML">
+                Afficher les informations de contact
+            </button>
+        </div>
         {% if offer.author == request.user %}
-            <div class="flex gap-2 flex-wrap">
+            <div class="flex gap-2 flex-wrap mt-4">
                 <div>
                     <a href="{% url 'update_offer' offer.id %}" class="btn btn-soft">
                         <i class="fa-solid fa-pen"></i>

@@ -52,7 +52,12 @@ class Offer(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     filled = models.BooleanField(default=False)
     author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
-    show_author_mail = models.BooleanField(default=True)
+    show_author_mail = models.BooleanField(default=False)
+    contact_name = models.CharField(max_length=255, null=True, blank=True)
+    contact_email = models.EmailField(null=True, blank=True)
+    contact_phone = models.CharField(max_length=255, null=True, blank=True)
+    contact_website = models.URLField(null=True, blank=True)
+    contact_details = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f'{self.title} - {self.author} - {self.created_on.strftime("%Y-%m-%d, %H:%M")}'

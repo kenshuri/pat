@@ -1,0 +1,33 @@
+<div class="flex flex-col p-2 border rounded gap-2 bg-base-200">
+    <div class="font-semibold">Informations de contact</div>
+    {% if offer.contact_name %}
+    <div class="flex gap-2 items-center">
+        <i class="fa-solid fa-user"></i> {{offer.contact_name}}
+    </div>
+    {% endif %}
+    {% if offer.contact_email %}
+    <div class="flex gap-2 items-center">
+        <i class="fa-solid fa-envelope"></i> <a class="link" href="mailto:{{offer.contact_email}}">{{offer.contact_email}}</a>
+    </div>
+    {% endif %}
+    {% if offer.author and offer.show_author_mail %}
+    <div class="flex gap-2 items-center">
+        <i class="fa-solid fa-envelope"></i> <a class="link" href="mailto:{{offer.author.email}}">{{offer.author.email}}</a>
+    </div>
+    {% endif %}
+    {% if offer.contact_phone %}
+    <div class="flex gap-2 items-center">
+        <i class="fa-solid fa-phone"></i> {{offer.contact_phone}}
+    </div>
+    {% endif %}
+    {% if offer.contact_website %}
+    <div class="flex gap-2 items-center">
+        <i class="fa-solid fa-link"></i> <a class="link" href="{{offer.contact_website}}">{{offer.contact_website}}</a>
+    </div>
+    {% endif %}
+    {% if offer.contact_details %}
+    <div class="flex gap-2 items-center">
+        <i class="fa-solid fa-info"></i> {{offer.contact_details}}
+    </div>
+    {% endif %}
+</div>
