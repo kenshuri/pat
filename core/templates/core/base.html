@@ -43,6 +43,9 @@
                         <li class="p-2 underline">
                             {{ user.email }}
                         </li>
+                        <li>
+                            <a href="{% url 'offer_user'%}"><i class="fa-solid fa-envelopes-bulk"></i>Mes annonces</a>
+                        </li>
                         <form method="post" action="{% url 'logout' %}">
                             <li>
                                 {% csrf_token %}
@@ -75,7 +78,7 @@
             </div>
         </div>
         <div>
-            Vous pouvez contacter le créateur de ce site web à 
+            Vous pouvez contacter le créateur de ce site web à
             <a class="link" href="mailto:admin@petites-annonces-theatre.fr">cette adresse</a> et le soutenir à
             <a class="link" href="https://ko-fi.com/petitesannoncestheatre">celle-ci</a> !
         </div>

@@ -1,0 +1,16 @@
+{% extends "core/base.html" %}
+
+{% block title %}
+Petites annonces dédiées au théâtre amateur pour connecter troupes et comédiens à la recherche d'un projet théatral
+{% endblock title %}
+
+{% block main %}
+<div class="p-2 md:p-0 md:mt-2">
+
+    <!--Offers cards-->
+    <div id="id_offers">
+        {% include "core/partials/offers_partials.html" %}
+    </div>
+</div>
+
+{% endblock main %}

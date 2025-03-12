@@ -42,7 +42,8 @@ def add_offer(request):
             # For example: offer.author = request.user
             offer.author = request.user
             offer.save()
-            return redirect('index')
+            offer_id = offer.id
+            return redirect('offer', offer_id=offer_id)
     else:
         form = OfferForm()
     return render(request,
@@ -56,15 +57,15 @@ def update_offer(request, offer_id: int):
     if request.method == 'POST':
         offer = get_object_or_404(Offer, id=offer_id)
         if offer.author != request.user:
-            return redirect('index')
+            return redirect('offer', offer_id=offer_id)
         form = OfferForm(request.POST, instance=offer)
         if form.is_valid():
             form.save()
-            return redirect('index')
+            return redirect('offer', offer_id=offer_id)
     else:
         offer = get_object_or_404(Offer, id=offer_id)
         if offer.author != request.user:
-            return redirect('index')
+            return redirect('offer', offer_id=offer_id)
         form = OfferForm(instance=offer)
     return render(request,
                   'core/add_offer.html',
@@ -86,9 +87,20 @@ def fill_offer(request, offer_id: int):
         offer = get_object_or_404(Offer, pk=offer_id)
         offer.filled = True
         offer.save()
-        return redirect('index')
+        return redirect('offer', offer_id=offer_id)
     else:
-        redirect('index')
+        return redirect('offer', offer_id=offer_id)
+
+
+@login_required
+def unfill_offer(request, offer_id: int):
+    if request.user.id == Offer.objects.get(pk=offer_id).author.id:
+        offer = get_object_or_404(Offer, pk=offer_id)
+        offer.filled = False
+        offer.save()
+        return redirect('offer', offer_id=offer_id)
+    else:
+        return redirect('offer', offer_id=offer_id)
 
 
 
@@ -110,6 +122,15 @@ def offer_search(request):
     }
 
     return render(request, 'core/partials/offers_partials.html', context)
+
+
+@login_required
+def offer_user(request):
+    user_offers = Offer.objects.filter(author=request.user.id)
+    context = {
+        'all_offers': user_offers.order_by('-created_on')
+    }
+    return render(request, 'core/offer_user.html', context)
 
 
 
