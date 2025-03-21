@@ -189,6 +189,13 @@
 
             </fieldset>
 
+            <div class="flex gap-2 items-center">
+                <input type="checkbox"  class="toggle" required />
+                <div>
+                    En cochant cette case, je déclare avoir lu et accepté les <a class="link" href="{% url 'tou' %} " target="_blank" rel="noopener noreferrer">Conditions Générales d’Utilisation</a> du site.
+                </div>
+            </div>
+
 
             <input class="btn btn-block btn-neutral mt-2" type="submit" value="{% if offer_id == -1 %}Déposer une annonce{% else %}Modifier mon annonce{% endif %}">
         </fieldset>

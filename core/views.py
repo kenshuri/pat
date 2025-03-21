@@ -142,6 +142,10 @@ def offer_contact_info(request, offer_id: int):
 def about(request):
     return render(request, 'core/about.html')
 
+
+def tou(request):
+    return render(request, 'core/tou.html')
+
 def announcement(request):
     return render(request, 'core/announcement.html')
 
