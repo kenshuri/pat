@@ -3,14 +3,16 @@ import os
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Q
 
 from core.forms import OfferForm, SignUpForm
 from core.models import Offer
+from moderation.services import moderate_text
 
 
 # Create your views here.
 def index(request):
-    all_offers = Offer.objects.filter(filled=False).order_by('-created_on')
+    all_offers = Offer.objects.filter(filled=False).filter(Q(moderation__isnull=True) | Q(moderation__passed=True)).order_by('-created_on')
     return render(request, 'core/index.html', {'all_offers': all_offers})
 
 
@@ -38,9 +40,9 @@ def add_offer(request):
         form = OfferForm(request.POST)
         if form.is_valid():
             offer = form.save(commit=False)
-            # You can set additional fields here if needed
-            # For example: offer.author = request.user
             offer.author = request.user
+            moderation_result = moderate_text(offer.get_moderation_text())
+            offer.moderation = moderation_result
             offer.save()
             offer_id = offer.id
             return redirect('offer', offer_id=offer_id)
@@ -60,7 +62,10 @@ def update_offer(request, offer_id: int):
             return redirect('offer', offer_id=offer_id)
         form = OfferForm(request.POST, instance=offer)
         if form.is_valid():
-            form.save()
+            offer = form.save(commit=False)
+            moderation_result = moderate_text(offer.get_moderation_text())
+            offer.moderation = moderation_result
+            offer.save()
             return redirect('offer', offer_id=offer_id)
     else:
         offer = get_object_or_404(Offer, id=offer_id)
@@ -112,10 +117,11 @@ def offer(request, offer_id: int):
 def offer_search(request):
     search_query = request.POST.get('search')
     if search_query:
-        results = Offer.objects.filter(filled=False).filter(title__icontains=search_query) | Offer.objects.filter(filled=False).filter(summary__icontains=search_query) | Offer.objects.filter(city__icontains=search_query)
+        results = (Offer.objects.filter(filled=False).filter(Q(moderation__isnull=True) | Q(moderation__passed=True))
+                   .filter(title__icontains=search_query) | Offer.objects.filter(filled=False).filter(summary__icontains=search_query) | Offer.objects.filter(city__icontains=search_query))
     else:
         # If no query is provided, return all books
-        results = Offer.objects.filter(filled=False)
+        results = Offer.objects.filter(filled=False).filter(Q(moderation__isnull=True) | Q(moderation__passed=True))
 
     context = {
         'all_offers': results.order_by('-created_on')

@@ -70,22 +70,28 @@
     {%  block main %}
     {%  endblock main %}
 </main>
-<footer class="footer items-center p-4 bg-neutral text-neutral-content max-w-3xl mx-auto lg:max-w-4xl xl:max-w-6xl mt-2">
-    <aside class="items-center grid-flow-col">
+<footer class="footer sm:footer-horizontal items-center p-4 bg-neutral text-neutral-content max-w-3xl mx-auto lg:max-w-4xl xl:max-w-6xl mt-2">
+    <nav>
+        <div class="flex items-center">
         <div class="avatar">
-            <div class="w-16 rounded">
+            <div class="w-16 md:w-24 rounded">
                 <img alt="logo" src="{% static 'mask.svg' %}" />
             </div>
         </div>
-        <div>
-            Vous pouvez contacter le créateur de ce site web à
-            <a class="link" href="mailto:admin@petites-annonces-theatre.fr">cette adresse</a> et le soutenir à
-            <a class="link" href="https://ko-fi.com/petitesannoncestheatre">celle-ci</a> !
+            <div class="font-semibold tracking-wide">
+                Petites Annonces Théâtre
+            </div>
         </div>
-        <div>
-            <a class="link" href="{% url 'tou' %}">CGU</a>
-        </div>
-    </aside>
+    </nav>
+    <nav>
+        <h6 class="footer-title">Créateur</h6>
+        <a class="link" href="mailto:admin@petites-annonces-theatre.fr">Contact</a>
+        <a class="link" href="https://ko-fi.com/petitesannoncestheatre">Soutenir</a>
+    </nav>
+    <nav>
+        <h6 class="footer-title">Légal</h6>
+        <a class="link" href="{% url 'tou' %}">Conditions Générales d'utilisations</a>
+    </nav>
 </footer>
 <script>
     document.body.addEventListener('htmx:configRequest', (event) => {

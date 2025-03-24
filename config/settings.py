@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'accounts',
+    'moderation',
     'fontawesomefree',
     'django_browser_reload',
 ]

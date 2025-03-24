@@ -1,4 +1,4 @@
-<div class="card {% if offer.filled %} bg-base-300 {% else %} bg-base-100 {% endif %} transition-all duration-300 cursor-pointer select-none"
+<div class="card {% if offer.filled %} bg-base-300 {% elif offer.moderation and not offer.moderation.passed %} bg-error {% else %} bg-base-100 {% endif %} transition-all duration-300 cursor-pointer select-none"
      x-data="{ offerUrl: '{% url 'offer' offer.id %}', clicked: false, touched: false }"
      :class="{
         'shadow-md hover:shadow-xl translate-y-0 hover:-translate-y-1 ': !clicked && !touched,

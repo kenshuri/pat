@@ -40,6 +40,7 @@ class OfferForm(ModelForm):
         }
 
 
+
 class SignUpForm(UserCreationForm):
     class Meta:
         model = CustomUser
