@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.forms import ModelForm
-from django_email_blacklist import DisposableEmailChecker
+# from django_email_blacklist import DisposableEmailChecker
 from turnstile.fields import TurnstileField
 
 from accounts.models import CustomUser
@@ -57,9 +57,9 @@ class SignUpForm(UserCreationForm):
 
     def clean_email(self):
         email = self.cleaned_data['email']
-        email_checker = DisposableEmailChecker()
-        if email_checker.is_disposable(email):
-            self.add_error('email', 'Utilisez une adresse email non-jetable svp')
+        # email_checker = DisposableEmailChecker()
+        # if email_checker.is_disposable(email):
+        #     self.add_error('email', 'Utilisez une adresse email non-jetable svp')
         return email
 
     def clean_password2(self):
