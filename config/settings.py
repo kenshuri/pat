@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'moderation',
     'fontawesomefree',
     'django_browser_reload',
+    'turnstile'
 ]
 
 # Custom User model
@@ -174,3 +175,11 @@ DEFAULT_FROM_EMAIL = "Petites Annonces Théâtre <ne-pas-repondre@petites-annonc
 CSRF_TRUSTED_ORIGINS = ['https://pat-production-b5b4.up.railway.app',
                         'https://petites-annonces-theatre.fr',
                         'https://pat-dev.up.railway.app']
+
+# TURNSTILE
+# TURNSTILE_JS_API_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?language=fr'
+TURNSTILE_SITEKEY = os.environ.get("TURNSTILE_SITEKEY")
+TURNSTILE_SECRET = os.environ.get("TURNSTILE_SECRET")
+TURNSTILE_DEFAULT_CONFIG = {
+    'language': 'fr',
+}

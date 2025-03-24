@@ -1,11 +1,14 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.forms import ModelForm
 from django_email_blacklist import DisposableEmailChecker
+from turnstile.fields import TurnstileField
 
 from accounts.models import CustomUser
 from core.models import Offer
 
 class OfferForm(ModelForm):
+    turnstile = TurnstileField()
+
     class Meta:
         model = Offer
         fields = ['type','category','title',
@@ -42,6 +45,8 @@ class OfferForm(ModelForm):
 
 
 class SignUpForm(UserCreationForm):
+    turnstile = TurnstileField()
+
     class Meta:
         model = CustomUser
         fields = ('email', 'password1', 'password2', )
