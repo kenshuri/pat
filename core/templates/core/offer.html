@@ -25,14 +25,14 @@
                 {% if offer.city %}
                     <div class="badge badge-neutral badge-soft">
                         <i class="fa-solid fa-house"></i>
-                        <span class="ml-2">{{ offer.city }}</span>
+                        <span class="">{{ offer.city }}</span>
                     </div>
                 {% endif %}
                 {% if offer.min_age or offer.max_age %}
                     <div class="badge badge-outline">
                         <i class="fa-solid fa-user"></i>
                         {% if offer.min_age and offer.max_age %}
-                            <span class="ml-1">
+                            <span class="">
                             {{ offer.min_age }}
                         </span>
                             <span>-</span>
@@ -52,7 +52,7 @@
                 {% if offer.gender %}
                     <div class="badge badge-neutral badge-dash">
                         <i class="fa-solid fa-person-half-dress"></i>
-                        <span class="ml-2">
+                        <span class="">
                     {% if offer.gender == 'female' %}
                         Femme
                     {% elif offer.gender == 'male' %}
