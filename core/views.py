@@ -117,8 +117,13 @@ def offer(request, offer_id: int):
 def offer_search(request):
     search_query = request.POST.get('search')
     if search_query:
-        results = (Offer.objects.filter(filled=False).filter(Q(moderation__isnull=True) | Q(moderation__passed=True))
-                   .filter(Q(title__icontains=search_query) | Q(summary__icontains=search_query) | Q(city__icontains=search_query)) )
+        results = Offer.objects.filter(
+            filled=False
+        ).filter(
+            Q(moderation__isnull=True) | Q(moderation__passed=True)
+        ).filter(
+            Q(title__icontains=search_query) | Q(summary__icontains=search_query) | Q(city__icontains=search_query)
+        )
     else:
         # If no query is provided, return all books
         results = Offer.objects.filter(filled=False).filter(Q(moderation__isnull=True) | Q(moderation__passed=True))
