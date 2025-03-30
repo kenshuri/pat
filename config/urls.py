@@ -34,6 +34,7 @@ urlpatterns = [
     path('about', core.views.about, name='about'),
     path('tou', core.views.tou, name='tou'),
     path('announcement', core.views.announcement, name='announcement'),
+    path('alert', core.views.alert, name='alert'),
     path("__reload__/", include("django_browser_reload.urls")),
 ]
 

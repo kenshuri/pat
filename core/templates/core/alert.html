@@ -1,0 +1,51 @@
+{% extends "core/base.html" %}
+
+{% block title %}
+    Petites Annonces Théâtre
+{% endblock title %}
+
+{% block main %}
+    <div class="bg-base-100 rounded p-4 mt-2 prose max-w-none">
+        <h2>
+            Vigilance – Tentatives d’arnaque ciblant les annonceurs
+        </h2>
+        <p>
+            Bonjour,
+        </p>
+
+        <p>
+            Nous souhaitons vous informer d’une tentative d’arnaque qui vient d’être portée à notre connaissance par un
+            utilisateur du site <a class="link" href="{% url 'index' %}">petites-annonces-theatre</a>.
+        </p>
+
+        <p>
+            Un individu se faisant passer pour un comédien intéressé par une annonce a établi un premier contact,
+            avant de prétexter une urgence (panne de voiture) pour demander une aide financière.
+            Il s'agit très probablement d'une arnaque.
+        </p>
+        <p>
+            C’est la première fois qu’un tel cas nous est signalé sur notre site, et nous prenons ce sujet très au sérieux.
+            Afin de protéger notre communauté, nous vous recommandons la plus grande prudence :
+        <ul>
+            <li>
+                <strong>Ne répondez jamais à une demande d'argent</strong>, quel que soit le prétexte.
+            </li>
+            <li>
+                <strong>Signalez-nous immédiatement tout comportement suspect</strong> via email.
+            </li>
+            <li>
+                <strong>Ne partagez pas d’informations personnelles sensibles</strong> en dehors de ce qui est
+                strictement nécessaire pour l'annonce.
+            </li>
+        </ul>
+        </p>
+        <p>
+            Merci de votre attention et de contribuer à faire de <a class="link" href="{% url 'index' %}">petites-annonces-theatre</a>
+            un espace sûr et bienveillant pour tous.
+        </p>
+        <p class="italic">
+            L'équipe Petites Annonces Théâtre
+        </p>
+
+    </div>
+{% endblock main %}

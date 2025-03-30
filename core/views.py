@@ -156,3 +156,7 @@ def announcement(request):
     return render(request, 'core/announcement.html')
 
 
+def alert(request):
+    return render(request, 'core/alert.html')
+
+
