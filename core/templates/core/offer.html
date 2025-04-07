@@ -8,19 +8,58 @@
     <div class="bg-base-100 rounded p-4 mt-2 flex flex-col gap-2">
         <div class="flex flex-col gap-1">
             <div class="flex flex-wrap items-center justify-between tracking-wide">
-                <h1 class="font-bold text-xl">{{ offer.title|capfirst }}</h1>
+                <h1 class="font-bold text-xl">
+                    {% if offer.section == "artists_groups" %}
+                        🎭
+                    {% elif offer.section == "courses_training" %}
+                        🎓
+                    {% elif offer.section == "calls_events" %}
+                        📣
+                    {% elif offer.section == "services_equipment" %}
+                        🛠️
+                    {% else %}
+                        ❓
+                    {% endif %}
+                    {{ offer.title|capfirst }}
+                </h1>
                 <div>{{ offer.created_on }}</div>
             </div>
             <div class="flex flex-row flex-wrap gap-2">
-                {% if offer.category == 'paid' %}
-                    <div class="badge badge-primary">Rémunéré</div>
-                {% else %}
-                    <div class="badge badge-primary badge-soft">Bénévole</div>
-                {% endif %}
                 {% if offer.type == 'offer' %}
-                    <div class="badge badge-secondary badge-soft flex gap-0.5"><i class="fa-solid fa-people-group"></i><i class="fa-solid fa-magnifying-glass-arrow-right"></i><i class="fa-solid fa-person-half-dress"></i></div>
+                    {% if offer.section == 'artists_groups' %}
+                        <div class="badge badge-primary badge-soft flex gap-0.5">Je recrute</div>
+                    {% elif offer.section == 'courses_training' %}
+                        <div class="badge badge-primary badge-soft flex gap-0.5">Je propose</div>
+                    {% elif offer.section == 'calls_events' %}
+                        <div class="badge badge-primary badge-soft flex gap-0.5">Je programme</div>
+                    {% elif offer.section == 'services_equipment' %}
+                        <div class="badge badge-primary badge-soft flex gap-0.5">Je propose</div>
+                    {% else %}
+                    {% endif %}
                 {% else %}
-                    <div class="badge badge-secondary flex gap-0.5"><i class="fa-solid fa-person-half-dress"></i><i class="fa-solid fa-magnifying-glass-arrow-right"></i><i class="fa-solid fa-people-group"></i></div>
+                    {% if offer.section == 'artists_groups' %}
+                        <div class="badge badge-primary flex gap-0.5">Je postule</div>
+                    {% elif offer.section == 'courses_training' %}
+                        <div class="badge badge-primary flex gap-0.5">Je recherche</div>
+                    {% elif offer.section == 'calls_events' %}
+                        <div class="badge badge-primary flex gap-0.5">Je me produis</div>
+                    {% elif offer.section == 'services_equipment' %}
+                        <div class="badge badge-primary flex gap-0.5">Je recherche</div>
+                    {% else %}
+                    {% endif %}
+                {% endif %}
+                {% if offer.category == 'paid' %}
+                    {% if offer.section == 'artists_groups' or offer.section == 'calls_events' %}
+                        <div class="badge badge-secondary">Rémunéré</div>
+                    {% else %}
+                        <div class="badge badge-secondary">Payant</div>
+                    {% endif %}
+                {% else %}
+                    {% if offer.section == 'artists_groups' or offer.section == 'calls_events' %}
+                        <div class="badge badge-soft badge-secondary">Bénévole</div>
+                    {% else %}
+                        <div class="badge badge-soft badge-secondary">Gratuit</div>
+                    {% endif %}
                 {% endif %}
                 {% if offer.city %}
                     <div class="badge badge-neutral badge-soft">
@@ -93,10 +132,10 @@
                                         <li>- {{ reason }}</li>
                                     {% endfor %}
                                 </ul>
-                            <p class="mt-2">
+                                <p class="mt-2">
                                     Nous vous invitons à modifier votre annonce afin de respecter nos règles de publication,
                                     puis à la soumettre de nouveau pour une nouvelle vérification.
-                            </p>
+                                </p>
                                 </p>
                             </div>
                         </div>

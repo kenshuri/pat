@@ -17,3 +17,8 @@ dependencies = [
     "pytz>=2025.1",
     "whitenoise>=6.9.0",
 ]
+
+[dependency-groups]
+dev = [
+    "openpyxl>=3.1.5",
+]

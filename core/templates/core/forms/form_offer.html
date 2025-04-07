@@ -1,203 +1,354 @@
+<style>
+    [x-cloak] { display: none !important; }
+</style>
 {% if offer_id == -1 %}
     <form action="{% url 'add_offer' %}" method="post">
 {% else %}
     <form action="{% url 'update_offer' offer_id %}" method="post">
 {% endif %}
-{% csrf_token %}
-<fieldset class="fieldset bg-base-200 border border-base-300 p-4 rounded-box">
-    {% if offer_id == -1 %}
-        <legend class="fieldset-legend">Déposer une annonce</legend>
-    {% else %}
-        <legend class="fieldset-legend">Modifier mon annonce</legend>
-    {% endif %}
+<div x-data="{
+            ready: false,
+            section: '{{ form.instance.section|default:"artists_groups" }}',
+            type: '{{ form.instance.type|default:"offer" }}',
+            category: '{{ form.instance.category|default:"unpaid" }}',
+            get typeLabels() {
+                switch (this.section) {
+                    case 'artists_groups':
+                    return { offer: 'Je recrute', demand: 'Je postule' };
+                    case 'courses_training':
+                    return { offer: 'Je propose', demand: 'Je recherche' };
+                    case 'calls_events':
+                    return { offer: 'Je programme', demand: 'Je me produis' };
+                    case 'services_equipment':
+                    return { offer: 'Je propose', demand: 'Je recherche' };
+                    default:
+                    return { offer: 'Offre', demand: 'Demande' };
+                    }
+            },
+            get categoryLabels() {
+                if (['artists_groups', 'calls_events'].includes(this.section)) {
+                    return { unpaid: 'Bénévole', paid: 'Rémunéré' };
+                } else {
+                    return { unpaid: 'Gratuit', paid: 'Payant' };
+                }
+                }
+            }"
+     x-init="$nextTick(() => ready = true)"
+     x-cloak
+     x-show="ready"
+>
+    {% csrf_token %}
+    <fieldset class="fieldset bg-base-200 border border-base-300 p-4 rounded-box">
+        {% if offer_id == -1 %}
+            <legend class="fieldset-legend">Déposer une annonce</legend>
+        {% else %}
+            <legend class="fieldset-legend">Modifier mon annonce</legend>
+        {% endif %}
 
-    <div class="grid grid-cols-1 md:grid-cols-2 mt-2 gap-2">
-        <div class="">
-            <label class="fieldset-label" for="id_type">{{ form.type.label }}*</label>
-            <div class="flex">
-                <select class="select grow" name="type" id="id_type">
-                    <option value="offer" {% if form.instance.type == 'offer' %}selected{% elif form.instance.type == 'demand' %} {% else %}selected{% endif %}>Troupe cherche comédien.ne</option>
-                    <option value="demand" {% if form.instance.type == 'demand' %}selected{% endif %}>Comédien.ne cherche troupe</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="">
-            <label class="fieldset-label" for="id_category">{{ form.category.label }}*</label>
-            <div class="flex">
-                <select class="select grow" name="category" id="id_category">
-                    <option value="unpaid" {% if form.instance.category == 'unpaid' %}selected{% elif form.instance.category == 'paid' %} {% else %}selected{% endif %}>Bénévole</option>
-                    <option value="paid" {% if form.instance.category == 'paid' %} selected{% endif %}>Rémunéré</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <div class="mt-2">
-        <label class="fieldset-label" for="id_title">{{ form.title.label }}*</label>
-        <div class="flex">
-            <input class="input grow" type="text" name="title" maxlength="50" required id="id_title" value="{{ form.instance.title }}">
-        </div>
-    </div>
-
-    <div class="mt-2">
-        <label class="fieldset-label" for="id_summary">{{ form.summary.label }}*</label>
-        <div class="flex">
-            <input class="input grow" type="text" name="summary" maxlength="255" required id="id_summary" value="{{ form.instance.summary }}">
-        </div>
-    </div>
-
-    <div class="mt-2">
-        <label class="fieldset-label" for="id_description">{{ form.description.label }}</label>
-        <div class="flex">
-            <textarea class="textarea grow" name="description" rows="5" maxlength="5000" id="id_description">
-                {{ form.instance.description }}
-            </textarea>
-        </div>
-    </div>
-
-    <div class="mt-2 flex flex-col gap-1">
-        <label class="fieldset-label" for="id_city">{{ form.city.label }}</label>
-        <mapbox-search-box
-                access-token="{{ MAPBOX_ACCESS_TOKEN }}"
-                proximity="0,0"
-        >
-        </mapbox-search-box>
-        <div class="flex">
-            <input class="input grow" type="text" name="city" maxlength="255"
-                   id="id_city" value="{{ form.instance.city }}"
-                   readonly>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 mt-2 gap-2">
-        <div class="">
-            <label class="fieldset-label" for="id_min_age">{{ form.min_age.label }}</label>
-            <div class="flex">
-                <input class="input grow" type="number" name="min_age" min="0" id="id_min_age" value="{{ form.instance.min_age }}">
-                <p>{{ form.min_age.errors }}</p>
-            </div>
-        </div>
-
-        <div class="">
-            <label class="fieldset-label" for="id_max_age">{{ form.max_age.label }}</label>
-            <div class="flex">
-                <input class="input grow" type="number" name="max_age" min="0" id="id_max_age"  value="{{ form.instance.max_age }}">
-                <p>{{ form.max_age.errors }}</p>
-            </div>
-        </div>
-
-        <div class="">
-            <label class="fieldset-label" for="id_gender">{{ form.gender.label }}</label>
-            <div class="flex">
-                <select class="select grow" name="gender" id="id_gender">
-                    <option value="" {% if form.instance.gender == '' %}selected{% elif form.instance.type == 'other' %} {% elif form.instance.type == 'female' %} {% elif form.instance.type == 'male' %} {% else %}selected{% endif %}>---------</option>
-                    <option value="other" {% if form.instance.gender == 'other' %}selected{% else %} {% endif %}>Non-Binaire</option>
-                    <option value="female" {% if form.instance.gender == 'female' %}selected{% else %} {% endif %}>Femme</option>
-                    <option value="male" {% if form.instance.gender == 'male' %}selected{% else %} {% endif %}>Homme</option>
-                </select>
-            </div>
-        </div>
-
-    </div>
-
-    <fieldset class="fieldset bg-base-300 border border-base-400 p-4 rounded-box">
-        <legend class="fieldset-legend">Informations de contact</legend>
-
-        <div class="">
-            <label class="fieldset-label" for="id_contact_name">{{ form.contact_name.label }}</label>
-            <div class="flex">
-                <label class="input validator grow">
-                    <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></g></svg>
-                    <input type="input" name="contact_name" id="id_contact_name"
-                           placeholder="La Compagnie de la Gazette"
-                           pattern="[A-Za-z][A-Za-z0-9\- ]*" minlength="3" maxlength="30"
-                           title="Seulement des lettres, chiffres, tirets et espaces."
-                            {% if form.instance.contact_name %} value="{{ form.instance.contact_name }}" {%else%}{%endif%}
-                    />
-                </label>
-            </div>
-        </div>
-
-        <div class="flex flex-col sm:flex-row mt-2 gap-2">
-
-            <div class="grow">
-                <label class="fieldset-label" for="id_contact_email">{{ form.contact_email.label }}</label>
+        <div class="grid grid-cols-1 sm:grid-cols-3 mt-2 gap-2">
+            <div class="">
+                <label class="fieldset-label" for="id_section">{{ form.section.label }}*</label>
                 <div class="flex">
-                    <label class="input validator grow">
-                        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></g></svg>
-                        <input type="email" id="id_contact_email" name="contact_email"
-                               placeholder="compagnie@gazette.fr"
-                                {% if form.instance.contact_email %} value="{{ form.instance.contact_email }}"{%else%}{%endif%}
-                        />
-                    </label>
+                    <select class="select grow" name="section" id="id_section" x-model="section">
+                        <option value="artists_groups" {% if form.instance.section == 'artists_groups' %}selected{% endif %}>Comédiens & Troupes</option>
+                        <option value="courses_training" {% if form.instance.section == 'courses_training' %}selected{% endif %}>Cours & Formations</option>
+                        <option value="calls_events" {% if form.instance.section == 'calls_events' %}selected{% endif %}>Appels & Événements</option>
+                        <option value="services_equipment" {% if form.instance.section == 'services_equipment' %}selected{% endif %}>Services & Matériel</option>
+                    </select>
                 </div>
-                <p class="text-error">{{ form.contact_email.errors }}</p>
+            </div>
+
+            <div class="block sm:hidden" role="region" aria-live="polite" aria-atomic="true">
+                <template x-if="section === 'artists_groups'">
+                    <div
+                            class="rounded bg-base-100 p-2"
+                            tabindex="0"
+                    >
+                        <h3 class="font-semibold text-lg">🎭 Comédiens & Troupes</h3>
+                        <p>
+                            Offres et recherches de rôles, auditions, troupes cherchant des comédien·nes, comédien·nes cherchant une troupe, projets de création collective, collaborations artistiques.
+                        </p>
+                    </div>
+                </template>
+
+                <template x-if="section === 'courses_training'">
+                    <div
+                            class="rounded bg-base-100 p-2"
+                            tabindex="0"
+                    >
+                        <h3 class="font-semibold text-lg">🎓 Cours & Formations</h3>
+                        <p>
+                            Annonces de cours de théâtre, stages, ateliers, formations professionnelles ou amateurs, coaching, interventions pédagogiques.
+                        </p>
+                    </div>
+                </template>
+
+                <template x-if="section === 'calls_events'">
+                    <div
+                            class="rounded bg-base-100 p-2"
+                            tabindex="0"
+                    >
+                        <h3 class="font-semibold text-lg">📣 Appels & Événements</h3>
+                        <p>
+                            Résidences artistiques, appels à projets, festivals, représentations, événements associatifs ou culturels, collaborations ponctuelles.
+                        </p>
+                    </div>
+                </template>
+
+                <template x-if="section === 'services_equipment'">
+                    <div
+                            class="rounded bg-base-100 p-2"
+                            tabindex="0"
+                    >
+                        <h3 class="font-semibold text-lg">🛠️ Services & Matériel</h3>
+                        <p>
+                            Locations de salles de répétition ou de spectacle, prêt ou vente de costumes, décors, accessoires, services techniques, captations, mise en scène, etc.
+                        </p>
+                    </div>
+                </template>
             </div>
 
             <div class="">
-                <label class="fieldset-label" for="id_show_author_mail">{{ form.show_author_mail.label }}</label>
-                <div class="tooltip tooltip-right sm:tooltip-left"
-                     data-tip="Affiche votre email d'utilisateur dans votre annonce. Ne pas activer si vous souhaitez conserver votre email d'utilisateur caché.">
-                    <i class="fa-solid fa-circle-info"></i>
+                <label class="fieldset-label" for="id_type">{{ form.type.label }}*</label>
+                <div class="flex">
+                    <select class="select grow" name="type" id="id_type" x-model="type">
+                        <option value="offer" x-text="typeLabels.offer" x-cloak></option>
+                        <option value="demand" x-text="typeLabels.demand" x-cloak></option>
+                    </select>
                 </div>
-                <input class="toggle" name="show_author_mail" id="id_show_author_mail" type="checkbox" {% if form.instance.show_author_mail %}checked{% else %}{% endif %}>
+            </div>
+
+
+
+            <div class="">
+                <label class="fieldset-label" for="id_category">{{ form.category.label }}*</label>
+                <div class="flex">
+                    <select class="select grow" name="category" id="id_category" x-model="category">
+                        <option value="unpaid" x-text="categoryLabels.unpaid" x-cloak></option>
+                        <option value="paid" x-text="categoryLabels.paid" x-cloak></option>
+                    </select>
+                </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 mt-2 gap-2">
-            <div class="">
-                <label class="fieldset-label" for="id_contact_phone">{{ form.contact_phone.label }}</label>
-                <div class="flex">
-                    <label class="input validator grow">
-                        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g fill="none"><path d="M7.25 11.5C6.83579 11.5 6.5 11.8358 6.5 12.25C6.5 12.6642 6.83579 13 7.25 13H8.75C9.16421 13 9.5 12.6642 9.5 12.25C9.5 11.8358 9.16421 11.5 8.75 11.5H7.25Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M6 1C4.61929 1 3.5 2.11929 3.5 3.5V12.5C3.5 13.8807 4.61929 15 6 15H10C11.3807 15 12.5 13.8807 12.5 12.5V3.5C12.5 2.11929 11.3807 1 10 1H6ZM10 2.5H9.5V3C9.5 3.27614 9.27614 3.5 9 3.5H7C6.72386 3.5 6.5 3.27614 6.5 3V2.5H6C5.44771 2.5 5 2.94772 5 3.5V12.5C5 13.0523 5.44772 13.5 6 13.5H10C10.5523 13.5 11 13.0523 11 12.5V3.5C11 2.94772 10.5523 2.5 10 2.5Z" fill="currentColor"></path></g></svg>
-                        <input type="tel" class="tabular-nums"
-                               name="contact_phone" id="id_contact_phone"
-                               placeholder="0612345678"
-                               pattern="[0-9]*" minlength="10" maxlength="10"
-                               title="Doit contenir 10 chiffres"
-                                {% if form.instance.contact_phone %} value="{{ form.instance.contact_phone }}"{%else%}{%endif%}
-                        />
-                    </label>
+        <div class="mt-2 hidden sm:block" role="region" aria-live="polite" aria-atomic="true">
+            <template x-if="section === 'artists_groups'">
+                <div
+                        class="rounded bg-base-100 p-2"
+                        tabindex="0"
+                >
+                    <h3 class="font-semibold text-lg">🎭 Comédiens & Troupes</h3>
+                    <p>
+                        Offres et recherches de rôles, auditions, troupes cherchant des comédien·nes, comédien·nes cherchant une troupe, projets de création collective, collaborations artistiques.
+                    </p>
                 </div>
-            </div>
+            </template>
 
-            <div class="">
-                <label class="fieldset-label" for="id_contact_website">{{ form.contact_website.label }}</label>
-                <div class="flex">
-                    <label class="input validator grow">
-                        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></g></svg>
-                        <input type="url"  name="contact_website" id="id_contact_website"
-                               placeholder="https://lacompagniedelagazette.fr"
-                               pattern="^(https?://)?([a-zA-Z0-9]([a-zA-Z0-9\-].*[a-zA-Z0-9])?\.)+[a-zA-Z].*$"
-                               title="Doit être une URL valide"
-                                {% if form.instance.contact_website %} value="{{ form.instance.contact_website }}"{%else%}{%endif%}
-                        />
-                    </label>
+            <template x-if="section === 'courses_training'">
+                <div
+                        class="rounded bg-base-100 p-2"
+                        tabindex="0"
+                >
+                    <h3 class="font-semibold text-lg">🎓 Cours & Formations</h3>
+                    <p>
+                        Annonces de cours de théâtre, stages, ateliers, formations professionnelles ou amateurs, coaching, interventions pédagogiques.
+                    </p>
                 </div>
+            </template>
+
+            <template x-if="section === 'calls_events'">
+                <div
+                        class="rounded bg-base-100 p-2"
+                        tabindex="0"
+                >
+                    <h3 class="font-semibold text-lg">📣 Appels & Événements</h3>
+                    <p>
+                        Résidences artistiques, appels à projets, festivals, représentations, événements associatifs ou culturels, collaborations ponctuelles.
+                    </p>
+                </div>
+            </template>
+
+            <template x-if="section === 'services_equipment'">
+                <div
+                        class="rounded bg-base-100 p-2"
+                        tabindex="0"
+                >
+                    <h3 class="font-semibold text-lg">🛠️ Services & Matériel</h3>
+                    <p>
+                        Locations de salles de répétition ou de spectacle, prêt ou vente de costumes, décors, accessoires, services techniques, captations, mise en scène, etc.
+                    </p>
+                </div>
+            </template>
+        </div>
+
+
+
+        <div class="mt-2">
+            <label class="fieldset-label" for="id_title">{{ form.title.label }}*</label>
+            <div class="flex">
+                <input class="input grow" type="text" name="title" maxlength="50" required id="id_title" value="{{ form.instance.title }}">
             </div>
         </div>
 
         <div class="mt-2">
-            <label class="fieldset-label" for="id_contact_details">{{ form.contact_details.label }}</label>
+            <label class="fieldset-label" for="id_summary">{{ form.summary.label }}*</label>
             <div class="flex">
-            <textarea class="textarea grow" name="contact_details" rows="5" maxlength="5000" id="id_contact_details">
-                {% if form.instance.contact_details %} {{ form.instance.contact_details }} {%else%}{%endif%}
+                <input class="input grow" type="text" name="summary" maxlength="255" required id="id_summary" value="{{ form.instance.summary }}">
+            </div>
+        </div>
+
+        <div class="mt-2">
+            <label class="fieldset-label" for="id_description">{{ form.description.label }}</label>
+            <div class="flex">
+            <textarea class="textarea grow" name="description" rows="5" maxlength="5000" id="id_description">
+                {{ form.instance.description }}
             </textarea>
             </div>
         </div>
 
-    </fieldset>
-
-    <div class="flex gap-2 items-center">
-        <input type="checkbox"  class="toggle" required />
-        <div>
-            En cochant cette case, je déclare avoir lu et accepté les <a class="link" href="{% url 'tou' %} " target="_blank" rel="noopener noreferrer">Conditions Générales d’Utilisation</a> du site.
+        <div class="mt-2 flex flex-col gap-1">
+            <label class="fieldset-label" for="id_city">{{ form.city.label }}</label>
+            <mapbox-search-box
+                    access-token="{{ MAPBOX_ACCESS_TOKEN }}"
+                    proximity="0,0"
+            >
+            </mapbox-search-box>
+            <div class="flex">
+                <input class="input grow" type="text" name="city" maxlength="255"
+                       id="id_city" value="{{ form.instance.city }}"
+                       readonly>
+            </div>
         </div>
-    </div>
 
-    <input class="btn btn-block btn-neutral mt-2" type="submit" value="{% if offer_id == -1 %}Déposer une annonce{% else %}Modifier mon annonce{% endif %}">
-</fieldset>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 mt-2 gap-2">
+            <div class="">
+                <label class="fieldset-label" for="id_min_age">{{ form.min_age.label }}</label>
+                <div class="flex">
+                    <input class="input grow" type="number" name="min_age" min="0" id="id_min_age" value="{{ form.instance.min_age }}">
+                    <p>{{ form.min_age.errors }}</p>
+                </div>
+            </div>
+
+            <div class="">
+                <label class="fieldset-label" for="id_max_age">{{ form.max_age.label }}</label>
+                <div class="flex">
+                    <input class="input grow" type="number" name="max_age" min="0" id="id_max_age"  value="{{ form.instance.max_age }}">
+                    <p>{{ form.max_age.errors }}</p>
+                </div>
+            </div>
+
+            <div class="">
+                <label class="fieldset-label" for="id_gender">{{ form.gender.label }}</label>
+                <div class="flex">
+                    <select class="select grow" name="gender" id="id_gender">
+                        <option value="" {% if form.instance.gender == '' %}selected{% elif form.instance.type == 'other' %} {% elif form.instance.type == 'female' %} {% elif form.instance.type == 'male' %} {% else %}selected{% endif %}>---------</option>
+                        <option value="other" {% if form.instance.gender == 'other' %}selected{% else %} {% endif %}>Non-Binaire</option>
+                        <option value="female" {% if form.instance.gender == 'female' %}selected{% else %} {% endif %}>Femme</option>
+                        <option value="male" {% if form.instance.gender == 'male' %}selected{% else %} {% endif %}>Homme</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+        <fieldset class="fieldset bg-base-300 border border-base-400 p-4 rounded-box">
+            <legend class="fieldset-legend">Informations de contact</legend>
+
+            <div class="">
+                <label class="fieldset-label" for="id_contact_name">{{ form.contact_name.label }}</label>
+                <div class="flex">
+                    <label class="input validator grow">
+                        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></g></svg>
+                        <input type="input" name="contact_name" id="id_contact_name"
+                               placeholder="La Compagnie de la Gazette"
+                               pattern="[A-Za-z][A-Za-z0-9\- ]*" minlength="3" maxlength="30"
+                               title="Seulement des lettres, chiffres, tirets et espaces."
+                                {% if form.instance.contact_name %} value="{{ form.instance.contact_name }}" {%else%}{%endif%}
+                        />
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row mt-2 gap-2">
+
+                <div class="grow">
+                    <label class="fieldset-label" for="id_contact_email">{{ form.contact_email.label }}</label>
+                    <div class="flex">
+                        <label class="input validator grow">
+                            <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></g></svg>
+                            <input type="email" id="id_contact_email" name="contact_email"
+                                   placeholder="compagnie@gazette.fr"
+                                    {% if form.instance.contact_email %} value="{{ form.instance.contact_email }}"{%else%}{%endif%}
+                            />
+                        </label>
+                    </div>
+                    <p class="text-error">{{ form.contact_email.errors }}</p>
+                </div>
+
+                <div class="">
+                    <label class="fieldset-label" for="id_show_author_mail">{{ form.show_author_mail.label }}</label>
+                    <div class="tooltip tooltip-right sm:tooltip-left"
+                         data-tip="Affiche votre email d'utilisateur dans votre annonce. Ne pas activer si vous souhaitez conserver votre email d'utilisateur caché.">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </div>
+                    <input class="toggle" name="show_author_mail" id="id_show_author_mail" type="checkbox" {% if form.instance.show_author_mail %}checked{% else %}{% endif %}>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 mt-2 gap-2">
+                <div class="">
+                    <label class="fieldset-label" for="id_contact_phone">{{ form.contact_phone.label }}</label>
+                    <div class="flex">
+                        <label class="input validator grow">
+                            <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g fill="none"><path d="M7.25 11.5C6.83579 11.5 6.5 11.8358 6.5 12.25C6.5 12.6642 6.83579 13 7.25 13H8.75C9.16421 13 9.5 12.6642 9.5 12.25C9.5 11.8358 9.16421 11.5 8.75 11.5H7.25Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M6 1C4.61929 1 3.5 2.11929 3.5 3.5V12.5C3.5 13.8807 4.61929 15 6 15H10C11.3807 15 12.5 13.8807 12.5 12.5V3.5C12.5 2.11929 11.3807 1 10 1H6ZM10 2.5H9.5V3C9.5 3.27614 9.27614 3.5 9 3.5H7C6.72386 3.5 6.5 3.27614 6.5 3V2.5H6C5.44771 2.5 5 2.94772 5 3.5V12.5C5 13.0523 5.44772 13.5 6 13.5H10C10.5523 13.5 11 13.0523 11 12.5V3.5C11 2.94772 10.5523 2.5 10 2.5Z" fill="currentColor"></path></g></svg>
+                            <input type="tel" class="tabular-nums"
+                                   name="contact_phone" id="id_contact_phone"
+                                   placeholder="0612345678"
+                                   pattern="[0-9]*" minlength="10" maxlength="10"
+                                   title="Doit contenir 10 chiffres"
+                                    {% if form.instance.contact_phone %} value="{{ form.instance.contact_phone }}"{%else%}{%endif%}
+                            />
+                        </label>
+                    </div>
+                </div>
+
+                <div class="">
+                    <label class="fieldset-label" for="id_contact_website">{{ form.contact_website.label }}</label>
+                    <div class="flex">
+                        <label class="input validator grow">
+                            <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></g></svg>
+                            <input type="url"  name="contact_website" id="id_contact_website"
+                                   placeholder="https://lacompagniedelagazette.fr"
+                                   pattern="^(https?://)?([a-zA-Z0-9]([a-zA-Z0-9\-].*[a-zA-Z0-9])?\.)+[a-zA-Z].*$"
+                                   title="Doit être une URL valide"
+                                    {% if form.instance.contact_website %} value="{{ form.instance.contact_website }}"{%else%}{%endif%}
+                            />
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <label class="fieldset-label" for="id_contact_details">{{ form.contact_details.label }}</label>
+                <div class="flex">
+            <textarea class="textarea grow" name="contact_details" rows="5" maxlength="5000" id="id_contact_details">
+                {% if form.instance.contact_details %} {{ form.instance.contact_details }} {%else%}{%endif%}
+            </textarea>
+                </div>
+            </div>
+
+        </fieldset>
+
+        <div class="flex gap-2 items-center">
+            <input type="checkbox"  class="toggle" required />
+            <div>
+                En cochant cette case, je déclare avoir lu et accepté les <a class="link" href="{% url 'tou' %} " target="_blank" rel="noopener noreferrer">Conditions Générales d’Utilisation</a> du site.
+            </div>
+        </div>
+
+        <input class="btn btn-block btn-neutral mt-2" type="submit" value="{% if offer_id == -1 %}Déposer une annonce{% else %}Modifier mon annonce{% endif %}">
+    </fieldset>
+</div>
 </form>
 <script>
     const script = document.getElementById('search-js');

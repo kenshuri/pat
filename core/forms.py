@@ -11,7 +11,10 @@ class OfferForm(ModelForm):
 
     class Meta:
         model = Offer
-        fields = ['type','category','title',
+        fields = ['type',
+                  'section',
+                  'category',
+                  'title',
                   'summary',
                   'description',
                   'city',
@@ -27,7 +30,8 @@ class OfferForm(ModelForm):
                   ]
         labels = {
             'type': "Type d'annonce",
-            'category': 'Catégorie',
+            'section': 'Rubrique',
+            'category': 'Rémunération',
             'title': "Titre de l'annonce",
             'summary': 'Résumé',
             'city': 'Ville',

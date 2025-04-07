@@ -24,6 +24,19 @@ class Offer(models.Model):
         (DEMAND, 'Demande'),
     ]
 
+    # Rubriques principales du site
+    ARTISTS_GROUPS = 'artists_groups'
+    COURSES_TRAINING = 'courses_training'
+    CALLS_EVENTS = 'calls_events'
+    SERVICES_EQUIPMENT = 'services_equipment'
+
+    SECTION_CHOICES = [
+        (ARTISTS_GROUPS, 'Artistes & Groupes'),
+        (COURSES_TRAINING, 'Cours & Formations'),
+        (CALLS_EVENTS, 'Appels & Événements'),
+        (SERVICES_EQUIPMENT, 'Services & Matériel'),
+    ]
+
     CATEGORY_CHOICES = [
         (UNPAID, 'Bénévole'),
         (PAID, 'Rémunéré'),
@@ -40,6 +53,11 @@ class Offer(models.Model):
         choices=TYPE_CHOICES,
         default=OFFER,
     )
+
+    section = models.CharField(
+        max_length=255,
+        choices=SECTION_CHOICES,
+        default=ARTISTS_GROUPS)
 
     category = models.CharField(
         max_length=255,
