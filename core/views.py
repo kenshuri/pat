@@ -115,18 +115,35 @@ def offer(request, offer_id: int):
 
 
 def offer_search(request):
-    search_query = request.POST.get('search')
+    search_data = request.POST
+
+    # Champs du formulaire
+    search_query = search_data.get('search', '').strip()
+    section = search_data.get('section')
+    offer_type = search_data.get('type')
+    category = search_data.get('category')
+
+    # Base queryset
+    results = Offer.objects.filter(filled=False).filter(
+        Q(moderation__isnull=True) | Q(moderation__passed=True)
+    )
+
+    # Filtres dynamiques
     if search_query:
-        results = Offer.objects.filter(
-            filled=False
-        ).filter(
-            Q(moderation__isnull=True) | Q(moderation__passed=True)
-        ).filter(
-            Q(title__icontains=search_query) | Q(summary__icontains=search_query) | Q(city__icontains=search_query)
+        results = results.filter(
+            Q(title__icontains=search_query) |
+            Q(summary__icontains=search_query) |
+            Q(city__icontains=search_query)
         )
-    else:
-        # If no query is provided, return all books
-        results = Offer.objects.filter(filled=False).filter(Q(moderation__isnull=True) | Q(moderation__passed=True))
+
+    if section:
+        results = results.filter(section=section)
+
+    if offer_type:
+        results = results.filter(type=offer_type)
+
+    if category:
+        results = results.filter(category=category)
 
     context = {
         'all_offers': results.order_by('-created_on')

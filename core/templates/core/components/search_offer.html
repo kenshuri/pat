@@ -1,0 +1,226 @@
+<!--Search Offer-->
+<div class="flex grow">
+    <form
+            class="w-full grow"
+            action=""
+            hx-post="{% url 'offer_search' %}"
+            hx-trigger="change, keyup delay:300ms"
+            hx-target="#id_offers"
+            hx-include="this"
+    >
+
+        <fieldset class="fieldset w-full grow bg-base-300 border border-base-300 px-4 pb-2 rounded-box">
+            <legend class="fieldset-legend">Rechercher des annonces</legend>
+            <label class="input input-bordered grow items-center gap-2 w-full">
+                <input type="text" placeholder="Rechercher des annonces par titre, ville..."
+                       name="search"/>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 opacity-70"><path fill-rule="evenodd" d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clip-rule="evenodd" /></svg>
+                <div id="loading-indicator" class="hidden text-center my-4">
+                    <i class="fa-solid fa-circle-notch fa-spin text-xl text-primary"></i>
+                </div>
+            </label>
+
+            <div
+                    class="mx-auto w-full grow"
+                    x-data="{
+            ready: false,
+            section: '',
+                type: '',
+                category: '',
+                get typeLabels() {
+                switch (this.section) {
+                case 'artists_groups':
+                return { offer: 'Je recrute', demand: 'Je postule' };
+                case 'courses_training':
+                return { offer: 'Je propose', demand: 'Je recherche' };
+                case 'calls_events':
+                return { offer: 'Je programme', demand: 'Je me produis' };
+                case 'services_equipment':
+                return { offer: 'Je propose', demand: 'Je recherche' };
+                default:
+                return { offer: 'Offre', demand: 'Demande' };
+                }
+                },
+                get categoryLabels() {
+                if (['artists_groups', 'calls_events'].includes(this.section)) {
+                return { unpaid: 'Bénévole', paid: 'Rémunéré' };
+                } else {
+                return { unpaid: 'Gratuit', paid: 'Payant' };
+                }
+                }
+                }"
+                    x-init="$nextTick(() => ready = true)"
+                    x-cloak
+                    x-show="ready"
+            >
+                <!-- Disclosure -->
+                <div x-disclosure class="block border-b border-gray-800/10 pb-4 pt-4 first:pt-0 last:border-b-0 last:pb-0">
+                    <!-- Disclosure Button -->
+                    <button
+                            x-disclosure:button
+                            type="button"
+                            class="group flex w-full items-center justify-between text-left font-medium text-gray-800 px-1 cursor-pointer">
+                        <span class="flex-1">Plus de filtres</span>
+
+                        <!-- Heroicons mini chevron-up -->
+                        <i x-show="$disclosure.isOpen" class="fa-solid fa-chevron-up"></i>
+
+                        <!-- Heroicons mini chevron-down -->
+                        <i x-show="!$disclosure.isOpen" class="fa-solid fa-chevron-down"></i>
+                    </button>
+
+                    <!-- Disclosure Panel -->
+                    <div x-disclosure:panel x-collapse>
+                        <div class="grid grid-cols-1 md:grid-cols-3 mt-2 gap-2">
+                            <div class="">
+                                <label class="fieldset-label" for="id_section">Rubrique</label>
+                                <div class="flex">
+                                    <select class="select grow" name="section" id="id_section" x-model="section">
+                                        <option value="">---</option>
+                                        <option value="artists_groups">Comédiens & Troupes</option>
+                                        <option value="courses_training">Cours & Formations</option>
+                                        <option value="calls_events">Appels & Événements</option>
+                                        <option value="services_equipment">Services & Matériel</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="block sm:hidden" role="region" aria-live="polite" aria-atomic="true">
+                                <template x-if="section === 'artists_groups'">
+                                    <div
+                                            class="rounded bg-base-100 p-2"
+                                            tabindex="0"
+                                    >
+                                        <h3 class="font-semibold text-lg">🎭 Comédiens & Troupes</h3>
+                                        <p>
+                                            Offres et recherches de rôles, auditions, troupes cherchant des comédien·nes, comédien·nes cherchant une troupe, projets de création collective, collaborations artistiques.
+                                        </p>
+                                    </div>
+                                </template>
+
+                                <template x-if="section === 'courses_training'">
+                                    <div
+                                            class="rounded bg-base-100 p-2"
+                                            tabindex="0"
+                                    >
+                                        <h3 class="font-semibold text-lg">🎓 Cours & Formations</h3>
+                                        <p>
+                                            Annonces de cours de théâtre, stages, ateliers, formations professionnelles ou amateurs, coaching, interventions pédagogiques.
+                                        </p>
+                                    </div>
+                                </template>
+
+                                <template x-if="section === 'calls_events'">
+                                    <div
+                                            class="rounded bg-base-100 p-2"
+                                            tabindex="0"
+                                    >
+                                        <h3 class="font-semibold text-lg">📣 Appels & Événements</h3>
+                                        <p>
+                                            Résidences artistiques, appels à projets, festivals, représentations, événements associatifs ou culturels, collaborations ponctuelles.
+                                        </p>
+                                    </div>
+                                </template>
+
+                                <template x-if="section === 'services_equipment'">
+                                    <div
+                                            class="rounded bg-base-100 p-2"
+                                            tabindex="0"
+                                    >
+                                        <h3 class="font-semibold text-lg">🛠️ Services & Matériel</h3>
+                                        <p>
+                                            Locations de salles de répétition ou de spectacle, prêt ou vente de costumes, décors, accessoires, services techniques, captations, mise en scène, etc.
+                                        </p>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="">
+                                <label class="fieldset-label" for="id_type">Type d'annonce</label>
+                                <div class="flex">
+                                    <select class="select grow" name="type" id="id_type" x-model="type">
+                                        <option value="">---</option>
+                                        <option value="offer" x-text="typeLabels.offer" x-cloak></option>
+                                        <option value="demand" x-text="typeLabels.demand" x-cloak></option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="">
+                                <label class="fieldset-label" for="id_category">Rémunération</label>
+                                <div class="flex">
+                                    <select class="select grow" name="category" id="id_category" x-model="category">
+                                        <option value="">---</option>
+                                        <option value="unpaid" x-text="categoryLabels.unpaid" x-cloak></option>
+                                        <option value="paid" x-text="categoryLabels.paid" x-cloak></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-2 hidden sm:block" role="region" aria-live="polite" aria-atomic="true">
+                            <template x-if="section === 'artists_groups'">
+                                <div
+                                        class="rounded bg-base-100 p-2"
+                                        tabindex="0"
+                                >
+                                    <h3 class="font-semibold text-lg">🎭 Comédiens & Troupes</h3>
+                                    <p>
+                                        Offres et recherches de rôles, auditions, troupes cherchant des comédien·nes, comédien·nes cherchant une troupe, projets de création collective, collaborations artistiques.
+                                    </p>
+                                </div>
+                            </template>
+
+                            <template x-if="section === 'courses_training'">
+                                <div
+                                        class="rounded bg-base-100 p-2"
+                                        tabindex="0"
+                                >
+                                    <h3 class="font-semibold text-lg">🎓 Cours & Formations</h3>
+                                    <p>
+                                        Annonces de cours de théâtre, stages, ateliers, formations professionnelles ou amateurs, coaching, interventions pédagogiques.
+                                    </p>
+                                </div>
+                            </template>
+
+                            <template x-if="section === 'calls_events'">
+                                <div
+                                        class="rounded bg-base-100 p-2"
+                                        tabindex="0"
+                                >
+                                    <h3 class="font-semibold text-lg">📣 Appels & Événements</h3>
+                                    <p>
+                                        Résidences artistiques, appels à projets, festivals, représentations, événements associatifs ou culturels, collaborations ponctuelles.
+                                    </p>
+                                </div>
+                            </template>
+
+                            <template x-if="section === 'services_equipment'">
+                                <div
+                                        class="rounded bg-base-100 p-2"
+                                        tabindex="0"
+                                >
+                                    <h3 class="font-semibold text-lg">🛠️ Services & Matériel</h3>
+                                    <p>
+                                        Locations de salles de répétition ou de spectacle, prêt ou vente de costumes, décors, accessoires, services techniques, captations, mise en scène, etc.
+                                    </p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </fieldset>
+    </form>
+</div>
+
+<script>
+    document.body.addEventListener('htmx:configRequest', function(evt) {
+        document.getElementById('loading-indicator')?.classList.remove('hidden');
+    });
+
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+        document.getElementById('loading-indicator')?.classList.add('hidden');
+    });
+</script>
