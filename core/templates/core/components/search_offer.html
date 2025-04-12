@@ -19,6 +19,8 @@
                     <i class="fa-solid fa-circle-notch fa-spin text-xl text-primary"></i>
                 </div>
             </label>
+
+            {# Below div only used to remove solve flicker issue#}
             <div x-data="{ready: false}",
                  x-init="$nextTick(() => ready = true)"
                  x-show="!ready" >
