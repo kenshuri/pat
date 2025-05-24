@@ -20,5 +20,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "django-debug-toolbar>=5.2.0",
     "openpyxl>=3.1.5",
 ]
