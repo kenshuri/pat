@@ -12,7 +12,7 @@ from moderation.services import moderate_text
 
 # Create your views here.
 def index(request):
-    all_offers = Offer.objects.filter(filled=False).filter(Q(moderation__isnull=True) | Q(moderation__passed=True)).order_by('-created_on')
+    all_offers = Offer.objects.select_related('moderation').filter(filled=False).filter(Q(moderation__isnull=True) | Q(moderation__passed=True)).order_by('-created_on')
     return render(request, 'core/index.html', {'all_offers': all_offers})
 
 
@@ -124,7 +124,7 @@ def offer_search(request):
     category = search_data.get('category')
 
     # Base queryset
-    results = Offer.objects.filter(filled=False).filter(
+    results = Offer.objects.select_related('moderation').filter(filled=False).filter(
         Q(moderation__isnull=True) | Q(moderation__passed=True)
     )
 
@@ -154,7 +154,7 @@ def offer_search(request):
 
 @login_required
 def offer_user(request):
-    user_offers = Offer.objects.filter(author=request.user.id)
+    user_offers = Offer.objects.select_related('moderation').filter(author=request.user.id)
     context = {
         'all_offers': user_offers.order_by('-created_on')
     }

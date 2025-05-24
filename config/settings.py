@@ -53,6 +53,9 @@ INSTALLED_APPS = [
     'turnstile'
 ]
 
+if DEBUG:
+    INSTALLED_APPS.append('debug_toolbar')
+
 # Custom User model
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
@@ -71,6 +74,9 @@ MIDDLEWARE = [
 DJANGO_BROWSER_RELOAD = os.environ.get("DJANGO_BROWSER_RELOAD") == 'True'
 if DJANGO_BROWSER_RELOAD:
     MIDDLEWARE.append('django_browser_reload.middleware.BrowserReloadMiddleware')
+
+if DEBUG:
+    MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
 
 ROOT_URLCONF = 'config.urls'
 
@@ -183,3 +189,8 @@ CSRF_TRUSTED_ORIGINS = ['https://pat-production-b5b4.up.railway.app',
 # TURNSTILE_DEFAULT_CONFIG = {
 #     'language': 'fr',
 # }
+
+# DJANGO DEBUT TOOLBAR
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
