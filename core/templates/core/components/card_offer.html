@@ -12,23 +12,30 @@
      @touchstart="clicked = true"
      @touchend="clicked = false"
      @touchcancel="clicked = false"
+        {% if last == 1 %}
+     hx-get="/offers/{{ page_next }}"
+     hx-trigger="revealed"
+     hx-target="#list_offers"
+     hx-swap="beforeend"
+     hx-indicator="#spinner"
+        {% endif %}
 >
     <div class="card-body">
         <h2 class="card-title flex justify-between">
-             {% if offer.section == "artists_groups" %}
-            🎭
+            {% if offer.section == "artists_groups" %}
+                🎭
             {% elif offer.section == "courses_training" %}
-            🎓
+                🎓
             {% elif offer.section == "calls_events" %}
-            📣
+                📣
             {% elif offer.section == "services_equipment" %}
-            🛠️
+                🛠️
             {% else %}
-            ❓
+                ❓
             {% endif %}
             {{ offer.title|capfirst}}
             {% if offer.recent %}
-            <div class="badge badge-accent">NEW</div>
+                <div class="badge badge-accent">NEW</div>
             {% endif %}
         </h2>
 
@@ -80,4 +87,3 @@
         </div>
     </div>
 </div>
-

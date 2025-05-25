@@ -1,5 +1,8 @@
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 mt-2 gap-2">
-    {% for offer in all_offers %}
-        {% include "core/components/card_offer.html" with offer=offer%}
-    {% endfor %}
-</div>
+{% for offer in all_offers %}
+    {% if forloop.last %}
+        {# Implements the infinite scroll logic #}
+        {% include "core/components/card_offer.html" with offer=offer last=1 page=page page_next=page_next %}
+    {% else %}
+        {% include "core/components/card_offer.html" with offer=offer last=0 %}
+    {% endif %}
+{% endfor %}
