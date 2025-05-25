@@ -43,6 +43,7 @@ urlpatterns = [
 htmx_urlpatterns = [
     path('offer_search/', core.views.offer_search, name='offer_search'),
     path('offer/<int:offer_id>/contact_info', core.views.offer_contact_info, name='offer_contact_info'),
+    path('offers/<int:page>', core.views.offers, name='offers'),
 ]
 
 urlpatterns += htmx_urlpatterns

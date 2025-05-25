@@ -13,8 +13,20 @@ from moderation.services import moderate_text
 # Create your views here.
 def index(request):
     all_offers = Offer.objects.select_related('moderation').filter(filled=False).filter(Q(moderation__isnull=True) | Q(moderation__passed=True)).order_by('-created_on')
-    return render(request, 'core/index.html', {'all_offers': all_offers})
+    return render(request, 'core/index.html', {
+        'all_offers': all_offers[0:20],
+        'page': 1,
+        'page_next': 2,
+    })
 
+def offers(request, page: int):
+    all_offers = Offer.objects.select_related('moderation').filter(filled=False).filter(
+        Q(moderation__isnull=True) | Q(moderation__passed=True)).order_by('-created_on')
+    return render(request, 'core/partials/offers_partials.html', {
+        'all_offers': all_offers[(page-1)*20:(page)*20],
+        'page': page,
+        'page_next': page+1,
+    })
 
 def signup(request):
     if request.method == 'POST':
