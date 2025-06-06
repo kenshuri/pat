@@ -194,3 +194,7 @@ def alert(request):
     return render(request, 'core/alert.html')
 
 
+def promote(request):
+    return render(request, 'core/promote.html')
+
+
