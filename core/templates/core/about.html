@@ -24,8 +24,8 @@ Petites Annonces Théâtre
     <p>
         Tout a commencé avec la fermeture de la page "Annonces" du site <a class="link" href="https://www.theatre-contemporain.net/annonces/">theatre-contemporain.net</a>, une ressource précieuse pour les annonces théâtrales.
         La migration vers <a class="link" href="https://www.artcena.fr/annonces">Artcena</a>, qui se concentre uniquement sur les emplois professionnels, a laissé un vide pour les amateurs.
-        En tant que comédien amateur moi-même, j'ai ressenti ce manque.
-        C'est pourquoi j'ai décidé de créer un espace dédié aux amateurs, pour que la passion du théâtre puisse continuer à prospérer et à s'épanouir.
+        En tant que comédiens amateurs nous-mêmes, nous avons ressenti ce manque.
+        C'est pourquoi nous avons décidé de créer un espace dédié aux amateurs, pour que la passion du théâtre puisse continuer à prospérer et à s'épanouir.
     </p>
 
     <h2 class="text-lg font-bold mt-2">
@@ -40,6 +40,9 @@ Petites Annonces Théâtre
         <li>
             <span><i class="fa-solid fa-check"></i></span> <span class="font-semibold">Répondre à des annonces</span>
         </li>
+    <li>
+        <span><i class="fa-solid fa-check"></i></span> <span class="font-semibold">Promouvoir votre pièce</span>  : un bandeau placé au-dessus des annonces peut être réservé pour mettre en avant vos dates (formules au jour, à la semaine ou au mois). <span class="italic">Seuls les spectacles de théâtre sont acceptés ; aucun contenu commercial tiers n’est affiché.</span>
+    </li>
     </ul>
     <p>
         Et c'est tout ! Pas besoin de faire compliqué quand on peut faire simple : nous nous sommes inspiré du fonctionnement de <a class="link" href="https://www.theatre-contemporain.net/annonces/">theatre-contemporain.net</a>.
@@ -66,9 +69,9 @@ Petites Annonces Théâtre
             <strong>Serveur Mail : MailJet</strong>, pour une gestion fiable des emails transactionnels.
         </li>
     </ul>
-    Cette migration permet de maintenir le site sans publicité et accessible à tous, tout en offrant une meilleure stabilité.
-    Toutefois, ces services génèrent des coûts, et pour continuer à vous offrir une plateforme gratuite,
-    nous avons mis en place une page de soutien où vous pouvez contribuer au financement des frais de fonctionnement.
+    Ces services génèrent des coûts, mais permettent de maintenir la plateforme sans publicité tierce.
+    Le bandeau “spectacle en vedette” et la page de soutien visent à couvrir ces frais afin que l’accès aux
+    annonces reste gratuit pour tous.
     </p>
     <h2 class="text-lg font-bold mt-2">🍪 Site garanti sans cookies ajoutés !</h2>
     <p>
@@ -95,11 +98,8 @@ Petites Annonces Théâtre
     <p>
         Si vous appréciez <a href="{% url 'index' %}" class="link">petites-annonces-theatre</a>
         et souhaitez participer à son maintien, vous pouvez désormais soutenir
-        l'initiative via une <a class="link" href="https://ko-fi.com/petitesannoncestheatre">page dédiée</a>.
-        Nous n'avons pas encore énormément de recul sur les frais de fonctionnement mensuels du site
-        mais ils devraient s'élever à environ à une trentaine d'euros.
-        Votre contribution permettra de couvrir ces coûts tout en conservant le site sans publicité
-        et totalement gratuit.
+        l'initiative via une <a class="link" href="https://ko-fi.com/petitesannoncestheatre">page dédiée</a>
+        ou choisir de mettre votre spectacle en avant grâce au <a class="link" href="{% url 'announcement' %}">bandeau dédié</a>.
     </p>
     <h2 class="text-lg font-bold mt-2">
         Rejoignez-nous
