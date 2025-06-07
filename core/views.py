@@ -1,22 +1,40 @@
 import os
 
+from datetime import date
+
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
+from django.db.models import F
+
 
 from core.forms import OfferForm, SignUpForm
 from core.models import Offer
 from moderation.services import moderate_text
+from promote.models import Promote
 
 
 # Create your views here.
 def index(request):
     all_offers = Offer.objects.select_related('moderation').filter(filled=False).filter(Q(moderation__isnull=True) | Q(moderation__passed=True)).order_by('-created_on')
+
+    today = date.today()
+    promo = Promote.objects.filter(
+        start_date__lte=today,
+        end_date__gte=today
+    ).first()
+
+    if promo:
+        Promote.objects.filter(pk=promo.pk).update(
+            impression_count=F("impression_count") + 1
+        )
+
     return render(request, 'core/index.html', {
         'all_offers': all_offers[0:20],
         'page': 1,
         'page_next': 2,
+        'promo': promo,
     })
 
 def offers(request, page: int):
@@ -192,5 +210,6 @@ def announcement(request):
 
 def alert(request):
     return render(request, 'core/alert.html')
+
 
 
