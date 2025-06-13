@@ -37,8 +37,8 @@ class PromoteDetailView(DetailView):
         """
         slug = self.kwargs.get(self.slug_url_kwarg)
         candidates = [
-            f"promote/{slug}.html",
-            "promote/promote.html",
+            f"promote/details_{slug}.html",
+            "promote/details_adn.html",
         ]
         # select_template returns the first template that actually exists
         return [select_template(candidates).template.name]
