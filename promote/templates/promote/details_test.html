@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-    ADN – En savoir plus
+    TEST – En savoir plus
 {% endblock title %}
 
 {% block main %}
@@ -19,8 +19,8 @@
     <section class="max-w-5xl mx-auto my-8 px-4 grid lg:grid-cols-12 gap-6">
         <!-- Affiche -->
         <figure class="lg:col-span-4 flex justify-center lg:block">
-            <img src="{% static 'promote/adn_affiche.png' %}"
-                 alt="Affiche de la pièce ADN de Dennis Kelly"
+            <img src="{% static 'promote/poster_' %}{{ promo.slug }}.jpg"
+                 alt="Affiche de la pièce {{ promo.title }}"
                  class="rounded shadow w-40 sm:w-52 md:w-60 lg:w-full object-cover" />
         </figure>
 
@@ -29,7 +29,7 @@
             <!-- En‑tête -->
             <header>
                 <h1 class="text-3xl font-bold">
-                    ADN <span class="text-xl font-semibold">(Acide désoxyribonucléique)</span>
+                    {{ promo.title }} <span class="text-xl font-semibold">(Acide désoxyribonucléique)</span>
                 </h1>
                 <p class="italic mt-1">« Si tu peux changer une seule chose, tu peux changer le monde entier. Tu y crois à ça&nbsp;? »</p>
             </header>

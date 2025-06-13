@@ -1,0 +1,89 @@
+<div class="card {% if offer.filled %} bg-base-300 {% elif offer.moderation and not offer.moderation.passed %} bg-error {% else %} bg-base-100 {% endif %} transition-all duration-300 cursor-pointer select-none"
+     x-data="{ offerUrl: '{% url 'offer' offer.id %}', clicked: false, touched: false }"
+     :class="{
+        'shadow-md hover:shadow-xl translate-y-0 hover:-translate-y-1 ': !clicked && !touched,
+        'opacity-50 shadow-sm hover:shadow-sm translate-y-1 hover:translate-y-0.5': clicked && !touched,
+        'opacity-50 shadow-none hover:shadow-none translate-y-1 hover:translate-y-1': !clicked && touched,
+     }"
+     @click="window.location.href = offerUrl"
+     @mousedown="clicked = true"
+     @mouseup="clicked = false"
+     @mouseleave="clicked = false"
+     @touchstart="clicked = true"
+     @touchend="clicked = false"
+     @touchcancel="clicked = false"
+        {% if last == 1 %}
+     hx-get="/offers/{{ page_next }}"
+     hx-trigger="revealed"
+     hx-target="#list_offers"
+     hx-swap="beforeend"
+     hx-indicator="#spinner"
+        {% endif %}
+>
+    <div class="card-body">
+        <h2 class="card-title flex justify-between">
+            {% if offer.section == "artists_groups" %}
+                🎭
+            {% elif offer.section == "courses_training" %}
+                🎓
+            {% elif offer.section == "calls_events" %}
+                📣
+            {% elif offer.section == "services_equipment" %}
+                🛠️
+            {% else %}
+                ❓
+            {% endif %}
+            {{ offer.title|capfirst}}
+            {% if offer.recent %}
+                <div class="badge badge-accent">NEW</div>
+            {% endif %}
+        </h2>
+
+        <p class="overflow-hidden text-ellipsis">
+            {{ offer.summary }}
+        </p>
+        <div class="flex items-center justify-between">
+            <div class="italic">
+                {{ offer.created_on|date:"d/m/Y"}}
+            </div>
+            <div class="flex justify-end items-center gap-2">
+                {% if offer.type == 'offer' %}
+                    {% if offer.section == 'artists_groups' %}
+                        <div class="badge badge-primary badge-soft flex gap-0.5">Je recrute</div>
+                    {% elif offer.section == 'courses_training' %}
+                        <div class="badge badge-primary badge-soft flex gap-0.5">Je propose</div>
+                    {% elif offer.section == 'calls_events' %}
+                        <div class="badge badge-primary badge-soft flex gap-0.5">Je programme</div>
+                    {% elif offer.section == 'services_equipment' %}
+                        <div class="badge badge-primary badge-soft flex gap-0.5">Je propose</div>
+                    {% else %}
+                    {% endif %}
+                {% else %}
+                    {% if offer.section == 'artists_groups' %}
+                        <div class="badge badge-primary flex gap-0.5">Je postule</div>
+                    {% elif offer.section == 'courses_training' %}
+                        <div class="badge badge-primary flex gap-0.5">Je recherche</div>
+                    {% elif offer.section == 'calls_events' %}
+                        <div class="badge badge-primary flex gap-0.5">Je me produis</div>
+                    {% elif offer.section == 'services_equipment' %}
+                        <div class="badge badge-primary flex gap-0.5">Je recherche</div>
+                    {% else %}
+                    {% endif %}
+                {% endif %}
+                {% if offer.category == 'paid' %}
+                    {% if offer.section == 'artists_groups' or offer.section == 'calls_events' %}
+                        <div class="badge badge-secondary">Rémunéré</div>
+                    {% else %}
+                        <div class="badge badge-secondary">Payant</div>
+                    {% endif %}
+                {% else %}
+                    {% if offer.section == 'artists_groups' or offer.section == 'calls_events' %}
+                        <div class="badge badge-soft badge-secondary">Bénévole</div>
+                    {% else %}
+                        <div class="badge badge-soft badge-secondary">Gratuit</div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

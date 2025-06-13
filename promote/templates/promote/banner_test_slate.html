@@ -1,7 +1,9 @@
 {% load static %}
 
+{% with bg_color="slate" %}
+{% with text_color="white" %}
 <a href="{% url 'promote:banner_click' promo.slug %}">
-    <div role="alert" class="alert bg-cyan-500 border-cyan-500">
+    <div role="alert" class="alert bg-{{ bg_color }}-500 border-{{ bg_color }}-500 text-{{ text_color }}">
         <div class="flex gap-3 items-center">
             <!-- Libellé publicité -->
             <span class="text-xs px-2 py-0.5 bg-gray-900/20 rounded ">
@@ -9,21 +11,23 @@
                     </span>
             <!-- Vignette d’affiche -->
             <img
-                    src="{% static 'promote/poster_' %}{{ promo.slug }}.png"
+                    src="{% static 'promote/poster_' %}{{ promo.slug }}.jpg"
                     alt="Affiche {{ promo.title }}"
                     class="w-12 h-16 object-cover rounded"
             />
         </div>
         <div>
-            <div class="font-bold text-base">ADN <span class="text-sm  sm:text-base">(Acide désoxyribonucléique)</span></div>
+            <div class="font-bold text-base">TEST <span class="text-sm  sm:text-base">(Acide désoxyribonucléique)</span></div>
             <div class="text-sm italic hidden lg:block"> « Si tu peux changer une seule chose, tu peux changer le monde entier. Tu y crois à ça ?» </div>
             <div class=""><span class="hidden sm:inline">Théâtre Le Funambule Montmartre – </span>Paris • <time datetime="2025-06-24">24 juin</time> → 5 juillet</div>
         </div>
         <div>
-            <button class="btn bg-cyan-200 border-cyan-200 text-cyan-600 hover:bg-cyan-400 hover:border-cyan-400  hover:text-cyan-900">
+            <button class="btn bg-{{ bg_color }}-200 border-{{ bg_color }}-200 text-{{ bg_color }}-600 hover:bg-{{ bg_color }}-400 hover:border-{{ bg_color }}-400  hover:text-{{ bg_color }}-900">
                 <span class="hidden sm:block">En savoir plus</span>
                 <span class="sm:hidden"><i class="fa-solid fa-chevron-right"></i></span>
             </button>
         </div>
     </div>
 </a>
+{% endwith %}
+{% endwith %}

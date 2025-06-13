@@ -23,7 +23,9 @@ def index(request):
     promo = Promote.objects.filter(
         start_date__lte=today,
         end_date__gte=today
-    ).first()
+    ).order_by('?').first()
+
+    promo = Promote.objects.get(slug="test")
 
     if promo:
         Promote.objects.filter(pk=promo.pk).update(

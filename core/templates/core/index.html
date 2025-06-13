@@ -9,9 +9,27 @@
     <div class="p-2 md:p-0 md:mt-2">
 
         <!--        Promo -->
-        {% with "promote/banner_"|add:promo.slug|add:".html" as template_name %}
-            {% include template_name %}
-        {% endwith %}
+        <div class="flex flex-col gap-2">
+            {% with "promote/banner_"|add:promo.slug|add:"_cyan.html" as template_name %}
+                {% include template_name %}
+            {% endwith %}
+
+            {% with "promote/banner_"|add:promo.slug|add:"_slate.html" as template_name %}
+                {% include template_name %}
+            {% endwith %}
+
+            {% with "promote/banner_"|add:promo.slug|add:"_yellow.html" as template_name %}
+                {% include template_name %}
+            {% endwith %}
+
+            {% with "promote/banner_"|add:promo.slug|add:"_pink.html" as template_name %}
+                {% include template_name %}
+            {% endwith %}
+
+            {% with "promote/banner_"|add:promo.slug|add:"_stone.html" as template_name %}
+                {% include template_name %}
+            {% endwith %}
+        </div>
 
 
         <!--Search Offer-->
