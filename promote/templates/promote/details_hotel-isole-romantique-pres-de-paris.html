@@ -1,0 +1,68 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}
+    {{ promote.title }} – En savoir plus
+{% endblock title %}
+
+{% block main %}
+    <!--        Annonce temporaire-->
+    <a href="{% url 'announcement' %}">
+        <div role="alert" class="alert alert-info my-2 ml-1 md:ml-0">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span class="font-semibold">Nouvelle fonctionnalité : faites la promo de votre spectacle ici <span class="hidden md:inline">- cliquez pour en savoir plus </span>!</span>
+        </div>
+    </a>
+
+    <section class="max-w-5xl mx-auto my-8 px-4 grid lg:grid-cols-12 gap-6">
+        <!-- Affiche -->
+        <figure class="lg:col-span-4 flex justify-center lg:block">
+            <img src="{% static 'promote/poster_' %}{{ promo.slug }}.jpg"
+                 alt="Affiche de la pièce {{ promo.title }}"
+                 class="rounded shadow w-40 sm:w-52 md:w-60 lg:w-full object-cover" />
+        </figure>
+
+        <!-- Contenu texte + synopsis -->
+        <article class="lg:col-span-8 space-y-6">
+            <!-- En‑tête -->
+            <header>
+                <h1 class="text-3xl font-bold">
+                    {{ promo.title }} <span class="text-xl font-semibold"></span>
+                </h1>
+                <p class="italic mt-1">Un week-end romantique qui devient chaotique</p>
+            </header>
+
+            <!-- Infos essentielles -->
+            <ul class="list-disc ml-5 text-base">
+                <li><span class="font-semibold">Dates&nbsp;:</span> du <time datetime="2025-06-27">27&nbsp;juin&nbsp;2025</time> au <time datetime="2025-07-05">5&nbsp;juillet&nbsp;2025</time></li>
+                <li><span class="font-semibold">Auteur&nbsp;:</span> Cédric TAPARO</li>
+            </ul>
+
+            <!-- Bouton de réservation -->
+            <a href="https://www.helloasso.com/associations/la-compagnie-des-11-trepides/evenements/hotel-isole-romantique-pres-de-paris" target="_blank" rel="noopener" class="text-base btn bg-cyan-500 border-cyan-500 text-cyan-900 hover:bg-cyan-600 hover:border-cyan-600  hover:text-black w-max">
+                Réserver vos places le 27 Juin 2025
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+            <a href="https://www.helloasso.com/associations/la-compagnie-des-11-trepides/evenements/hotel-isole-romantique-pres-de-paris-de-cedric-taparo" target="_blank" rel="noopener" class="text-base btn bg-cyan-500 border-cyan-500 text-cyan-900 hover:bg-cyan-600 hover:border-cyan-600  hover:text-black w-max">
+                Réserver vos places le 28 Juin 2025
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+            <a href="https://www.helloasso.com/associations/la-compagnie-des-11-trepides/evenements/hotel-isole-romantique-pres-de-paris-de-cedric-taparo-1" target="_blank" rel="noopener" class="text-base btn bg-cyan-500 border-cyan-500 text-cyan-900 hover:bg-cyan-600 hover:border-cyan-600  hover:text-black w-max">
+                Réserver vos places le 4 Juillet 2025
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+            <a href="https://www.helloasso.com/associations/la-compagnie-des-11-trepides/evenements/hotel-isole-romantique-pres-de-paris-de-cedric-taparo-2" target="_blank" rel="noopener" class="text-base btn bg-cyan-500 border-cyan-500 text-cyan-900 hover:bg-cyan-600 hover:border-cyan-600  hover:text-black w-max">
+                Réserver vos places le 5 Juillet 2025
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+
+            <!-- Synopsis -->
+            <div class="prose max-w-none">
+                <p>Dans un petit hôtel de charme romantique autrefois éclatant, fastueux et réputé, deux hommes ont réservé une chambre pour s'adonner aux plaisirs de l'adultère... Chacun attend sa chacune avec impatience.</p>
+                <p>Ces Messieurs, que tout oppose, ont pourtant un point en commun, ils ont tous les deux décidé de se faire appeler "Monsieur DUBOIS" et c'est là que leurs ennuis commencent...</p>
+            </div>
+        </article>
+    </section>
+{% endblock main %}

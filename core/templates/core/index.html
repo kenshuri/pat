@@ -10,25 +10,31 @@
 
         <!--        Promo -->
         <div class="flex flex-col gap-2">
-            {% with "promote/banner_"|add:promo.slug|add:"_cyan.html" as template_name %}
+
+            {% with "promote/banner_"|add:promo.slug|add:".html" as template_name %}
                 {% include template_name %}
             {% endwith %}
 
-            {% with "promote/banner_"|add:promo.slug|add:"_slate.html" as template_name %}
-                {% include template_name %}
-            {% endwith %}
-
-            {% with "promote/banner_"|add:promo.slug|add:"_yellow.html" as template_name %}
-                {% include template_name %}
-            {% endwith %}
-
-            {% with "promote/banner_"|add:promo.slug|add:"_pink.html" as template_name %}
-                {% include template_name %}
-            {% endwith %}
-
-            {% with "promote/banner_"|add:promo.slug|add:"_stone.html" as template_name %}
-                {% include template_name %}
-            {% endwith %}
+            {#        Test Banner Colors#}
+            {#            {% with "promote/banner_"|add:promo.slug|add:"_cyan.html" as template_name %}#}
+            {#                {% include template_name %}#}
+            {#            {% endwith %}#}
+            {##}
+            {#            {% with "promote/banner_"|add:promo.slug|add:"_slate.html" as template_name %}#}
+            {#                {% include template_name %}#}
+            {#            {% endwith %}#}
+            {##}
+            {#            {% with "promote/banner_"|add:promo.slug|add:"_yellow.html" as template_name %}#}
+            {#                {% include template_name %}#}
+            {#            {% endwith %}#}
+            {##}
+            {#            {% with "promote/banner_"|add:promo.slug|add:"_pink.html" as template_name %}#}
+            {#                {% include template_name %}#}
+            {#            {% endwith %}#}
+            {##}
+            {#            {% with "promote/banner_"|add:promo.slug|add:"_stone.html" as template_name %}#}
+            {#                {% include template_name %}#}
+            {#            {% endwith %}#}
         </div>
 
 

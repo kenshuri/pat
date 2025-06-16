@@ -25,7 +25,7 @@ def index(request):
         end_date__gte=today
     ).order_by('?').first()
 
-    promo = Promote.objects.get(slug="test")
+    promo = Promote.objects.get(slug="hotel-isole-romantique-pres-de-paris")
 
     if promo:
         Promote.objects.filter(pk=promo.pk).update(
