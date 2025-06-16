@@ -1,26 +1,57 @@
-<div class="card {% if offer.filled %} bg-base-300 {% elif offer.moderation and not offer.moderation.passed %} bg-error {% else %} bg-base-100 {% endif %} transition-all duration-300 cursor-pointer select-none"
-     x-data="{ offerUrl: '{% url 'offer' offer.id %}', clicked: false, touched: false }"
-     :class="{
-        'shadow-md hover:shadow-xl translate-y-0 hover:-translate-y-1 ': !clicked && !touched,
-        'opacity-50 shadow-sm hover:shadow-sm translate-y-1 hover:translate-y-0.5': clicked && !touched,
-        'opacity-50 shadow-none hover:shadow-none translate-y-1 hover:translate-y-1': !clicked && touched,
-     }"
-     @click="window.location.href = offerUrl"
-     @mousedown="clicked = true"
-     @mouseup="clicked = false"
-     @mouseleave="clicked = false"
-     @touchstart="clicked = true"
-     @touchend="clicked = false"
-     @touchcancel="clicked = false"
-        {% if last == 1 %}
-     hx-get="/offers/{{ page_next }}"
-     hx-trigger="revealed"
-     hx-target="#list_offers"
-     hx-swap="beforeend"
-     hx-indicator="#spinner"
-        {% endif %}
+<a
+    href="{% url 'offer' offer.id %}"
+    tabindex="0"
+    class="card
+           {% if offer.filled %}
+               bg-base-300
+           {% elif offer.moderation and not offer.moderation.passed %}
+               bg-error
+           {% else %}
+               bg-base-100
+           {% endif %}
+           transition-all duration-300 cursor-pointer select-none w-full
+           focus-visible:outline-none
+           focus-visible:ring-4 focus-visible:ring-primary/80
+           focus-visible:ring-offset-2 focus-visible:ring-offset-base-100
+           rounded-box"
+    x-data="{ pressed:false, sx:0, sy:0 }"
+
+    /* ---- souris / clavier ---- */
+    @mousedown="pressed = true"
+    @mouseup="pressed = false"
+    @mouseleave="pressed = false"
+
+    /* ---- tactile ---- */
+    @touchstart="
+        pressed = true;
+        sx = $event.touches[0].clientX;
+        sy = $event.touches[0].clientY;
+    "
+    @touchmove.passive="
+        if (Math.abs($event.touches[0].clientX - sx) > 6
+            || Math.abs($event.touches[0].clientY - sy) > 6) {
+            pressed = false;   // on considère que c’est un scroll, pas un tap
+        }
+    "
+    @touchend="pressed = false"
+    @touchcancel="pressed = false"
+
+    {% if last == 1 %}
+        hx-get="/offers/{{ page_next }}"
+        hx-trigger="revealed"
+        hx-target="#list_offers"
+        hx-swap="beforeend"
+        hx-indicator="#spinner"
+    {% endif %}
+    :class="{
+        /* affichage normal */
+        'shadow-md hover:shadow-xl translate-y-0 hover:-translate-y-1': !pressed,
+        /* affichage pressé (clic ou tap) */
+        'opacity-50 shadow-sm translate-y-1': pressed
+    }"
 >
     <div class="card-body">
+        <!-- Titre + icône + badge NEW -->
         <h2 class="card-title flex justify-between">
             {% if offer.section == "artists_groups" %}
                 🎭
@@ -33,57 +64,66 @@
             {% else %}
                 ❓
             {% endif %}
-            {{ offer.title|capfirst}}
+
+            {{ offer.title|capfirst }}
+
             {% if offer.recent %}
-                <div class="badge badge-accent">NEW</div>
+                <span class="badge badge-accent">NEW</span>
             {% endif %}
         </h2>
 
+        <!-- Résumé -->
         <p class="overflow-hidden text-ellipsis">
             {{ offer.summary }}
         </p>
+
+        <!-- Bas de carte : date + badges -->
         <div class="flex items-center justify-between">
-            <div class="italic">
-                {{ offer.created_on|date:"d/m/Y"}}
-            </div>
-            <div class="flex justify-end items-center gap-2">
+            <time class="italic">
+                {{ offer.created_on|date:"d/m/Y" }}
+            </time>
+
+            <div class="flex flex-wrap justify-end items-center gap-2">
+
+                {# TYPE / SECTION #}
                 {% if offer.type == 'offer' %}
                     {% if offer.section == 'artists_groups' %}
-                        <div class="badge badge-primary badge-soft flex gap-0.5">Je recrute</div>
+                        <span class="badge badge-primary badge-soft">Je recrute</span>
                     {% elif offer.section == 'courses_training' %}
-                        <div class="badge badge-primary badge-soft flex gap-0.5">Je propose</div>
+                        <span class="badge badge-primary badge-soft">Je propose</span>
                     {% elif offer.section == 'calls_events' %}
-                        <div class="badge badge-primary badge-soft flex gap-0.5">Je programme</div>
+                        <span class="badge badge-primary badge-soft">Je programme</span>
                     {% elif offer.section == 'services_equipment' %}
-                        <div class="badge badge-primary badge-soft flex gap-0.5">Je propose</div>
-                    {% else %}
+                        <span class="badge badge-primary badge-soft">Je propose</span>
                     {% endif %}
                 {% else %}
                     {% if offer.section == 'artists_groups' %}
-                        <div class="badge badge-primary flex gap-0.5">Je postule</div>
+                        <span class="badge badge-primary">Je postule</span>
                     {% elif offer.section == 'courses_training' %}
-                        <div class="badge badge-primary flex gap-0.5">Je recherche</div>
+                        <span class="badge badge-primary">Je recherche</span>
                     {% elif offer.section == 'calls_events' %}
-                        <div class="badge badge-primary flex gap-0.5">Je me produis</div>
+                        <span class="badge badge-primary">Je me produis</span>
                     {% elif offer.section == 'services_equipment' %}
-                        <div class="badge badge-primary flex gap-0.5">Je recherche</div>
-                    {% else %}
+                        <span class="badge badge-primary">Je recherche</span>
                     {% endif %}
                 {% endif %}
+
+                {# GRATUIT / PAYANT, etc. #}
                 {% if offer.category == 'paid' %}
-                    {% if offer.section == 'artists_groups' or offer.section == 'calls_events' %}
-                        <div class="badge badge-secondary">Rémunéré</div>
+                    {% if offer.section in 'artists_groups calls_events' %}
+                        <span class="badge badge-secondary">Rémunéré</span>
                     {% else %}
-                        <div class="badge badge-secondary">Payant</div>
+                        <span class="badge badge-secondary">Payant</span>
                     {% endif %}
                 {% else %}
-                    {% if offer.section == 'artists_groups' or offer.section == 'calls_events' %}
-                        <div class="badge badge-soft badge-secondary">Bénévole</div>
+                    {% if offer.section in 'artists_groups calls_events' %}
+                        <span class="badge badge-soft badge-secondary">Bénévole</span>
                     {% else %}
-                        <div class="badge badge-soft badge-secondary">Gratuit</div>
+                        <span class="badge badge-soft badge-secondary">Gratuit</span>
                     {% endif %}
                 {% endif %}
+
             </div>
         </div>
     </div>
-</div>
+</a>
