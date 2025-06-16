@@ -14,6 +14,7 @@
     x-data="{ clicked:false, touched:false }"
     :class="{
         'shadow-md hover:shadow-xl translate-y-0 hover:-translate-y-1': !clicked && !touched,
+        'opacity-50 shadow-sm hover:shadow-sm translate-y-1 hover:translate-y-0.5': clicked && touched,
         'opacity-50 shadow-sm hover:shadow-sm translate-y-1 hover:translate-y-0.5': clicked && !touched,
         'opacity-50 shadow-none hover:shadow-none translate-y-1 hover:translate-y-1': !clicked && touched
     }"
@@ -21,8 +22,8 @@
     @mouseup="clicked = false"
     @mouseleave="clicked = false"
     @touchstart="clicked = true; touched = true"
-    @touchend="clicked = false"
-    @touchcancel="clicked = false"
+    @touchend="clicked = false; touched = false"
+    @touchcancel="clicked = false; touched = false"
 
     {% if last == 1 %}
         hx-get="/offers/{{ page_next }}"
