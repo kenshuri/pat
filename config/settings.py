@@ -195,3 +195,16 @@ CSRF_TRUSTED_ORIGINS = ['https://pat-production-b5b4.up.railway.app',
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+## DEBUG LOGGING
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",            # or "DEBUG" temporarily
+    },
+}
