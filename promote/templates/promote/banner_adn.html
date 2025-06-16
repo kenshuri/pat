@@ -11,7 +11,7 @@
                     </span>
             <!-- Vignette d’affiche -->
             <img
-                    src="{% static 'promote/poster_' %}{{ promo.slug }}.png"
+                    src="{% static 'promote/poster_'|add:promo.slug|add:'.png' %}"
                     alt="Affiche {{ promo.title }}"
                     class="w-12 h-16 object-cover rounded"
             />

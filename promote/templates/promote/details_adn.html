@@ -19,7 +19,7 @@
     <section class="max-w-5xl mx-auto my-8 px-4 grid lg:grid-cols-12 gap-6">
         <!-- Affiche -->
         <figure class="lg:col-span-4 flex justify-center lg:block">
-            <img src="{% static 'promote/adn_affiche.png' %}"
+            <img src="{% static 'promote/poster_'|add:promo.slug|add:'.png' %}"
                  alt="Affiche de la pièce ADN de Dennis Kelly"
                  class="rounded shadow w-40 sm:w-52 md:w-60 lg:w-full object-cover" />
         </figure>
