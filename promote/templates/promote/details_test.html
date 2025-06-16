@@ -49,7 +49,9 @@
             </div>
 
             <!-- Bouton de réservation -->
-            <a href="https://www.funambule-montmartre.com/adn" target="_blank" rel="noopener" class="text-base btn bg-cyan-500 border-cyan-500 text-cyan-900 hover:bg-cyan-600 hover:border-cyan-600  hover:text-black w-max">
+            <a href="{% url 'promote:booking_redirect' promo.slug %}?next=https://www.funambule-montmartre.com/adn"
+               target="_blank" rel="noopener"
+               class="text-base btn bg-cyan-500 border-cyan-500 text-cyan-900 hover:bg-cyan-600 hover:border-cyan-600  hover:text-black w-max">
                 Réserver vos places
                 <i class="fa-solid fa-arrow-up-right-from-square"></i>
             </a>
