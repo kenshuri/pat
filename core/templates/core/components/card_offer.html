@@ -1,5 +1,6 @@
 <a
     href="{% url 'offer' offer.id %}"
+    tabindex="0"
     class="card
            {% if offer.filled %}
                bg-base-300
@@ -8,22 +9,32 @@
            {% else %}
                bg-base-100
            {% endif %}
-           transition-all duration-300 cursor-pointer select-none
-           focus:outline-none focus:ring-2 focus:ring-primary
-           w-full"
-    x-data="{ clicked:false, touched:false }"
-    :class="{
-        'shadow-md hover:shadow-xl translate-y-0 hover:-translate-y-1': !clicked && !touched,
-        'opacity-50 shadow-sm hover:shadow-sm translate-y-1 hover:translate-y-0.5': clicked && touched,
-        'opacity-50 shadow-sm hover:shadow-sm translate-y-1 hover:translate-y-0.5': clicked && !touched,
-        'opacity-50 shadow-none hover:shadow-none translate-y-1 hover:translate-y-1': !clicked && touched
-    }"
-    @mousedown="clicked = true"
-    @mouseup="clicked = false"
-    @mouseleave="clicked = false"
-    @touchstart="clicked = true; touched = true"
-    @touchend="clicked = false; touched = false"
-    @touchcancel="clicked = false; touched = false"
+           transition-all duration-300 cursor-pointer select-none w-full
+           focus-visible:outline-none
+           focus-visible:ring-4 focus-visible:ring-primary/80
+           focus-visible:ring-offset-2 focus-visible:ring-offset-base-100
+           rounded-box"
+    x-data="{ pressed:false, sx:0, sy:0 }"
+
+    /* ---- souris / clavier ---- */
+    @mousedown="pressed = true"
+    @mouseup="pressed = false"
+    @mouseleave="pressed = false"
+
+    /* ---- tactile ---- */
+    @touchstart="
+        pressed = true;
+        sx = $event.touches[0].clientX;
+        sy = $event.touches[0].clientY;
+    "
+    @touchmove.passive="
+        if (Math.abs($event.touches[0].clientX - sx) > 6
+            || Math.abs($event.touches[0].clientY - sy) > 6) {
+            pressed = false;   // on considère que c’est un scroll, pas un tap
+        }
+    "
+    @touchend="pressed = false"
+    @touchcancel="pressed = false"
 
     {% if last == 1 %}
         hx-get="/offers/{{ page_next }}"
@@ -32,6 +43,12 @@
         hx-swap="beforeend"
         hx-indicator="#spinner"
     {% endif %}
+    :class="{
+        /* affichage normal */
+        'shadow-md hover:shadow-xl translate-y-0 hover:-translate-y-1': !pressed,
+        /* affichage pressé (clic ou tap) */
+        'opacity-50 shadow-sm translate-y-1': pressed
+    }"
 >
     <div class="card-body">
         <!-- Titre + icône + badge NEW -->
