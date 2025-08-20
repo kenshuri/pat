@@ -31,6 +31,8 @@ def index(request):
         Promote.objects.filter(pk=promo.pk).update(
             impression_count=F("impression_count") + 1
         )
+    else:
+        promo = Promote.objects.filter(slug__exact='your-ad').first()
 
     return render(request, 'core/index.html', {
         'all_offers': all_offers[0:20],
