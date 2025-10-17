@@ -9,7 +9,7 @@ Petites annonces dédiées au théâtre amateur pour connecter troupes et coméd
 
     <!--Offers cards-->
     {% if all_offers %}
-    <div id="id_offers">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 mt-2 gap-2" id="list_offers">
         {% include "core/partials/offers_partials.html" %}
     </div>
     {% else %}
