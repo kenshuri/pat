@@ -33,7 +33,7 @@
                     </header>
 
                     <!-- Informations -->
-                    <ul class="list-disc ml-5 text-base space-y-1">
+                    <ul class="list-disc ml-5 text-base space-y-1 mt-4">
                         {% if play.author %}
                             <li><strong>Auteur·e :</strong> {{ play.author }}</li>
                         {% endif %}
@@ -45,7 +45,7 @@
                             <li><strong>Durée :</strong> {{ play.duration|duration_human }}</li>
                         {% endif %}
                         {% if play.website %}
-                            <li><strong>Site :</strong> <a href="{{ play.website }}" target="_blank" class="text-blue-500 underline">{{ play.website }}</a></li>
+                            <li><strong>Site :</strong> <a href="{{ play.website }}" target="_blank" class="link">Lien</a></li>
                         {% endif %}
                     </ul>
 
@@ -63,7 +63,7 @@
 
                     <!-- Description -->
                     {% if play.description %}
-                        <div class="prose max-w-none">
+                        <div class="prose max-w-none mt-4">
                             {{ play.description|linebreaks }}
                         </div>
                     {% endif %}
