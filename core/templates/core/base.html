@@ -31,12 +31,16 @@
                         <img alt="logo" src="{% static 'core/mask.svg' %}" />
                     </div>
                 </div>
-                <span class="flex font-bold text-base md:text-xl">Petites Annonces Théâtre</span>
+                <span class="flex font-bold text-base hidden sm:inline text-xs md:text-sm md:text-xl">Petites Annonces Théâtre</span>
             </a>
         </div>
         <div class="flex gap-2 items-center mr-2">
             <a href="{% url 'add_offer' %}" class='btn btn-accent' aria-label="déposer une annonce"><i class='fa-solid fa-plus'></i><span class="hidden ml-2 sm:inline-flex">Déposer une annonce</span><span class="ml-2 sm:ml-0 sm:hidden">Annonce</span></a>
-            <a href="{% url 'about' %}" class="btn btn-soft btn-info" aria-label="à propos"><i class="fa-solid fa-circle-info"></i><span class="hidden md:inline ml-2">À propos</span></a>
+            <a href="{% url 'shows:agenda' %}" class="btn btn-primary gap-2">
+                <i class="fa-solid fa-calendar-days"></i>
+                <span class="hidden sm:inline">Agenda</span>
+            </a>
+            <a href="{% url 'about' %}" class="btn btn-soft btn-info" aria-label="à propos"><i class="fa-solid fa-circle-info"></i><span class="hidden lg:inline ml-2">À propos</span></a>
             {% if user.is_authenticated %}
                 <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-sm btn-circle btn-neutral" aria-label="utilisateur">
@@ -48,6 +52,9 @@
                         </li>
                         <li>
                             <a href="{% url 'offer_user'%}"><i class="fa-solid fa-envelopes-bulk"></i>Mes annonces</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'shows:agenda-user'%}"><i class="fa-solid fa-ticket"></i>Mes pièces</a>
                         </li>
                         <form method="post" action="{% url 'logout' %}">
                             <li>

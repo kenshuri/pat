@@ -1,0 +1,25 @@
+{% extends "core/base.html" %}
+
+{% block title %}Supprimer la pièce – {{ play.title }}{% endblock %}
+
+{% block main %}
+<div class="max-w-xl mx-auto bg-base-100 rounded p-6 mt-6">
+  <h1 class="text-xl font-semibold mb-4">Supprimer « {{ play.title }} »</h1>
+  <p class="mb-4">
+    Cette action supprimera la pièce et toutes ses données associées
+    (distribution, représentations). Elle est irréversible.
+  </p>
+
+  {% if play.poster %}
+    <figure class="mb-4 max-w-[200px]">
+      <img src="{{ play.poster.url }}" alt="Affiche actuelle" class="rounded shadow object-contain w-full max-h-48">
+    </figure>
+  {% endif %}
+
+  <form method="post" class="flex gap-2">
+    {% csrf_token %}
+    <a href="{% url 'shows:play_detail' play.pk %}" class="btn btn-outline">Annuler</a>
+    <button type="submit" class="btn btn-error">Supprimer définitivement</button>
+  </form>
+</div>
+{% endblock %}

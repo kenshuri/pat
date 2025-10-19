@@ -1,0 +1,27 @@
+{# templates/shows/partials/contributor_row.html #}
+<div class="flex border border-base-300 rounded p-3 bg-base-100 w-full gap-2"
+     data-contributor-row>
+
+    {# champs cachés éventuels générés par le formset #}
+    {% if form.id %}{{ form.id }}{% endif %}
+
+    <div class="flex flex-col md:flex-row gap-2 w-full">
+        <div class="w-full">
+            <label class="label"><span class="label-text">{{ form.role.label }}</span></label>
+            {{ form.role }}
+            {% if form.role.errors %}<p class="text-error text-sm mt-1">{{ form.role.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="w-full">
+            <label class="label"><span class="label-text">{{ form.name.label }}</span></label>
+            {{ form.name }}
+            {% if form.name.errors %}<p class="text-error text-sm mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+        </div>
+    </div>
+
+    <div class="flex items-center">
+        <button type="button" class="btn btn-sm btn-error ml-2" onclick="removeContributor(this)">
+            <i class="fa-solid fa-trash"></i>
+        </button>
+    </div>
+</div>

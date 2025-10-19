@@ -1,0 +1,85 @@
+<form method="post"
+      hx-post="{% url 'shows:add_representation' play.pk %}"
+      hx-target="#representations-list"
+      hx-swap="beforeend"
+      class="mt-4">
+    {% csrf_token %}
+    <fieldset class="fieldset bg-base-300 border border-base-400 rounded-box p-4">
+    <legend class="fieldset-legend">Ajouter une représentation</legend>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Date et heure -->
+            <div class="flex flex-col gap-1">
+                <label for="id_datetime" class="label label-text">Date et heure*</label>
+                <input type="datetime-local" name="datetime" id="id_datetime"
+                       class="input input-bordered w-full"
+                       required>
+                <p class="text-error text-sm mt-1">{{ form.datetime.errors }}</p>
+            </div>
+
+            <!-- Ville -->
+            <div class="flex flex-col gap-1">
+                <label class="fieldset-label" for="id_city">Ville*</label>
+                <mapbox-search-box
+                        access-token="{{ MAPBOX_ACCESS_TOKEN }}"
+                        proximity="0,0"
+                >
+                </mapbox-search-box>
+                <div class="flex">
+                    <input class="input grow" type="text" name="city" maxlength="255"
+                           id="id_city"
+                           required
+                           tabindex="-1"
+                           onkeydown="return false;"
+                           onpaste="return false;"
+                           autocomplete="off"
+                           style="pointer-events: none;"
+                    >
+                </div>
+            </div>
+
+            <!-- Lieu -->
+            <div class="flex flex-col gap-1">
+                <label for="id_venue" class="label label-text">Lieu*</label>
+                <input type="text" name="venue" id="id_venue"
+                       class="input input-bordered w-full"
+                       maxlength="255"
+                       required
+                       placeholder="Théâtre municipal"
+                >
+                <p class="text-error text-sm mt-1">{{ form.venue.errors }}</p>
+            </div>
+        </div>
+
+        <!-- Lien vers billetterie -->
+        <div>
+            <label for="id_ticket_url" class="label label-text">Lien billetterie</label>
+            <input type="url" name="ticket_url" id="id_ticket_url"
+                   class="input input-bordered w-full"
+                   placeholder="https://...">
+            <p class="text-error text-sm mt-1">{{ form.ticket_url.errors }}</p>
+        </div>
+
+        <!-- Crédit -->
+        <div id="credit-related">
+            <div id="credit-counter">
+                Crédits restants : {{ user.publication_credit.remaining_credits }}
+            </div>
+
+            <button type="submit"
+                    class="btn btn-neutral btn-block mt-2"
+                    {% if user.publication_credit.remaining_credits <= 0 %}disabled{% endif %}>
+                Ajouter la représentation
+            </button>
+
+            {% if user.publication_credit.remaining_credits <= 0 %}
+                <p class="mt-2 text-sm text-error">
+                    ⚠️ Vous n’avez plus de crédits. <br>
+                    {#            <a href="{% url 'shows:purchase_credits' %}" class="link link-hover underline">#}
+                    {#                Ajouter des crédits pour publier une nouvelle représentation.#}
+                    {#            </a>#}
+                </p>
+            {% endif %}
+        </div>
+    </fieldset>
+</form>

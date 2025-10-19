@@ -1,0 +1,29 @@
+{% extends "core/base.html" %}
+
+{% block title %}Répertoire – Toutes les pièces{% endblock %}
+
+{% block main %}
+    <div class="p-2 md:p-4">
+
+        <!-- Titre -->
+        <div class="text-center my-6">
+            <h1 class="text-2xl md:text-3xl font-bold flex items-center justify-center gap-2">
+                <i class="fa-solid fa-book text-primary"></i>
+                <span>Répertoire</span>
+            </h1>
+            <p class="text-base-content/70 mt-2">
+                Toutes les pièces ajoutées sur la plateforme, y compris celles sans représentations programmées.
+            </p>
+            <hr class="w-24 mx-auto border-t-2 border-primary/40 mt-4">
+        </div>
+
+
+        <!-- Résultats -->
+        <div id="id_plays">
+            <div class="mt-4 w-full" id="plays_table">
+                {% include "shows/partials/plays_table.html" %}
+            </div>
+        </div>
+
+    </div>
+{% endblock main %}

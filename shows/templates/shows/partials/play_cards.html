@@ -1,0 +1,35 @@
+{% for rep in representations %}
+    <a href="{% url 'shows:play_detail' rep.play.id %}"
+       class="card bg-base-100 hover:shadow-lg transition-all cursor-pointer select-none"
+       x-data="{ pressed:false }"
+       @mousedown="pressed = true"
+       @mouseup="pressed = false"
+       @mouseleave="pressed = false"
+       @touchstart="pressed = true"
+       @touchend="pressed = false"
+
+       {% if forloop.last %}
+           hx-get="{% url 'shows:agenda-page' page_next %}"
+           hx-trigger="revealed"
+           hx-target="#list_representations"
+           hx-swap="beforeend"
+           hx-indicator="#spinner"
+       {% endif %}
+
+       :class="{
+           'shadow-md hover:shadow-xl': !pressed,
+           'opacity-50 shadow-sm': pressed
+       }"
+    >
+        <div class="card-body">
+            <h2 class="card-title">{{ rep.play.title }}</h2>
+            <p class="text-sm text-gray-600">{{ rep.venue }} — {{ rep.city }}</p>
+            <p class="text-sm">
+                🗓 {{ rep.datetime|date:"d/m/Y H:i" }}
+            </p>
+            {% if rep.play.genre %}
+                <span class="badge badge-ghost">{{ rep.play.get_genre_display }}</span>
+            {% endif %}
+        </div>
+    </a>
+{% endfor %}

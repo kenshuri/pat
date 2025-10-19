@@ -1,27 +1,39 @@
 {% extends "core/base.html" %}
 
 {% block title %}
-Petites annonces dédiées au théâtre amateur pour connecter troupes et comédiens à la recherche d'un projet théatral
+    Petites annonces dédiées au théâtre amateur pour connecter troupes et comédiens à la recherche d'un projet théatral
 {% endblock title %}
 
 {% block main %}
-<div class="p-2 md:p-0 md:mt-2">
+    <div class="p-2 md:p-0">
 
-    <!--Offers cards-->
-    {% if all_offers %}
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 mt-2 gap-2" id="list_offers">
-        {% include "core/partials/offers_partials.html" %}
+        <!-- Titre principal -->
+        <div class="text-center my-6">
+            <h1 class="text-2xl md:text-3xl font-bold flex items-center justify-center gap-2">
+                <i class="fa-solid fa-envelopes-bulk text-primary"></i>
+                <span>Mes annonces</span>
+            </h1>
+            <p class="text-base-content/70 mt-2 max-w-2xl mx-auto">
+                Retrouvez ici toutes les annonces que vous avez publiées — qu’il s’agisse d’appels à projets, de recherches d’artistes ou de propositions de cours et de formations.
+            </p>
+            <hr class="w-24 mx-auto border-t-2 border-primary/40 mt-4">
+        </div>
+
+        <!--Offers cards-->
+        {% if all_offers %}
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 mt-2 gap-2" id="list_offers">
+                {% include "core/partials/offers_partials.html" %}
+            </div>
+        {% else %}
+            <div role="alert" class="alert alert-warning">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span class="font-semibold" >Vous n'avez pas encore publié d'annonce !</span>
+            </div>
+        {% endif %}
+
+
     </div>
-    {% else %}
-    <div role="alert" class="alert alert-warning">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-        <span class="font-semibold" >Vous n'avez pas encore publié d'annonce !</span>
-    </div>
-    {% endif %}
-
-
-</div>
 
 {% endblock main %}

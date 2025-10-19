@@ -49,9 +49,11 @@ INSTALLED_APPS = [
     'accounts',
     'moderation',
     'promote',
+    'shows',
     'fontawesomefree',
     'django_browser_reload',
-    'turnstile'
+    'turnstile',
+    'storages'
 ]
 
 if DEBUG:
@@ -145,12 +147,12 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-
-    },
-}
+# STORAGES = {
+#     "staticfiles": {
+#         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+#
+#     },
+# }
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -208,3 +210,31 @@ INTERNAL_IPS = [
 #         "level": "INFO",            # or "DEBUG" temporarily
 #     },
 # }
+
+# --- Scaleway S3 ---
+AWS_ACCESS_KEY_ID = os.getenv("SCW_S3_KEY")
+AWS_SECRET_ACCESS_KEY = os.getenv("SCW_S3_SECRET")
+AWS_STORAGE_BUCKET_NAME = os.getenv("SCW_S3_BUCKET")
+AWS_S3_REGION_NAME = os.getenv("SCW_S3_REGION", "fr-par")
+AWS_S3_ENDPOINT_URL = f"https://s3.{AWS_S3_REGION_NAME}.scw.cloud"
+
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+AWS_S3_ADDRESSING_STYLE = "virtual"
+
+# URLs publiques lisibles
+AWS_QUERYSTRING_AUTH = False
+AWS_DEFAULT_ACL = None
+AWS_S3_OBJECT_PARAMETERS = {
+    "CacheControl": "public, max-age=31536000, immutable",
+}
+
+MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.scw.cloud/"
+
+STORAGES = {
+    "default": {      # <— requis en Django 5
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}

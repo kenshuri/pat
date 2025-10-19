@@ -1,0 +1,187 @@
+{% load static %}
+
+<form method="post" enctype="multipart/form-data" class="space-y-6">
+    {% csrf_token %}
+    <fieldset class="fieldset bg-base-200 border border-base-300 p-4 rounded-box">
+        <legend class="fieldset-legend">Ajouter une pièce</legend>
+
+        <!-- 🔴 Bloc d'erreurs globales -->
+        {% if form.errors %}
+            <div class="alert alert-error shadow-sm mb-4 flex flex-col items-start justify-start">
+                <span class="font-semibold">Merci de corriger les erreurs suivantes :</span>
+                <ul class="list-disc list-inside space-y-1">
+                    {# erreurs non liées à un champ #}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                    {# erreurs liées aux champs #}
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li><strong>{{ field.label }} :</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="flex flex-col gap-4">
+            <div class="form-control">
+                <label for="id_title" class="label">
+                    <span class="label-text">Titre de la pièce*</span>
+                </label>
+                {{ form.title }}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                    <label for="id_author" class="label">
+                        <span class="label-text">Auteur</span>
+                    </label>
+                    {{ form.author }}
+                </div>
+
+                <div class="form-control">
+                    <label for="id_company" class="label">
+                        <span class="label-text">Compagnie</span>
+                    </label>
+                    {{ form.company }}
+                </div>
+            </div>
+
+            <div class="form-control">
+                <label for="id_genre" class="label">
+                    <span class="label-text">Genre*</span>
+                </label>
+                {{ form.genre }}
+            </div>
+
+            <div class="form-control">
+                <label for="id_duration" class="label">
+                    <span class="label-text">Durée (hh:mm)</span>
+                </label>
+                {{ form.duration }}
+            </div>
+
+            <div class="form-control">
+                <label for="id_year_created" class="label">
+                    <span class="label-text">Année de création</span>
+                </label>
+                {{ form.year_created }}
+            </div>
+
+            <div class="form-control">
+                <label for="id_website" class="label">
+                    <span class="label-text">Site web</span>
+                </label>
+                {{ form.website }}
+            </div>
+
+            <div class="form-control">
+                <label for="id_poster" class="label">
+                    <span class="label-text">Affiche (max 2 Mo)</span>
+                </label>
+
+                {# Aperçu si on édite et qu'il y a déjà une affiche #}
+                {% if play and play.pk and play.poster %}
+                    <figure class="mb-2">
+                        <img src="{{ play.poster.url }}" alt="Affiche actuelle" class="rounded shadow w-40 object-cover">
+                    </figure>
+                    <label class="label cursor-pointer gap-2">
+                        <input type="checkbox" name="poster-clear" class="checkbox checkbox-sm">
+                        <span class="label-text">Supprimer l’affiche existante</span>
+                    </label>
+                {% endif %}
+
+                <input
+                        type="file"
+                        name="poster"
+                        id="id_poster"
+                        accept="image/*"
+                        class="file-input file-input-bordered w-full"
+                />
+                {% if form.poster.errors %}
+                    <p class="text-error text-sm mt-1">{{ form.poster.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-control">
+                <label for="id_description" class="label">
+                    <span class="label-text">Description</span>
+                </label>
+                {{ form.description }}
+            </div>
+        </div>
+
+        {# === Distribution === #}
+        <div class="mt-6">
+            <h3 class="text-lg font-semibold mb-2">Distribution</h3>
+
+            {# Management form obligatoire pour formset #}
+            {{ formset.management_form }}
+
+            {# erreurs globales du formset #}
+            {% if formset.non_form_errors %}
+                <div class="alert alert-error mb-3">
+                    <ul class="list-disc list-inside">
+                        {% for e in formset.non_form_errors %}<li>{{ e }}</li>{% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div id="contributors-forms" class="space-y-3">
+                {# ré-affiche les lignes en cas d’erreurs/redisplay #}
+                {% for cform in formset.forms %}
+                    {% include "shows/partials/contributor_row.html" with form=cform %}
+                {% endfor %}
+            </div>
+
+            {# PROTOTYPE caché basé sur empty_form (contient __prefix__) #}
+            <template id="contributor-prototype">
+                {% include "shows/partials/contributor_row.html" with form=formset.empty_form %}
+            </template>
+
+            <div class="mt-3">
+                <button type="button" class="btn btn-outline btn-sm" onclick="addContributor()">
+                    ➕ Ajouter un membre
+                </button>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-neutral btn-block mt-6">
+            {% if play and play.pk %}Enregistrer les modifications{% else %}Valider la création de la pièce{% endif %}
+        </button>
+    </fieldset>
+</form>
+{# Script utilitaire #}
+<script>
+    function addContributor(){
+        const container = document.getElementById('contributors-forms');
+        const totalInput = document.getElementById('id_contributors-TOTAL_FORMS');
+        let index = parseInt(totalInput.value || '0', 10);
+
+        // clone le prototype et remplace __prefix__ par l’index courant
+        const tpl = document.getElementById('contributor-prototype').innerHTML;
+        const html = tpl.replaceAll('__prefix__', index.toString());
+
+        container.insertAdjacentHTML('beforeend', html);
+        totalInput.value = (index + 1).toString();
+    }
+
+    // suppression d’une ligne (gère DELETE s’il existe)
+    function removeContributor(btn){
+        const row = btn.closest('[data-contributor-row]');
+        if(!row) return;
+
+        const del = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+        if (del) {
+            del.checked = true;
+            row.classList.add('hidden');
+            return;
+        }
+        row.remove();
+
+        // NB: on ne décrémente pas TOTAL_FORMS quand on supprime une "nouvelle" ligne
+        // déjà ajoutée : ce n’est pas nécessaire si la ligne a été retirée avant submit,
+        // mais si tu veux être ultra strict, tu peux décrémenter ici.
+    }
+</script>

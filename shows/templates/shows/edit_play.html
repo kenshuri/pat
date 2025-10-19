@@ -1,0 +1,10 @@
+{# templates/shows/edit_play.html #}
+{% extends "core/base.html" %}
+
+{% block title %}Modifier la pièce – {{ play.title }}{% endblock %}
+
+{% block main %}
+  <div class="bg-base-100 rounded p-2 mt-2">
+    {% include 'shows/forms/play_form.html' %}
+  </div>
+{% endblock %}

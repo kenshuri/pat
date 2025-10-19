@@ -1,0 +1,273 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load duration_filters %}
+
+
+{% block title %}
+    {{ play.title }} – En savoir plus
+{% endblock title %}
+
+{% block main %}
+    <div class="">
+        <section class="max-w-5xl mx-auto my-8 px-4 grid lg:grid-cols-12 gap-6">
+
+            <!-- Affiche -->
+            <figure class="lg:col-span-4 flex justify-center lg:block">
+                <img src="{% if play.poster %}{{ play.poster.url }}{% else %}{% static 'promote/poster_your-ad.jpg' %}{% endif %}"
+                     alt="Affiche {{ play.title }}"
+                     class="rounded shadow w-40 sm:w-52 md:w-60 lg:w-full object-cover" />
+            </figure>
+
+            <!-- Contenu texte -->
+            <article class="lg:col-span-8 space-y-6 flex flex-col justify-between">
+                <div>
+                    <!-- Titre -->
+                    <header>
+                        <h1 class="text-3xl font-bold">
+                            {{ play.title }}
+                        </h1>
+                        {% if play.company %}
+                            <p class="text-sm text-gray-600">Une création de <strong>{{ play.company }}</strong></p>
+                        {% endif %}
+                    </header>
+
+                    <!-- Informations -->
+                    <ul class="list-disc ml-5 text-base space-y-1">
+                        {% if play.author %}
+                            <li><strong>Auteur·e :</strong> {{ play.author }}</li>
+                        {% endif %}
+                        <li><strong>Genre :</strong> {{ play.get_genre_display }}</li>
+                        {% if play.year_created %}
+                            <li><strong>Création :</strong> {{ play.year_created }}</li>
+                        {% endif %}
+                        {% if play.duration %}
+                            <li><strong>Durée :</strong> {{ play.duration|duration_human }}</li>
+                        {% endif %}
+                        {% if play.website %}
+                            <li><strong>Site :</strong> <a href="{{ play.website }}" target="_blank" class="text-blue-500 underline">{{ play.website }}</a></li>
+                        {% endif %}
+                    </ul>
+
+                    <!-- Distribution -->
+                    {% if play.contributors.exists %}
+                        <div class="mt-4">
+                            <h2 class="font-semibold text-lg">Distribution</h2>
+                            <ul class="list-disc ml-5">
+                                {% for contributor in play.contributors.all %}
+                                    <li><strong>{{ contributor.role }} :</strong> {{ contributor.name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <!-- Description -->
+                    {% if play.description %}
+                        <div class="prose max-w-none">
+                            {{ play.description|linebreaks }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div>
+                    {% if request.user.is_authenticated and play.user_id == request.user.id %}
+                    <div class="flex gap-2 flex-wrap mt-4">
+                        <div class="grow">
+                            <a href="{% url 'shows:edit_play' play.pk %}" class="btn btn-soft btn-block">
+                                <i class="fa-solid fa-pen"></i>
+                                <span class="ml-2">Modifier la pièce</span>
+                            </a>
+                        </div>
+                        <div class="grow">
+                            <a href="{% url 'shows:delete_play' play.pk %}" class="btn btn-error btn-block">
+                                <i class="fa-solid fa-trash"></i>
+                                <span class="ml-2">Supprimer la pièce</span>
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+                </div>
+            </article>
+
+        </section>
+
+        <!-- Représentations à venir -->
+        <div class="space-y-2">
+            <h2 class="text-xl font-semibold">📅 Représentations à venir</h2>
+            <table class="table table-xs sm:table-md w-full overflow-x-auto bg-base-100">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Ville</th>
+                    <th>Lieu</th>
+                    <th class="text-right">Billetterie</th>
+                </tr>
+                </thead>
+                <tbody id="representations-list">
+                {% for rep in representations %}
+                    <tr class="transition-opacity duration-300">
+                        <td>{{ rep.datetime|date:"D d/m/Y H:i" }}</td>
+                        <td>{{ rep.city }}</td>
+                        <td>{{ rep.venue }}</td>
+                        <td class="text-right">
+                            <div class="flex gap-1 justify-end">
+                                {% if rep.ticket_url %}
+                                    <a href="{{ rep.ticket_url }}" target="_blank" class="btn btn-sm btn-primary">
+                                        <i class="fa-solid fa-ticket"></i>
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-sm btn-primary btn-disabled">
+                                        <i class="fa-solid fa-ticket"></i>
+                                    </button>
+                                {% endif %}
+
+                                {% if rep.play.user == user %}
+                                    <button
+                                            class="btn btn-sm btn-error ml-2"
+                                            onclick="fadeAndDelete(this, '{% url 'shows:delete_representation' rep.pk %}')"
+                                    >
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                {% endif %}
+
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr id="no-rep-row">
+                        <td colspan="5" class="text-center text-gray-500 py-4">
+                            Aucune représentation à venir pour cette pièce.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if request.user == play.user %}
+            <div class="my-6">
+                <button
+                        class="btn btn-outline btn-sm sm:btn-md"
+                        hx-get="{% url 'shows:add_representation' play.pk %}"
+                        hx-target="#representation-form"
+                        hx-swap="innerHTML"
+                >
+                    ➕ Ajouter une représentation
+                </button>
+
+                <div id="representation-form" class="mt-4"></div>
+            </div>
+            <script>
+                document.body.addEventListener('htmx:afterSwap', (e) => {
+                    // Vérifie si un mapbox-search-box a été injecté
+                    const searchBox = document.querySelector('mapbox-search-box');
+                    const inputCity = document.getElementById("id_city");
+
+                    if (searchBox && inputCity) {
+                        searchBox.options = {
+                            language: 'fr',
+                            country: 'FR',
+                            types: 'place'
+                        };
+
+                        searchBox.placeholder = 'Cherchez votre ville';
+
+                        searchBox.theme = {
+                            variables: {
+                                boxShadow: 'none',
+                                border: '1px solid #18181B32',
+                                borderRadius: '4px'
+                            }
+                        };
+
+                        // Évite d’ajouter plusieurs fois le même listener
+                        searchBox.addEventListener('retrieve', (e) => {
+                            const feature = e.detail.features[0];
+                            const cityName = feature.properties.full_address;
+                            inputCity.value = cityName;
+                            console.log("Ville sélectionnée :", cityName);
+                        });
+
+                        searchBox.addEventListener('clear', () => {
+                            inputCity.value = '';
+                        });
+                    }
+                });
+            </script>
+            <script>
+                document.body.addEventListener('htmx:afterSwap', (e) => {
+                    // S'assurer que c'est une réponse venant de notre formulaire spécifique
+                    if (e.detail.target && e.detail.target.id === 'representations-list') {
+                        // Clear uniquement le champ datetime
+                        const datetimeInput = document.getElementById('id_datetime');
+                        if (datetimeInput) datetimeInput.value = '';
+
+                        // Recharger les crédits dynamiquement
+                        fetch("{% url 'shows:get_representation_credit' %}")
+                            .then(res => res.text())
+                            .then(html => {
+                                const credit = document.getElementById('credit-related');
+                                if (credit) credit.innerHTML = html;
+                            });
+                    }
+                });
+            </script>
+            <script>
+                function fadeAndDelete(button, url) {
+                    const row = button.closest('tr');
+                    if (!row) return;
+
+                    // Ajoute la classe d'opacité
+                    row.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+
+                    // Attends 500ms avant suppression
+                    setTimeout(() => {
+                        htmx.ajax('DELETE', url, {
+                            target: row,
+                            swap: 'outerHTML'
+                        });
+                    }, 500);
+                }
+            </script>
+            <script>
+                function removeNoRepRow() {
+                    const noRow = document.getElementById('no-rep-row');
+                    if (noRow) noRow.remove();
+                }
+
+                function maybeShowNoRepRow() {
+                    const tbody = document.getElementById('representations-list');
+                    if (!tbody) return;
+                    const count = tbody.querySelectorAll('tr[data-rep-row]').length;
+                    const hasPlaceholder = !!document.getElementById('no-rep-row');
+                    if (count === 0 && !hasPlaceholder) {
+                        tbody.insertAdjacentHTML('beforeend', `
+      <tr id="no-rep-row">
+        <td colspan="5" class="text-center text-gray-500 py-4">
+          Aucune représentation à venir pour cette pièce.
+        </td>
+      </tr>
+    `);
+                    }
+                }
+
+                // 1) Après AJOUT : cible = #representations-list (on ajoute une nouvelle <tr>)
+                //    -> on retire la ligne "no-rep-row"
+                document.body.addEventListener('htmx:afterSwap', (e) => {
+                    if (e.detail && e.detail.target && e.detail.target.id === 'representations-list') {
+                        removeNoRepRow();
+
+                        // (ton code existant pour vider le champ + rafraîchir crédits)
+                        const datetimeInput = document.getElementById('id_datetime');
+                        if (datetimeInput) datetimeInput.value = '';
+                        fetch("{% url 'shows:get_representation_credit' %}")
+                            .then(res => res.text())
+                            .then(html => {
+                                const credit = document.getElementById('credit-related');
+                                if (credit) credit.innerHTML = html;
+                            });
+                    }
+                });
+            </script>
+
+        {% endif %}
+
+    </div>
+{% endblock main %}

@@ -1,0 +1,199 @@
+<!--Search Plays with representations-->
+<div class="flex grow">
+    <form
+            class="w-full grow"
+            action=""
+            hx-get="{% url 'shows:agenda-filter' %}"
+            hx-trigger="change, keyup delay:300ms"
+            hx-target="#plays_table"
+            hx-include="this"
+    >
+
+        <fieldset class="fieldset w-full grow bg-base-300 border border-base-300 px-4 pb-2 rounded-box">
+            <legend class="fieldset-legend">Rechercher des pièces</legend>
+            <label class="input input-bordered grow items-center gap-2 w-full">
+                <input type="text" placeholder="Rechercher des pièces par titre, ville..."
+                       name="search"/>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 opacity-70"><path fill-rule="evenodd" d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clip-rule="evenodd" /></svg>
+                <div id="loading-indicator" class="hidden text-center my-4">
+                    <i class="fa-solid fa-circle-notch fa-spin text-xl text-primary"></i>
+                </div>
+            </label>
+
+            {# barre d’actions rapide #}
+            <div class="mt-1 flex flex-wrap gap-2">
+                <button
+                        type="button"
+                        class="btn btn-xs md:btn-sm"
+                        onclick="setTodayRange(this)"
+                >
+                    Aujourd’hui
+                </button>
+
+                <button
+                        type="button"
+                        class="btn btn-xs md:btn-sm"
+                        onclick="setNextDays(this, 7)"
+                >
+                    Ces 7 prochains jours
+                </button>
+
+                <button
+                        type="button"
+                        class="btn btn-xs md:btn-sm"
+                        onclick="setNextDays(this, 30)"
+                >
+                    Ces 30 prochains jours
+                </button>
+
+                <button
+                        type="button"
+                        class="btn btn-xs md:btn-sm btn-outline"
+                        onclick="resetDates(this)"
+                >
+                    Réinitialiser dates
+                </button>
+            </div>
+
+            {# Below div only used to remove solve flicker issue#}
+            <div x-data="{ready: false}",
+                 x-init="$nextTick(() => ready = true)"
+                 x-show="!ready" >
+                <button
+                        x-disclosure:button
+                        type="button"
+                        class="group flex w-full items-center justify-between text-left font-medium text-gray-800 px-1 cursor-pointer">
+                    <span class="flex-1">Plus de filtres</span>
+
+                    <!-- Heroicons mini chevron-down -->
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+            </div>
+
+            <div
+                    class="mx-auto w-full grow"
+                    x-data="{ready: false,}"
+                    x-init="$nextTick(() => ready = true)"
+                    x-cloak
+                    x-show="ready"
+            >
+                <!-- Disclosure -->
+                <div x-disclosure class="block border-b border-gray-800/10 pb-4 pt-4 first:pt-0 last:border-b-0 last:pb-0">
+                    <!-- Disclosure Button -->
+                    <button
+                            x-disclosure:button
+                            type="button"
+                            class="group flex w-full items-center justify-between text-left font-medium text-gray-800 px-1 cursor-pointer">
+                        <span class="flex-1 mt-1">Plus de filtres</span>
+
+                        <!-- Heroicons mini chevron-up -->
+                        <i x-show="$disclosure.isOpen" class="fa-solid fa-chevron-up"></i>
+
+                        <!-- Heroicons mini chevron-down -->
+                        <i x-show="!$disclosure.isOpen" class="fa-solid fa-chevron-down"></i>
+                    </button>
+
+
+
+                    <!-- Disclosure Panel -->
+                    <div x-disclosure:panel x-collapse>
+                        <div class="grid grid-cols-1 md:grid-cols-3 mt-2 gap-2">
+                            <div class="">
+                                <label class="fieldset-label" for="id_genre">Genre</label>
+                                <div class="flex">
+                                    <select class="select grow" name="genre" id="id_genre">
+                                        <option value="">---</option>
+                                        <option value="theatre">Théâtre</option>
+                                        <option value="dance">Danse</option>
+                                        <option value="lyric">Lyrique</option>
+                                        <option value="circus">Cirque</option>
+                                        <option value="youth">Jeune public</option>
+                                        <option value="other">Autres</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {# === NOUVEAU : filtre date de début === #}
+                            <div>
+                                <label class="fieldset-label" for="id_date_from">À partir du</label>
+                                <input
+                                        type="date"
+                                        id="id_date_from"
+                                        name="date_from"
+                                        class="input input-bordered w-full"
+                                >
+                            </div>
+
+                            {# === NOUVEAU : filtre date de fin === #}
+                            <div>
+                                <label class="fieldset-label" for="id_date_to">Jusqu’au</label>
+                                <input
+                                        type="date"
+                                        id="id_date_to"
+                                        name="date_to"
+                                        class="input input-bordered w-full"
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </fieldset>
+    </form>
+</div>
+
+<script>
+    document.body.addEventListener('htmx:configRequest', function(evt) {
+        document.getElementById('loading-indicator')?.classList.remove('hidden');
+    });
+
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+        document.getElementById('loading-indicator')?.classList.add('hidden');
+    });
+</script>
+<script>
+    // Helper format YYYY-MM-DD
+    function toISODate(d) {
+        const y = d.getFullYear();
+        const m = ('0' + (d.getMonth() + 1)).slice(-2);
+        const day = ('0' + d.getDate()).slice(-2);
+        return `${y}-${m}-${day}`;
+    }
+
+    function setTodayRange(btn) {
+        const form = btn.closest('form');
+        const from = document.getElementById('id_date_from');
+        const to = document.getElementById('id_date_to');
+        const d = new Date();
+        const iso = toISODate(d);
+        if (from) from.value = iso;
+        if (to) to.value = iso;
+        form.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // days = 7 → aujourd’hui -> +6; days = 30 → aujourd’hui -> +29
+    function setNextDays(btn, days) {
+        const form = btn.closest('form');
+        const from = document.getElementById('id_date_from');
+        const to = document.getElementById('id_date_to');
+
+        const start = new Date(); // aujourd’hui
+        const end = new Date();
+        end.setDate(end.getDate() + (days - 1));
+
+        if (from) from.value = toISODate(start);
+        if (to) to.value = toISODate(end);
+        form.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function resetDates(btn) {
+        const form = btn.closest('form');
+        const from = document.getElementById('id_date_from');
+        const to = document.getElementById('id_date_to');
+        if (from) from.value = '';
+        if (to) to.value = '';
+        form.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+</script>

@@ -1,0 +1,44 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}
+    Agenda des représentations de théâtre amateur en France
+{% endblock title %}
+
+{% block main %}
+    <div class="px-2 md:px-4">
+
+        <!-- Titre principal -->
+        <div class="text-center mt-6 mb-4">
+            <h1 class="text-2xl md:text-3xl font-bold flex items-center justify-center gap-2">
+                <i class="fa-solid fa-calendar-days text-primary"></i>
+                <span>Agenda</span>
+            </h1>
+            <p class="text-base-content/70 mt-2">
+                Découvrez les représentations de théâtre amateur à venir en France.
+            </p>
+            <p class="text-xs sm:text-sm text-base-content/70 mt-2">
+                Accéder à l'ensemble du <a href="{% url 'shows:repertoire' %}" class="link">répertoire ici</a>.
+            </p>
+            <hr class="w-24 mx-auto border-t-2 border-primary/40 mt-4">
+        </div>
+
+        <!-- Filtres HTMX -->
+        {% include "shows/components/search_agenda.html" %}
+
+        <!-- Ajouter une pièce -->
+        <div class="flex justify-end mb-4 mt-2 w-full">
+            <a href="{% url 'shows:add_play' %}" class="btn btn-primary btn-outline btn-sm md:btn-md w-full">
+                <i class="fa-solid fa-plus"></i> Ajouter une nouvelle pièce
+            </a>
+        </div>
+
+        <!-- Résultats -->
+        <div id="id_plays">
+            <div class="mt-4 w-full" id="plays_table">
+                {% include "shows/partials/plays_table.html" %}
+            </div>
+        </div>
+
+    </div>
+{% endblock main %}
