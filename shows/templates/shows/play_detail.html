@@ -13,7 +13,8 @@
 
             <!-- Affiche -->
             <figure class="lg:col-span-4 flex justify-center lg:block">
-                <img src="{% if play.poster %}{{ play.poster.url }}{% else %}{% static 'promote/poster_your-ad.jpg' %}{% endif %}"
+
+                <img src="{% if play.poster %}{{ play.poster.url }}{% else %}https://placehold.co/800x1200/png?text={{ play.title|urlencode }}{% endif %}"
                      alt="Affiche {{ play.title }}"
                      class="rounded shadow w-40 sm:w-52 md:w-60 lg:w-full object-cover" />
             </figure>
