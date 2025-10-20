@@ -1,6 +1,8 @@
 {% extends "core/base.html" %}
 {% load static %}
 {% load duration_filters %}
+{% load placeholder_tags %}
+
 
 
 {% block title %}
@@ -14,7 +16,7 @@
             <!-- Affiche -->
             <figure class="lg:col-span-4 flex justify-center lg:block">
 
-                <img src="{% if play.poster %}{{ play.poster.url }}{% else %}https://placehold.co/800x1200/png?text={{ play.title|urlencode }}{% endif %}"
+                <img src="{% if play.poster %}{{ play.poster.url }}{% else %}https://placehold.co/800x1200/png?text={{ play.title|wrap_for_placeholder }}{% endif %}"
                      alt="Affiche {{ play.title }}"
                      class="rounded shadow w-40 sm:w-52 md:w-60 lg:w-full object-cover" />
             </figure>
