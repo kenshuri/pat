@@ -19,7 +19,7 @@
 
             <!-- Ville -->
             <div class="flex flex-col gap-1">
-                <label class="fieldset-label" for="id_city">Ville*</label>
+                <label class="fieldset-label" for="id_city">Ville</label>
                 <mapbox-search-box
                         access-token="{{ MAPBOX_ACCESS_TOKEN }}"
                         proximity="0,0"
@@ -28,7 +28,6 @@
                 <div class="flex">
                     <input class="input grow" type="text" name="city" maxlength="255"
                            id="id_city"
-                           required
                            tabindex="-1"
                            onkeydown="return false;"
                            onpaste="return false;"

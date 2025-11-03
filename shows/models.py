@@ -173,7 +173,7 @@ class Representation(models.Model):
     play = models.ForeignKey(Play, on_delete=models.CASCADE, related_name='representations')
     datetime = models.DateTimeField(_("Date et heure"))
     venue = models.CharField(_("Lieu"), max_length=255)
-    city = models.CharField(_("Ville"), max_length=100)
+    city = models.CharField(_("Ville"), max_length=100, blank=True, null=True)
     price = models.CharField(_("Tarif"), max_length=50, blank=True)
     ticket_url = models.URLField(_("Lien vers la billetterie"), blank=True, null=True)
 
