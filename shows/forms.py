@@ -25,7 +25,6 @@ class RepresentationForm(forms.ModelForm):
             }),
             "city": forms.TextInput(attrs={
                 "class": "input input-bordered",
-                "required": True
             }),
             "ticket_url": forms.URLInput(attrs={
                 "class": "input input-bordered"

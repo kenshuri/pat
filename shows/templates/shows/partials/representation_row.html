@@ -1,6 +1,12 @@
 <tr data-rep-row>
     <td>{{ rep.datetime|date:"d/m/Y H:i" }}</td>
-    <td>{{ rep.city }}</td>
+    <td>
+        {% if rep.city %}
+            {{ rep.city }}
+        {% else %}
+            Ville non renseignée
+        {% endif %}
+    </td>
     <td>{{ rep.venue }}</td>
     <td class="text-right">
         <div class="flex gap-1 justify-end">
