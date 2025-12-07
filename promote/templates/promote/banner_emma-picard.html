@@ -2,7 +2,7 @@
 
 {% with bg_color="yellow" %}
 {% with text_color="black" %}
-<a href="{% url 'play_detail' pk=21 %}">
+<a href="{% url 'shows:play_detail' pk=21 %}">
     <div role="alert" class="alert bg-{{ bg_color }}-500 border-{{ bg_color }}-500 text-{{ text_color }}">
         <div class="flex gap-3 items-center">
             <!-- Libellé publicité -->
