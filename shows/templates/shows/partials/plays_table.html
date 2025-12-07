@@ -1,4 +1,5 @@
 {% load static %}
+{% load placeholder_tags %}
 
 <div class="overflow-x-auto w-full">
     <table class="table table-xs md:table-md bg-base-100">
@@ -21,7 +22,7 @@
                             {% if play.poster %}
                                 <img src="{{ play.poster.url }}" alt="Affiche {{ play.title }}">
                             {% else %}
-                                <img src="https://placehold.co/800x1200/png?text={{ play.title|urlencode }}" alt="Affiche par défaut">
+                                <img src="https://placehold.co/800x1200/png?text={{ play.title|wrap_for_placeholder }}" alt="Affiche par défaut">
                             {% endif %}
                         </div>
                     </div>

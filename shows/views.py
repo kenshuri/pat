@@ -163,7 +163,7 @@ def add_representation(request, pk):
     # --- Calcul du nombre de crédits par défaut ---
     today = timezone.now().date()
     total_plays = Play.objects.count()
-    before_deadline = today <= timezone.datetime(year=2025, month=10, day=31).date()
+    before_deadline = today <= timezone.datetime(year=2025, month=12, day=31).date()
 
     default_credits = 6 if total_plays < 25 or before_deadline else 0
 

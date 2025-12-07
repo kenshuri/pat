@@ -1,6 +1,8 @@
 {% extends "core/base.html" %}
 {% load static %}
 {% load duration_filters %}
+{% load placeholder_tags %}
+
 
 
 {% block title %}
@@ -14,7 +16,7 @@
             <!-- Affiche -->
             <figure class="lg:col-span-4 flex justify-center lg:block">
 
-                <img src="{% if play.poster %}{{ play.poster.url }}{% else %}https://placehold.co/800x1200/png?text={{ play.title|urlencode }}{% endif %}"
+                <img src="{% if play.poster %}{{ play.poster.url }}{% else %}https://placehold.co/800x1200/png?text={{ play.title|wrap_for_placeholder }}{% endif %}"
                      alt="Affiche {{ play.title }}"
                      class="rounded shadow w-40 sm:w-52 md:w-60 lg:w-full object-cover" />
             </figure>
@@ -33,7 +35,7 @@
                     </header>
 
                     <!-- Informations -->
-                    <ul class="list-disc ml-5 text-base space-y-1">
+                    <ul class="list-disc ml-5 text-base space-y-1 mt-4">
                         {% if play.author %}
                             <li><strong>Auteur·e :</strong> {{ play.author }}</li>
                         {% endif %}
@@ -45,7 +47,7 @@
                             <li><strong>Durée :</strong> {{ play.duration|duration_human }}</li>
                         {% endif %}
                         {% if play.website %}
-                            <li><strong>Site :</strong> <a href="{{ play.website }}" target="_blank" class="text-blue-500 underline">{{ play.website }}</a></li>
+                            <li><strong>Site :</strong> <a href="{{ play.website }}" target="_blank" class="link">Lien</a></li>
                         {% endif %}
                     </ul>
 
@@ -63,7 +65,7 @@
 
                     <!-- Description -->
                     {% if play.description %}
-                        <div class="prose max-w-none">
+                        <div class="prose max-w-none mt-4">
                             {{ play.description|linebreaks }}
                         </div>
                     {% endif %}
@@ -92,7 +94,7 @@
 
         <!-- Représentations à venir -->
         <div class="space-y-2">
-            <h2 class="text-xl font-semibold">📅 Représentations à venir</h2>
+            <h2 class="text-xl font-semibold">📅 Représentations</h2>
             <table class="table table-xs sm:table-md w-full overflow-x-auto bg-base-100">
                 <thead>
                 <tr>
