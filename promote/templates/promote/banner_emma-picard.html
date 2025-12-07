@@ -1,0 +1,33 @@
+{% load static %}
+
+{% with bg_color="yellow" %}
+{% with text_color="black" %}
+<a href="{% url 'shows:play_detail' pk=21 %}">
+    <div role="alert" class="alert bg-{{ bg_color }}-500 border-{{ bg_color }}-500 text-{{ text_color }}">
+        <div class="flex gap-3 items-center">
+            <!-- Libellé publicité -->
+            <span class="text-xs px-2 py-0.5 bg-gray-900/20 rounded ">
+                    Publicité
+                    </span>
+            <!-- Vignette d’affiche -->
+            <img
+                    src="{% static 'promote/poster_'|add:promo.slug|add:'.webp' %}"
+                    alt="Affiche {{ promo.title }}"
+                    class="w-12 h-16 object-cover rounded"
+            />
+        </div>
+        <div>
+            <div class="font-bold text-base">Emma Picard <span class="text-sm  sm:text-base"></span></div>
+            <div class="text-sm italic hidden lg:block"> « Bouleversant d'humanité ! » </div>
+            <div class=""><span class="hidden sm:inline">Essaïon Théâtre – </span>Paris • <time datetime="2025-12-09">9 décembre</time> → <time datetime="2025-12-16">16 décembre</time></div>
+        </div>
+        <div>
+            <button class="btn bg-{{ bg_color }}-200 border-{{ bg_color }}-200 text-{{ bg_color }}-600 hover:bg-{{ bg_color }}-400 hover:border-{{ bg_color }}-400  hover:text-{{ bg_color }}-900">
+                <span class="hidden sm:block">En savoir plus</span>
+                <span class="sm:hidden"><i class="fa-solid fa-chevron-right"></i></span>
+            </button>
+        </div>
+    </div>
+</a>
+{% endwith %}
+{% endwith %}
