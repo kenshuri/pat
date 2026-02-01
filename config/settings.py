@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
+import sys
 import dj_database_url
 from pathlib import Path
 
@@ -108,6 +109,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     "default": dj_database_url.config(default=os.getenv("DJANGO_DATABASE_URL"))
 }
+
+if 'test' in sys.argv:
+    DATABASES['default'] = dj_database_url.parse(
+        f"sqlite:///{BASE_DIR / 'test_db.sqlite3'}"
+    )
 
 
 # Password validation

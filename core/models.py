@@ -5,7 +5,8 @@ from django.db.models.fields import CharField
 
 from accounts.models import CustomUser
 import datetime
-import pytz
+
+from django.utils import timezone
 
 from moderation.models import ModerationResult
 
@@ -89,10 +90,8 @@ class Offer(models.Model):
 
     @property
     def recent(self):
-        utc = pytz.UTC
-
         offer_date = self.created_on
-        threshold = utc.localize(datetime.datetime.now() - datetime.timedelta(weeks=1))
+        threshold = timezone.now() - datetime.timedelta(weeks=1)
         return offer_date > threshold
 
 
