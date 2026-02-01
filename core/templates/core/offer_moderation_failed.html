@@ -1,0 +1,60 @@
+{% extends "core/base.html" %}
+
+{% block title %}
+    Annonce refusee
+{% endblock title %}
+
+{% block main %}
+    <div class="bg-base-100 rounded p-4 mt-2 flex flex-col gap-3">
+        <h1 class="font-bold text-xl">Annonce non visible</h1>
+        {% if offer.author == request.user %}
+            <div class="mt-4">
+                <div role="alert" class="alert alert-error">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div class="flex flex-col gap-1">
+                        <h4 class="font-bold">
+                            Votre annonce n’a pas été acceptée.
+                        </h4>
+                        <p>
+                            Notre système de modération automatique a détecté que son contenu pourrait appartenir
+                            à l’une des catégories suivantes :
+                        <ul>
+                            {% for reason in offer.moderation.get_localized_reasons %}
+                                <li>- {{ reason }}</li>
+                            {% endfor %}
+                        </ul>
+                        <p class="mt-2">
+                            Nous vous invitons à modifier votre annonce afin de respecter nos règles de publication,
+                            puis à la soumettre de nouveau pour une nouvelle vérification.
+                        </p>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2 flex-wrap mt-4">
+                <div class="grow">
+                    <a href="{% url 'update_offer' offer.id %}" class="btn btn-soft btn-block">
+                        <i class="fa-solid fa-pen"></i>
+                        <span class="ml-2">
+                    Modifier l'annonce
+                    </span>
+                    </a>
+                </div>
+            </div>
+            <div class="grow">
+                <a href="{% url 'delete_offer' offer.id %}" class="btn btn-error btn-block">
+                    <i class="fa-solid fa-trash"></i>
+                    <span class="ml-2">
+                    Supprimer l'annonce
+                    </span>
+                </a>
+            </div>
+        {% else %}
+            Le contenu de cette annonce a été modérée et n'est donc pas visible.
+        {% endif %}
+        <a class="btn btn-primary w-fit" href="{% url 'index' %}">Retour a l'accueil</a>
+    </div>
+{% endblock main %}
