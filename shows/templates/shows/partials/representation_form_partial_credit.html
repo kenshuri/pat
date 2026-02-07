@@ -4,13 +4,14 @@
 
 <button type="submit"
         class="btn btn-neutral btn-block mt-2"
-        {% if user.publication_credit.remaining_credits <= 0 %}disabled{% endif %}>
+{#        {% if user.publication_credit.remaining_credits <= 0 %}disabled{% endif %}#}
+>
     Ajouter la représentation
 </button>
 
 {% if user.publication_credit.remaining_credits <= 0 %}
     <p class="mt-2 text-sm text-error">
-        ⚠️ Vous n’avez plus de crédits. <br>
+        ⚠️ Vous n’avez plus de crédits mais la fonctionnalité ne nécessite plus de crédits jusqu'à nouvel ordre. <br>
         {#            <a href="{% url 'shows:purchase_credits' %}" class="link link-hover underline">#}
         {#                Ajouter des crédits pour publier une nouvelle représentation.#}
         {#            </a>#}
