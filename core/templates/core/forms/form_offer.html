@@ -412,7 +412,7 @@
     const script = document.getElementById('search-js');
     script.onload = function () {
         const searchBox = document.querySelector('mapbox-search-box');
-        searchBox.options = { language: 'fr', country: 'FR', types: 'place' };
+        searchBox.options = { language: 'fr', country: 'FR,BE,CH,LU,CA', types: 'place' };
         searchBox.placeholder = 'Cherchez votre ville';
         searchBox.theme = {
             variables: {

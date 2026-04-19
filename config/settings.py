@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'moderation',
     'promote',
     'shows',
+    'profiles',
     'fontawesomefree',
     'django_browser_reload',
     'turnstile',

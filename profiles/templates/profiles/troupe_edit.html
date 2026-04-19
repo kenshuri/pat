@@ -1,0 +1,223 @@
+{% extends "core/base.html" %}
+
+{% block title %}{% if profile %}Ma troupe{% else %}Créer ma troupe{% endif %} — Petites Annonces Théâtre{% endblock %}
+
+{% block main %}
+<link rel="stylesheet" href="https://unpkg.com/trix@2.1.10/dist/trix.css">
+<script type="text/javascript" src="https://unpkg.com/trix@2.1.10/dist/trix.umd.min.js"></script>
+<style>
+    trix-editor.pat-editor {
+        min-height: 160px;
+        border: 1px solid oklch(10% 0.008 260 / 0.20);
+        border-top: none;
+        background: oklch(100% 0 0);
+        padding: 0.625rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.7;
+        color: oklch(10% 0.008 260);
+        outline: none;
+        border-radius: 0;
+    }
+    trix-editor.pat-editor:focus { border-color: oklch(10% 0.008 260); }
+    trix-toolbar {
+        border: 1px solid oklch(10% 0.008 260 / 0.20);
+        border-bottom: none;
+        background: oklch(96.5% 0.002 240);
+        padding: 0.3rem 0.5rem;
+    }
+    trix-toolbar .trix-button-group { border: none; margin-bottom: 0; }
+    trix-toolbar .trix-button {
+        border: none; background: transparent;
+        padding: 0.25rem 0.4rem; font-size: 0.75rem;
+        color: oklch(35% 0.006 260); border-radius: 2px;
+    }
+    trix-toolbar .trix-button:hover       { background: oklch(10% 0.008 260 / 0.08); }
+    trix-toolbar .trix-button.trix-active { background: oklch(10% 0.008 260 / 0.12); color: oklch(10% 0.008 260); }
+    trix-toolbar .trix-button-group--file-tools { display: none; }
+    trix-editor ul { list-style-type: disc;    padding-left: 1.4rem; }
+    trix-editor ol { list-style-type: decimal; padding-left: 1.4rem; }
+</style>
+
+<!-- Strip d'en-tête -->
+<div class="relative overflow-hidden w-full bg-ink py-10 md:py-14">
+    <div class="absolute inset-0 pointer-events-none"
+         style="background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 12px);"></div>
+    <div class="relative max-w-screen-xl mx-auto px-4 md:px-8">
+        <p class="text-white/30 text-[10px] font-bold uppercase tracking-[0.18em] mb-2">Profil troupe</p>
+        <h1 class="font-display font-bold text-white text-2xl sm:text-3xl uppercase tracking-[0.04em]">
+            {% if profile %}Modifier ma troupe{% else %}Créer ma troupe{% endif %}
+        </h1>
+        <p class="text-white/40 text-sm mt-2">
+            Présentez votre compagnie pour être trouvée par comédiens et partenaires.
+        </p>
+    </div>
+</div>
+
+<div class="max-w-2xl mx-auto px-4 md:px-6 py-10">
+<form method="post" enctype="multipart/form-data"
+      x-data="{ submitting: false }"
+      @submit="submitting = true">
+{% csrf_token %}
+
+<div class="space-y-8">
+
+    <!-- ── Identité ── -->
+    <div class="space-y-4">
+        <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">La troupe</p>
+
+        <div class="space-y-1.5">
+            <label for="id_name" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">
+                Nom de la troupe <span class="text-red-400">*</span>
+            </label>
+            <input type="text" id="id_name" name="name"
+                   value="{{ form.name.value|default:'' }}"
+                   placeholder="Compagnie du Masque" maxlength="120" required
+                   class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
+                          focus:outline-none focus:border-ink transition-colors bg-surface">
+            {% if form.name.errors %}<p class="text-xs text-red-500 mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+                <label class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Ville</label>
+                <mapbox-search-box access-token="{{ MAPBOX_ACCESS_TOKEN }}" proximity="0,0"></mapbox-search-box>
+                <input type="text" id="id_city" name="city" maxlength="255"
+                       value="{{ form.city.value|default:'' }}" readonly
+                       placeholder="Sélectionnez une ville dans la liste"
+                       class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink/60
+                              bg-surface-2 focus:outline-none cursor-default">
+            </div>
+            <div class="space-y-1.5">
+                <label for="id_founded_year" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Année de création</label>
+                <input type="number" id="id_founded_year" name="founded_year"
+                       value="{{ form.founded_year.value|default:'' }}"
+                       placeholder="2010" min="1800" max="2100"
+                       class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
+                              focus:outline-none focus:border-ink transition-colors bg-surface">
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Présentation ── -->
+    <div class="border-t border-ink/8 pt-6 space-y-1.5">
+        <label class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">
+            Présentation
+        </label>
+        <input id="id_description_trix" type="hidden" name="description" value="{{ form.description.value|default:'' }}">
+        <trix-editor input="id_description_trix" class="trix-content pat-editor"
+                     placeholder="Histoire de la compagnie, répertoire, style de jeu, projets en cours…"></trix-editor>
+    </div>
+
+    <!-- ── Photos & liens (accordéon) ── -->
+    <div x-data="{ open: {% if profile and profile.photo or form.website.value %}true{% else %}false{% endif %} }" class="border-t border-ink/8 pt-4">
+        <button type="button" @click="open = !open"
+                class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted hover:text-ink transition-colors w-full text-left">
+            <i class="fa-solid fa-image text-[9px]"></i>
+            Photos &amp; liens
+            <i class="fa-solid fa-chevron-down text-[9px] ml-auto transition-transform" :class="open ? 'rotate-180' : ''"></i>
+        </button>
+        <div x-show="open" x-collapse class="pt-5 space-y-6">
+
+            <!-- Photo de profil -->
+            <div>
+                <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted mb-1.5">Photo de profil</p>
+                <p class="text-xs text-ink-muted mb-3">Format carré recommandé. Convertie en WebP automatiquement.</p>
+                {% if profile and profile.photo %}
+                <div class="mb-3 flex items-center gap-4">
+                    <img src="{{ profile.photo.url }}" alt="Photo actuelle" class="w-16 h-16 object-cover">
+                    <p class="text-xs text-ink-muted">Photo actuelle — uploadez-en une nouvelle pour la remplacer.</p>
+                </div>
+                {% endif %}
+                <input type="file" name="photo" accept="image/*"
+                       class="block w-full text-sm text-ink-soft border border-ink/20 cursor-pointer bg-surface
+                              file:mr-4 file:py-2 file:px-4 file:border-0 file:border-r file:border-ink/10
+                              file:text-[10px] file:font-bold file:uppercase file:tracking-[0.12em]
+                              file:bg-surface-2 file:text-ink-muted hover:file:bg-ink/5 file:cursor-pointer">
+            </div>
+
+            <!-- Photos supplémentaires -->
+            <div class="border-t border-ink/8 pt-5">
+                <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted mb-1.5">Photos supplémentaires</p>
+                <p class="text-xs text-ink-muted mb-3">Vous pouvez sélectionner plusieurs fichiers à la fois.</p>
+                {% if profile and profile.photos.exists %}
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                    {% for photo in profile.photos.all %}
+                    <div class="relative group">
+                        <img src="{{ photo.image.url }}" alt="" class="aspect-square object-cover w-full">
+                        <label class="absolute top-1 right-1 flex items-center gap-1.5 bg-white/90 px-2 py-1
+                                      text-[9px] font-bold uppercase tracking-[0.08em] cursor-pointer
+                                      hover:bg-red-50 transition-colors">
+                            <input type="checkbox" name="delete_photo_{{ photo.pk }}" class="w-3 h-3 accent-red-500">
+                            Supprimer
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <input type="file" name="extra_photos" accept="image/*" multiple
+                       class="block w-full text-sm text-ink-soft border border-ink/20 cursor-pointer bg-surface
+                              file:mr-4 file:py-2 file:px-4 file:border-0 file:border-r file:border-ink/10
+                              file:text-[10px] file:font-bold file:uppercase file:tracking-[0.12em]
+                              file:bg-surface-2 file:text-ink-muted hover:file:bg-ink/5 file:cursor-pointer">
+            </div>
+
+            <!-- Site internet -->
+            <div class="border-t border-ink/8 pt-5 space-y-1.5">
+                <label for="id_website" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Site internet</label>
+                <input type="url" id="id_website" name="website"
+                       value="{{ form.website.value|default:'' }}"
+                       placeholder="https://…"
+                       class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
+                              focus:outline-none focus:border-ink transition-colors bg-surface">
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── Soumettre ── -->
+    <div class="border-t border-ink/8 pt-6 flex gap-3">
+        <button type="submit" :disabled="submitting"
+                class="flex-1 py-3 bg-ink text-white text-[11px] font-display font-bold uppercase tracking-[0.14em]
+                       hover:opacity-80 transition-opacity disabled:opacity-50">
+            <span x-show="!submitting" x-cloak>
+                {% if profile %}Enregistrer les modifications{% else %}Créer ma troupe{% endif %}
+            </span>
+            <span x-show="submitting" x-cloak class="inline-flex items-center gap-2 justify-center">
+                <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                </svg>
+                Enregistrement…
+            </span>
+        </button>
+        {% if profile %}
+        <a href="{% url 'profiles:troupe_detail' slug=profile.slug %}"
+           class="px-6 py-3 border border-ink/20 text-[11px] font-display font-bold uppercase tracking-[0.14em]
+                  text-ink-soft hover:border-ink hover:text-ink transition-colors">
+            Annuler
+        </a>
+        {% endif %}
+    </div>
+
+</div>
+</form>
+</div>
+
+<script>
+    document.getElementById('search-js').addEventListener('load', function () {
+        const searchBox = document.querySelector('mapbox-search-box');
+        searchBox.options = { language: 'fr', country: 'FR,BE,CH,LU,CA', types: 'place' };
+        searchBox.placeholder = 'Cherchez votre ville';
+        searchBox.theme = {
+            variables: { boxShadow: 'none', border: '1px solid oklch(10% 0.008 260 / 0.20)', borderRadius: '0' }
+        };
+        searchBox.addEventListener('retrieve', (e) => {
+            document.getElementById('id_city').value = e.detail.features[0].properties.full_address;
+        });
+        searchBox.addEventListener('clear', () => {
+            document.getElementById('id_city').value = '';
+        });
+    });
+</script>
+
+{% endblock %}

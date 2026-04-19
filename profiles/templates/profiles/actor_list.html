@@ -1,0 +1,74 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Comédien·nes — Petites Annonces Théâtre{% endblock %}
+{% block meta_description %}Découvrez les profils de comédiens et comédiennes amateurs disponibles pour vos auditions.{% endblock %}
+
+{% block main %}
+<div class="px-4 md:px-8 py-6">
+
+    <div class="flex items-end justify-between mb-8 gap-4 flex-wrap">
+        <div>
+            <h1 class="font-display font-bold text-ink text-xl md:text-2xl uppercase tracking-[0.06em] mb-2">
+                Comédien·nes
+            </h1>
+            <p class="text-sm text-ink-muted">{{ actors|length }} profil{% if actors|length > 1 %}s{% endif %}</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'profiles:actor_list' %}"
+               class="px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.10em] border transition-colors
+                      {% if not available_only %}border-ink text-ink{% else %}border-ink/15 text-ink/40 hover:border-ink/35{% endif %}">
+                Tous
+            </a>
+            <a href="?disponibles=1"
+               class="px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.10em] border transition-colors
+                      {% if available_only %}border-ink text-ink{% else %}border-ink/15 text-ink/40 hover:border-ink/35{% endif %}">
+                Disponibles
+            </a>
+        </div>
+    </div>
+
+    {% if actors %}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+        {% for actor in actors %}
+        <a href="{% url 'profiles:actor_detail' slug=actor.slug %}"
+           class="group flex flex-col">
+            <!-- Photo -->
+            <div class="aspect-[3/4] bg-ink/4 mb-3 overflow-hidden">
+                {% if actor.photo %}
+                <img src="{{ actor.photo.url }}" alt="{{ actor.display_name }}"
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                {% else %}
+                <div class="w-full h-full flex items-center justify-center">
+                    <i class="fa-regular fa-user text-3xl text-ink/15"></i>
+                </div>
+                {% endif %}
+            </div>
+            <!-- Infos -->
+            <p class="font-display font-bold text-sm text-ink uppercase tracking-[0.06em] group-hover:opacity-70 transition-opacity leading-tight mb-1">
+                {{ actor.display_name }}
+            </p>
+            {% if actor.city %}
+            <p class="text-[11px] text-ink-muted truncate">{{ actor.city|truncatechars:30 }}</p>
+            {% endif %}
+            {% if actor.available %}
+            <span class="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.08em] text-green-600">
+                <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+                Disponible
+            </span>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="py-16 text-center">
+        <i class="fa-regular fa-user text-3xl text-ink/10 mb-4 block"></i>
+        <p class="text-sm text-ink-muted">
+            {% if available_only %}Aucun comédien disponible en ce moment.{% else %}Aucun profil pour l'instant.{% endif %}
+        </p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

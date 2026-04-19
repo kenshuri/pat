@@ -78,11 +78,19 @@
             <!-- Compte -->
             {% if user.is_authenticated %}
             <div class="relative ml-1" x-data="{ open: false }">
+                {% with actor_photo=request.user.actor_profile.photo troupe_photo=request.user.troupe_profile.photo %}
                 <button @click="open = !open"
-                        class="w-8 h-8 rounded-full bg-ink/6 hover:bg-ink/12 flex items-center justify-center transition-colors"
+                        class="w-8 h-8 rounded-full bg-ink/6 hover:bg-ink/12 flex items-center justify-center transition-colors overflow-hidden cursor-pointer"
                         aria-label="Mon compte">
-                    <i class="fa-regular fa-user text-sm text-ink-soft"></i>
+                    {% if actor_photo %}
+                    <img src="{{ actor_photo.url }}" alt="" class="w-full h-full object-cover transition-transform duration-300 hover:scale-110">
+                    {% elif troupe_photo %}
+                    <img src="{{ troupe_photo.url }}" alt="" class="w-full h-full object-cover transition-transform duration-300 hover:scale-110">
+                    {% else %}
+                    <i class="fa-solid fa-user text-sm text-ink-soft"></i>
+                    {% endif %}
                 </button>
+                {% endwith %}
                 <div x-show="open"
                      x-cloak
                      @click.away="open = false"
@@ -103,12 +111,26 @@
                         <i class="fa-solid fa-bell text-[10px] text-ink-muted"></i>
                         Mes alertes
                     </a>
+                    {% with actor_slug=request.user.actor_profile.slug %}
+                    <a href="{% if actor_slug %}{% url 'profiles:actor_detail' slug=actor_slug %}{% else %}{% url 'profiles:actor_edit' %}{% endif %}"
+                       class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft hover:bg-ink/4 hover:text-ink transition-colors">
+                        <i class="fa-regular fa-id-card text-[10px] text-ink-muted"></i>
+                        Mon profil comédien·ne
+                    </a>
+                    {% endwith %}
+                    {% with troupe_slug=request.user.troupe_profile.slug %}
+                    <a href="{% if troupe_slug %}{% url 'profiles:troupe_detail' slug=troupe_slug %}{% else %}{% url 'profiles:troupe_edit' %}{% endif %}"
+                       class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft hover:bg-ink/4 hover:text-ink transition-colors">
+                        <i class="fa-solid fa-masks-theater text-[10px] text-ink-muted"></i>
+                        Ma troupe
+                    </a>
+                    {% endwith %}
                     <div class="border-t border-ink/6 mt-1 pt-1">
                         <form method="post" action="{% url 'logout' %}">
                             {% csrf_token %}
                             <input type="hidden" name="next" value="{% url 'index' %}">
                             <button type="submit"
-                                    class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-muted hover:bg-ink/4 hover:text-ink transition-colors text-left">
+                                    class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-muted hover:bg-ink/4 hover:text-ink transition-colors text-left cursor-pointer">
                                 <i class="fa-solid fa-right-from-bracket text-[10px]"></i>
                                 Se déconnecter
                             </button>

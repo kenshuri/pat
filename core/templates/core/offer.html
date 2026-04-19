@@ -238,6 +238,18 @@
     </div>
     {% endif %}
 
+    <!-- ── Lien profil auteur ── -->
+    {% if offer.author %}
+    <div class="border-t border-ink/8 pt-6 pb-4">
+        <a href="{% url 'profiles:user_detail' pk=offer.author.pk %}"
+           class="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em]
+                  text-ink-muted hover:text-ink transition-colors">
+            <i class="fa-regular fa-id-card text-[10px]"></i>
+            Voir le profil du membre
+        </a>
+    </div>
+    {% endif %}
+
     <!-- ── Contact ── -->
     <div class="border-t border-ink/8 pt-8 mb-8" id="contact_info">
         <button class="w-full flex items-center justify-center gap-2

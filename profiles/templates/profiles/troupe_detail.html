@@ -1,0 +1,179 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ troupe.name }} — Troupe | Petites Annonces Théâtre{% endblock %}
+{% block meta_description %}{{ troupe.name }}{% if troupe.city %}, {{ troupe.city }}{% endif %}. {{ troupe.description|truncatechars:120 }}{% endblock %}
+
+{% block canonical_tag %}<link rel="canonical" href="{{ SITE_URL }}{% url 'profiles:troupe_detail' slug=troupe.slug %}">{% endblock %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "PerformingGroup",
+  "name": "{{ troupe.name }}",
+  "url": "{{ SITE_URL }}{% url 'profiles:troupe_detail' slug=troupe.slug %}"
+  {% if troupe.city %},"address": {"@type": "PostalAddress", "addressLocality": "{{ troupe.city }}"}{% endif %}
+  {% if troupe.photo %},"image": "{{ troupe.photo.url }}"{% endif %}
+  {% if troupe.website %},"sameAs": "{{ troupe.website }}"{% endif %}
+  {% if troupe.description %},"description": "{{ troupe.description|truncatechars:300|escapejs }}"{% endif %}
+  {% if troupe.founded_year %},"foundingDate": "{{ troupe.founded_year }}"{% endif %}
+}
+</script>
+{% endblock %}
+
+{% block main %}
+<div class="px-4 md:px-8 py-6 max-w-4xl">
+
+    <!-- Fil d'Ariane -->
+    <nav class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-6 flex items-center gap-2">
+        <a href="{% url 'index' %}" class="hover:text-ink transition-colors">Accueil</a>
+        <span>›</span>
+        <span class="text-ink">{{ troupe.name }}</span>
+    </nav>
+
+    {% if own %}
+    <div class="mb-6 flex items-center gap-3 p-4 bg-ink/3 border border-ink/8">
+        <i class="fa-solid fa-pen text-[10px] text-ink-muted"></i>
+        <p class="text-sm text-ink-muted flex-1">C'est votre troupe.</p>
+        <a href="{% url 'profiles:troupe_edit' %}"
+           class="text-[11px] font-bold uppercase tracking-[0.10em] text-ink hover:opacity-60 transition-opacity">
+            Modifier
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        <!-- Photo de profil + infos -->
+        <div class="md:col-span-1">
+            <div class="aspect-square bg-ink/4 mb-4 overflow-hidden">
+                {% if troupe.photo %}
+                <img src="{{ troupe.photo.url }}" alt="{{ troupe.name }}"
+                     class="w-full h-full object-cover">
+                {% else %}
+                <div class="w-full h-full flex items-center justify-center">
+                    <i class="fa-solid fa-masks-theater text-5xl text-ink/10"></i>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if troupe.city %}
+            <p class="flex items-center gap-2 text-sm text-ink-muted mb-2">
+                <i class="fa-solid fa-location-dot text-[10px] text-ink/30 w-3"></i>
+                {{ troupe.city }}
+            </p>
+            {% endif %}
+
+            {% if troupe.founded_year %}
+            <p class="flex items-center gap-2 text-sm text-ink-muted mb-2">
+                <i class="fa-solid fa-calendar text-[10px] text-ink/30 w-3"></i>
+                Fondée en {{ troupe.founded_year }}
+            </p>
+            {% endif %}
+
+            {% if troupe.website %}
+            <a href="{{ troupe.website }}" target="_blank" rel="noopener"
+               class="flex items-center gap-2 text-sm text-ink-muted hover:text-ink transition-colors mb-2">
+                <i class="fa-solid fa-globe text-[10px] text-ink/30 w-3"></i>
+                Site internet
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Description -->
+        <div class="md:col-span-2">
+            <h1 class="font-display font-bold text-ink text-2xl md:text-3xl uppercase tracking-[0.06em] mb-6">
+                {{ troupe.name }}
+            </h1>
+
+            {% if troupe.description %}
+            <div class="trix-content text-sm text-ink-soft leading-relaxed">
+                {{ troupe.description|safe }}
+            </div>
+            {% endif %}
+
+            {% if troupe.photos.exists %}
+            <div class="mt-8">
+                <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
+                    Photos
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {% for photo in troupe.photos.all %}
+                    <div class="aspect-square overflow-hidden bg-ink/4">
+                        <img src="{{ photo.image.url }}" alt=""
+                             class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if actor_profile %}
+            <div class="mt-8">
+                <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
+                    Profil comédien·ne
+                </h2>
+                <a href="{% url 'profiles:actor_detail' slug=actor_profile.slug %}"
+                   class="flex items-center gap-3 p-3 border border-ink/10 hover:border-ink/30 transition-colors">
+                    {% if actor_profile.photo %}
+                    <img src="{{ actor_profile.photo.url }}" alt="" class="w-10 h-14 object-cover flex-shrink-0">
+                    {% else %}
+                    <span class="w-10 h-14 bg-ink/5 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-regular fa-user text-ink/20"></i>
+                    </span>
+                    {% endif %}
+                    <div>
+                        <p class="text-sm font-semibold text-ink">{{ actor_profile.display_name }}</p>
+                        {% if actor_profile.city %}<p class="text-xs text-ink-muted">{{ actor_profile.city }}</p>{% endif %}
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+
+            {% if active_offers %}
+            <div class="mt-8">
+                <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
+                    Annonces actives
+                </h2>
+                <ul class="space-y-2">
+                    {% for offer in active_offers %}
+                    <li>
+                        <a href="{% url 'offer' offer.pk %}"
+                           class="flex items-start gap-2 p-3 border border-ink/10 hover:border-ink/30 transition-colors">
+                            <span class="flex-1 min-w-0">
+                                <span class="block text-sm text-ink font-medium truncate">{{ offer.title }}</span>
+                                <span class="text-[11px] text-ink-muted">{{ offer.get_section_display }}{% if offer.city %} · {{ offer.city }}{% endif %}</span>
+                            </span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if filled_offers %}
+            <div class="mt-8">
+                <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
+                    Annonces pourvues
+                </h2>
+                <ul class="space-y-2">
+                    {% for offer in filled_offers %}
+                    <li>
+                        <a href="{% url 'offer' offer.pk %}"
+                           class="flex items-start gap-2 p-3 border border-ink/10 hover:border-ink/30 transition-colors opacity-60">
+                            <span class="flex-1 min-w-0">
+                                <span class="block text-sm text-ink font-medium truncate">{{ offer.title }}</span>
+                                <span class="text-[11px] text-ink-muted">{{ offer.get_section_display }}{% if offer.city %} · {{ offer.city }}{% endif %}</span>
+                            </span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

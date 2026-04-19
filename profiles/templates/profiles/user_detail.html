@@ -1,0 +1,182 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}
+    {% if actor_profile %}{{ actor_profile.display_name }}{% elif troupe_profile %}{{ troupe_profile.name }}{% else %}Membre{% endif %} — Petites Annonces Théâtre
+{% endblock %}
+
+{% block main %}
+<div class="px-4 md:px-8 py-6 max-w-4xl">
+
+    <!-- Fil d'Ariane -->
+    <nav class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-6 flex items-center gap-2">
+        <a href="{% url 'index' %}" class="hover:text-ink transition-colors">Accueil</a>
+        <span>›</span>
+        <span class="text-ink">
+            {% if actor_profile %}{{ actor_profile.display_name }}{% elif troupe_profile %}{{ troupe_profile.name }}{% else %}Membre{% endif %}
+        </span>
+    </nav>
+
+    {% if own %}
+    <div class="mb-6 flex items-center gap-3 p-4 bg-ink/3 border border-ink/8">
+        <i class="fa-solid fa-user text-[10px] text-ink-muted"></i>
+        <p class="text-sm text-ink-muted flex-1">C'est votre profil public.</p>
+    </div>
+    {% endif %}
+
+    <div class="space-y-10">
+
+        <!-- ── Profil comédien·ne ── -->
+        {% if actor_profile %}
+        <section>
+            <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
+                Comédien·ne
+            </h2>
+            <a href="{% url 'profiles:actor_detail' slug=actor_profile.slug %}"
+               class="flex items-center gap-4 p-4 border border-ink/10 hover:border-ink/30 transition-colors">
+                <div class="w-16 h-20 bg-ink/5 overflow-hidden flex-shrink-0">
+                    {% if actor_profile.photo %}
+                    <img src="{{ actor_profile.photo.url }}" alt="{{ actor_profile.display_name }}"
+                         class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center">
+                        <i class="fa-regular fa-user text-2xl text-ink/15"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-display font-bold text-ink text-lg uppercase tracking-[0.04em]">{{ actor_profile.display_name }}</p>
+                    {% if actor_profile.city %}<p class="text-xs text-ink-muted mt-0.5">{{ actor_profile.city }}</p>{% endif %}
+                    {% if actor_profile.skills_list %}
+                    <div class="flex flex-wrap gap-1 mt-2">
+                        {% for skill in actor_profile.skills_list|slice:":5" %}
+                        <span class="px-2 py-0.5 bg-ink/5 text-[10px] text-ink-soft">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-ink-muted flex-shrink-0"></i>
+            </a>
+        </section>
+        {% endif %}
+
+        <!-- ── Profil troupe ── -->
+        {% if troupe_profile %}
+        <section>
+            <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
+                Troupe
+            </h2>
+            <a href="{% url 'profiles:troupe_detail' slug=troupe_profile.slug %}"
+               class="flex items-center gap-4 p-4 border border-ink/10 hover:border-ink/30 transition-colors">
+                <div class="w-16 h-16 bg-ink/5 overflow-hidden flex-shrink-0">
+                    {% if troupe_profile.photo %}
+                    <img src="{{ troupe_profile.photo.url }}" alt="{{ troupe_profile.name }}"
+                         class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center">
+                        <i class="fa-solid fa-masks-theater text-2xl text-ink/15"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-display font-bold text-ink text-lg uppercase tracking-[0.04em]">{{ troupe_profile.name }}</p>
+                    {% if troupe_profile.city %}<p class="text-xs text-ink-muted mt-0.5">{{ troupe_profile.city }}</p>{% endif %}
+                    {% if troupe_profile.founded_year %}<p class="text-xs text-ink-muted">Fondée en {{ troupe_profile.founded_year }}</p>{% endif %}
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-ink-muted flex-shrink-0"></i>
+            </a>
+        </section>
+        {% endif %}
+
+        {% if not actor_profile and not troupe_profile %}
+        <p class="text-sm text-ink-muted">Ce membre n'a pas encore créé de profil public.</p>
+        {% endif %}
+
+        <!-- ── Annonces actives ── -->
+        {% if active_offers %}
+        <section>
+            <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
+                Annonces actives
+            </h2>
+            <ul class="space-y-2">
+                {% for offer in active_offers %}
+                <li>
+                    <a href="{% url 'offer' offer.pk %}"
+                       class="flex items-start gap-3 p-3 border border-ink/10 hover:border-ink/30 transition-colors">
+                        {% if offer.cover_image %}
+                        <img src="{{ offer.cover_image.url }}" alt="" class="w-12 h-12 object-cover flex-shrink-0">
+                        {% endif %}
+                        <span class="flex-1 min-w-0">
+                            <span class="block text-sm font-medium text-ink">{{ offer.title }}</span>
+                            <span class="block text-[11px] text-ink-muted mt-0.5">
+                                {{ offer.get_section_display }}{% if offer.city %} · {{ offer.city }}{% endif %} · {{ offer.created_on|date:"d/m/Y" }}
+                            </span>
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-ink-muted flex-shrink-0 mt-1"></i>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        <!-- ── Annonces pourvues ── -->
+        {% if filled_offers %}
+        <section>
+            <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
+                Annonces pourvues
+            </h2>
+            <ul class="space-y-2">
+                {% for offer in filled_offers %}
+                <li>
+                    <a href="{% url 'offer' offer.pk %}"
+                       class="flex items-start gap-3 p-3 border border-ink/10 hover:border-ink/30 transition-colors opacity-50">
+                        <span class="flex-1 min-w-0">
+                            <span class="block text-sm font-medium text-ink">{{ offer.title }}</span>
+                            <span class="block text-[11px] text-ink-muted mt-0.5">
+                                {{ offer.get_section_display }}{% if offer.city %} · {{ offer.city }}{% endif %} · {{ offer.created_on|date:"d/m/Y" }}
+                            </span>
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-ink-muted flex-shrink-0 mt-1"></i>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        <!-- ── Pièces ── -->
+        {% if plays %}
+        <section>
+            <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
+                Pièces
+            </h2>
+            <ul class="space-y-2">
+                {% for play in plays %}
+                <li>
+                    <a href="{% url 'shows:play_detail' pk=play.pk %}"
+                       class="flex items-center gap-3 p-3 border border-ink/10 hover:border-ink/30 transition-colors">
+                        {% if play.poster %}
+                        <img src="{{ play.poster.url }}" alt="" class="w-10 h-14 object-cover flex-shrink-0">
+                        {% else %}
+                        <span class="w-10 h-14 bg-ink/5 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-book-open text-ink/20"></i>
+                        </span>
+                        {% endif %}
+                        <span class="flex-1 min-w-0">
+                            <span class="block text-sm font-medium text-ink">{{ play.title }}</span>
+                            <span class="block text-[11px] text-ink-muted mt-0.5">
+                                {{ play.get_genre_display }}{% if play.company %} · {{ play.company }}{% endif %}{% if play.year_created %} · {{ play.year_created }}{% endif %}
+                            </span>
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-ink-muted flex-shrink-0"></i>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

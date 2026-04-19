@@ -1,0 +1,32 @@
+{% if field.field.widget.input_type == 'textarea' %}
+<div>
+    <label class="block text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-2">
+        {{ field.label }}
+        {% if field.field.required %}<span class="text-red-400">*</span>{% endif %}
+    </label>
+    <textarea name="{{ field.html_name }}" id="{{ field.id_for_label }}"
+              rows="{{ field.field.widget.attrs.rows|default:4 }}"
+              placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}"
+              maxlength="{{ field.field.max_length|default:'' }}"
+              class="w-full bg-transparent border border-ink/15 text-sm text-ink p-3
+                     focus:outline-none focus:border-ink transition-colors placeholder:text-ink/25 resize-y">{{ field.value|default:'' }}</textarea>
+    {% if field.help_text %}<p class="mt-1 text-xs text-ink/35">{{ field.help_text }}</p>{% endif %}
+    {% if field.errors %}<p class="mt-1 text-xs text-red-500">{{ field.errors.0 }}</p>{% endif %}
+</div>
+{% else %}
+<div>
+    <label class="block text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-2">
+        {{ field.label }}
+        {% if field.field.required %}<span class="text-red-400">*</span>{% endif %}
+    </label>
+    <input type="{{ field.field.widget.input_type }}"
+           name="{{ field.html_name }}"
+           id="{{ field.id_for_label }}"
+           value="{{ field.value|default:'' }}"
+           placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}"
+           class="w-full bg-transparent border-b border-ink/20 text-sm text-ink py-2
+                  focus:outline-none focus:border-ink transition-colors placeholder:text-ink/25">
+    {% if field.help_text %}<p class="mt-1 text-xs text-ink/35">{{ field.help_text }}</p>{% endif %}
+    {% if field.errors %}<p class="mt-1 text-xs text-red-500">{{ field.errors.0 }}</p>{% endif %}
+</div>
+{% endif %}
