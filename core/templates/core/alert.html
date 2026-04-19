@@ -1,51 +1,173 @@
 {% extends "core/base.html" %}
+{% load static %}
 
-{% block title %}
-    Petites Annonces Théâtre
-{% endblock title %}
+{% block title %}Créer une alerte — Petites Annonces Théâtre{% endblock %}
+{% block meta_description %}Soyez notifié par email dès qu'une nouvelle annonce de théâtre amateur correspond à vos critères.{% endblock %}
 
 {% block main %}
-    <div class="bg-base-100 rounded p-4 mt-2 prose max-w-none">
-        <h2>
-            Vigilance – Tentatives d’arnaque ciblant les annonceurs
-        </h2>
-        <p>
-            Bonjour,
-        </p>
+<div class="px-4 md:px-8 py-8 max-w-2xl">
 
-        <p>
-            Nous souhaitons vous informer d’une tentative d’arnaque qui vient d’être portée à notre connaissance par un
-            utilisateur du site <a class="link" href="{% url 'index' %}">petites-annonces-theatre</a>.
-        </p>
+    <h1 class="font-display font-bold text-ink text-xl md:text-2xl uppercase tracking-[0.06em] mb-2">
+        Créer une alerte
+    </h1>
+    <p class="text-sm text-ink-muted mb-8">
+        Recevez un email dès qu'une nouvelle annonce correspond à vos critères.
+    </p>
 
-        <p>
-            Un individu se faisant passer pour un comédien intéressé par une annonce a établi un premier contact,
-            avant de prétexter une urgence (panne de voiture) pour demander une aide financière.
-            Il s'agit très probablement d'une arnaque.
-        </p>
-        <p>
-            C’est la première fois qu’un tel cas nous est signalé sur notre site, et nous prenons ce sujet très au sérieux.
-            Afin de protéger notre communauté, nous vous recommandons la plus grande prudence :
-        <ul>
-            <li>
-                <strong>Ne répondez jamais à une demande d'argent</strong>, quel que soit le prétexte.
-            </li>
-            <li>
-                <strong>Signalez-nous immédiatement tout comportement suspect</strong> via email.
-            </li>
-            <li>
-                <strong>Ne partagez pas d’informations personnelles sensibles</strong> en dehors de ce qui est
-                strictement nécessaire pour l'annonce.
-            </li>
-        </ul>
-        </p>
-        <p>
-            Merci de votre attention et de contribuer à faire de <a class="link" href="{% url 'index' %}">petites-annonces-theatre</a>
-            un espace sûr et bienveillant pour tous.
-        </p>
-        <p class="italic">
-            L'équipe Petites Annonces Théâtre
-        </p>
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
 
-    </div>
-{% endblock main %}
+        <!-- Email -->
+        <div>
+            <label class="block text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-2">
+                Adresse e-mail <span class="text-red-400">*</span>
+            </label>
+            <input type="email" name="email"
+                   value="{{ form.email.value|default:'' }}"
+                   placeholder="votre@email.fr"
+                   required
+                   class="w-full bg-transparent border-b border-ink/25 text-sm text-ink py-2
+                          focus:outline-none focus:border-ink transition-colors placeholder:text-ink/25">
+            {% if form.email.errors %}
+            <p class="mt-1.5 text-xs text-red-500">{{ form.email.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Critères de filtrage -->
+        <div class="border border-ink/10 p-5 space-y-5">
+            <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">
+                Critères <span class="font-normal normal-case tracking-normal text-ink/30 ml-1">— tous optionnels</span>
+            </p>
+
+            <!-- Mot-clé -->
+            <div>
+                <label class="block text-[10px] uppercase tracking-[0.12em] text-ink/40 font-medium mb-2">Mot-clé / ville</label>
+                <input type="text" name="search"
+                       value="{{ form.search.value|default:'' }}"
+                       placeholder="Paris, comédie, troupe…"
+                       class="w-full bg-transparent border-b border-ink/20 text-sm text-ink py-1
+                              focus:outline-none focus:border-ink transition-colors placeholder:text-ink/25">
+            </div>
+
+            <!-- Rubrique + Type -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-[10px] uppercase tracking-[0.12em] text-ink/40 font-medium mb-2">Rubrique</label>
+                    <div class="relative">
+                        <select name="section"
+                                class="w-full appearance-none bg-transparent border-b border-ink/20
+                                       text-sm text-ink pb-1 pr-6 focus:outline-none focus:border-ink cursor-pointer">
+                            <option value="">Toutes</option>
+                            <option value="artists_groups"     {% if form.section.value == 'artists_groups' %}selected{% endif %}>Comédien·nes</option>
+                            <option value="courses_training"   {% if form.section.value == 'courses_training' %}selected{% endif %}>Cours</option>
+                            <option value="calls_events"       {% if form.section.value == 'calls_events' %}selected{% endif %}>Appels</option>
+                            <option value="services_equipment" {% if form.section.value == 'services_equipment' %}selected{% endif %}>Services</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-0 top-1 text-[10px] text-ink/30 pointer-events-none"></i>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase tracking-[0.12em] text-ink/40 font-medium mb-2">Type</label>
+                    <div class="relative">
+                        <select name="offer_type"
+                                class="w-full appearance-none bg-transparent border-b border-ink/20
+                                       text-sm text-ink pb-1 pr-6 focus:outline-none focus:border-ink cursor-pointer">
+                            <option value="">Tous</option>
+                            <option value="offer"  {% if form.offer_type.value == 'offer' %}selected{% endif %}>Offre</option>
+                            <option value="demand" {% if form.offer_type.value == 'demand' %}selected{% endif %}>Demande</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-0 top-1 text-[10px] text-ink/30 pointer-events-none"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Genre + Rémunération -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-[10px] uppercase tracking-[0.12em] text-ink/40 font-medium mb-2">Genre</label>
+                    <div class="relative">
+                        <select name="gender"
+                                class="w-full appearance-none bg-transparent border-b border-ink/20
+                                       text-sm text-ink pb-1 pr-6 focus:outline-none focus:border-ink cursor-pointer">
+                            <option value="">Tous</option>
+                            <option value="male"   {% if form.gender.value == 'male' %}selected{% endif %}>Homme</option>
+                            <option value="female" {% if form.gender.value == 'female' %}selected{% endif %}>Femme</option>
+                            <option value="other"  {% if form.gender.value == 'other' %}selected{% endif %}>Non-binaire</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-0 top-1 text-[10px] text-ink/30 pointer-events-none"></i>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase tracking-[0.12em] text-ink/40 font-medium mb-2">Rémunération</label>
+                    <div class="relative">
+                        <select name="category"
+                                class="w-full appearance-none bg-transparent border-b border-ink/20
+                                       text-sm text-ink pb-1 pr-6 focus:outline-none focus:border-ink cursor-pointer">
+                            <option value="">Toutes</option>
+                            <option value="unpaid" {% if form.category.value == 'unpaid' %}selected{% endif %}>Bénévole</option>
+                            <option value="paid"   {% if form.category.value == 'paid' %}selected{% endif %}>Rémunéré</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-0 top-1 text-[10px] text-ink/30 pointer-events-none"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tranche d'âge -->
+            <div>
+                <label class="block text-[10px] uppercase tracking-[0.12em] text-ink/40 font-medium mb-2">Tranche d'âge</label>
+                <div class="flex items-center gap-3">
+                    <input type="number" name="age_min" value="{{ form.age_min.value|default:'' }}"
+                           min="0" max="99" placeholder="De"
+                           class="w-20 bg-transparent border-b border-ink/20 text-sm text-ink py-1
+                                  focus:outline-none focus:border-ink placeholder:text-ink/25">
+                    <span class="text-ink/20">—</span>
+                    <input type="number" name="age_max" value="{{ form.age_max.value|default:'' }}"
+                           min="0" max="99" placeholder="à"
+                           class="w-20 bg-transparent border-b border-ink/20 text-sm text-ink py-1
+                                  focus:outline-none focus:border-ink placeholder:text-ink/25">
+                    <span class="text-xs text-ink/30">ans</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fréquence -->
+        <div>
+            <label class="block text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-3">
+                Fréquence de notification
+            </label>
+            <div class="space-y-2.5">
+                {% for val, label in form.fields.frequency.choices %}
+                <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="radio" name="frequency" value="{{ val }}"
+                           {% if form.frequency.value == val or not form.frequency.value and val == 'daily' %}checked{% endif %}
+                           class="sr-only peer">
+                    <span class="w-4 h-4 rounded-full border-2 border-ink/20 peer-checked:border-ink peer-checked:bg-ink
+                                 transition-colors flex-shrink-0 relative">
+                    </span>
+                    <span class="text-sm text-ink-soft group-hover:text-ink transition-colors peer-checked:text-ink">
+                        {{ label }}
+                    </span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="text-sm text-red-500">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <button type="submit"
+                class="inline-flex items-center gap-2 px-6 py-3 bg-ink text-white
+                       text-[11px] font-display font-bold uppercase tracking-[0.14em]
+                       hover:opacity-80 transition-opacity">
+            <i class="fa-solid fa-bell text-[9px]"></i>
+            Créer l'alerte
+        </button>
+
+        <p class="text-xs text-ink/30">
+            Un email de confirmation vous sera envoyé. Pas de compte requis.
+            Maximum {{ max_alerts }} alertes par adresse email.
+        </p>
+    </form>
+</div>
+{% endblock %}

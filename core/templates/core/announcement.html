@@ -1,78 +1,122 @@
-    {% extends "core/base.html" %}
+{% extends "core/base.html" %}
 
-    {% block title %}
-        Petites Annonces Théâtre
-    {% endblock title %}
+{% block title %}Faire sa promo — Petites Annonces Théâtre{% endblock %}
 
-    {% block main %}
-        <div class="bg-base-100 rounded p-4 mt-2 prose max-w-none">
-            <h2>
-                Chères comédiennes, chers comédiens,
-            </h2>
-            <p>
-                Un petit ruban turquoise s’est glissé tout en haut de vos annonces.
-                Ce n’est pas une réclame quelconque : c’est un coup de projecteur pour vos spectacles.
-            </p>
-            <h3>
-                Pourquoi ce bandeau existe-t-il ?
-            </h3>
-            <p>
-                Parce que, depuis la création du site, plusieurs troupes nous murmurent :
-            <blockquote>
-                « Et si l’on pouvait mettre un peu en avant nos dates ? Les salles seraient plus remplies... »
-            </blockquote>
-            Nous avons donc créé un unique espace – discret, mais visible – réservé aux pièces de théâtre.
-            Pas de bannières pour des chaussures, ni d’algorithmes qui vous pistent :
-            <ul>
-                <li class="font-semibold">zéro cookie supplémentaire,</li>
-                <li class="font-semibold">aucun tracking publicitaire,</li>
-                <li class="font-semibold">seulement la passion du plateau.</li>
-            </ul>
-            </p>
-            <h3>À quoi cela sert-il ?</h3>
-            <ol>
-                <li>
-                    <span class="font-bold">Remplir vos salles.</span> Un bandeau qui paraît sur chaque page, devant un public déjà conquis par le théâtre,
-                    c’est un fauteuil de plus, peut-être deux… parfois toute une rangée.
-                </li>
-                <li>
-                    <span class="font-bold">Garder le site vivant et gratuit.</span> Nos frais d’hébergement tournent autour de 30 € par mois ;
-                    la page « soutien » n’a pas (encore) trouvé son public. Louer cet encart,
-                    c’est partager un bout du loyer tout en faisant vibrer les planches.
-                </li>
-            </ol>
-            <h3>
-                Combien ça coûte ?
-            </h3>
-            <p>
-            <ul>
-                <li><span class="font-bold">3 € la journée</span> pour un dernier rappel avant la première,</li>
-                <li><span class="font-bold">10 € la semaine</span> pour un week-end de représentations,</li>
-                <li><span class="font-bold">30 € le mois</span> pour une longue série ou une tournée locale.</li>
-            </ul>
-            </p>
-            <h3>
-                Comment procéder ?
-            </h3>
-            <p>
-                Dans cette phase d’essai, tout se fait à l’ancienne.
-                Envoyez simplement un courriel à
-                <a class="link" href="mailto:admin@petites-annonces-theatre.fr">admin@petites-annonces-theatre.fr</a>
-                en nous précisant :
-            <ul>
-                <li>le spectacle que vous souhaitez mettre en lumière ;</li>
-                <li>la durée d’affichage désirée ;</li>
-            </ul>
-            Nous vous répondrons aussi vite que possible afin de récupérer l’affiche au bon format
-            et les informations pratiques manquantes, puis nous mettrons votre bandeau en ligne sans délai.
-            Si le test s’avère concluant, nous travaillerons à simplifier encore cette étape, pour que,
-            demain, la mise en avant de votre pièce se fasse en quelques clics directement depuis votre compte.
-            </p>
-            <div class="divider"></div>
-            <p>
-                <span class="font-bold">Ce site reste votre maison</span> : gratuite, sans publicité tierce, bâtie pour les amateurs.
-            </p>
-                À très bientôt, et… <span class="font-bold">merde</span> pour vos prochaines représentations !
-            </p>
+{% block main %}
+
+<!-- Strip d'en-tête -->
+<div class="relative overflow-hidden w-full bg-ink py-10 md:py-14"
+     style="background: linear-gradient(150deg, oklch(16% .115 12) 0%, oklch(26% .12 22) 100%);">
+    <div class="absolute inset-0 pointer-events-none"
+         style="background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 12px);"></div>
+    <div class="relative max-w-screen-xl mx-auto px-4 md:px-8">
+        <span class="text-white/30 text-[10px] font-display font-bold uppercase tracking-[0.20em] block mb-3">
+            📣&nbsp; Promotion
+        </span>
+        <h1 class="font-display font-bold text-white text-2xl sm:text-3xl md:text-4xl uppercase tracking-[0.04em]">
+            Faire sa promo
+        </h1>
+        <p class="text-white/40 text-sm mt-2">
+            Un coup de projecteur pour votre spectacle, devant un public déjà conquis.
+        </p>
+    </div>
+</div>
+
+<div class="max-w-screen-md mx-auto px-4 md:px-8 py-12 space-y-12">
+
+    <!-- Intro -->
+    <p class="text-base text-ink-soft leading-relaxed">
+        Chères comédiennes, chers comédiens — un bandeau discret mais visible s'affiche en tête de chaque page,
+        réservé exclusivement aux pièces de théâtre. Pas de publicité pour des chaussures, pas d'algorithmes
+        qui vous pistent : seulement la passion du plateau.
+    </p>
+
+    <!-- Pourquoi -->
+    <section>
+        <h2 class="font-display font-bold text-ink text-xs uppercase tracking-[0.18em] mb-5 border-b border-ink/10 pb-3">
+            Pourquoi ce bandeau ?
+        </h2>
+        <div class="grid sm:grid-cols-2 gap-6">
+            <div class="space-y-2">
+                <p class="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-secondary">Remplir vos salles</p>
+                <p class="text-sm text-ink-soft leading-relaxed">
+                    Un bandeau affiché devant un public déjà conquis par le théâtre,
+                    c'est un fauteuil de plus, peut-être deux… parfois toute une rangée.
+                </p>
+            </div>
+            <div class="space-y-2">
+                <p class="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-secondary">Garder le site vivant</p>
+                <p class="text-sm text-ink-soft leading-relaxed">
+                    Nos frais d'hébergement tournent autour de 30 € par mois.
+                    Louer cet encart, c'est partager un bout du loyer tout en faisant vibrer les planches.
+                </p>
+            </div>
         </div>
-    {% endblock main %}
+        <ul class="mt-6 space-y-1.5">
+            <li class="flex items-center gap-2 text-sm text-ink-soft">
+                <span class="w-1 h-1 rounded-full bg-secondary inline-block shrink-0"></span>
+                Zéro cookie supplémentaire
+            </li>
+            <li class="flex items-center gap-2 text-sm text-ink-soft">
+                <span class="w-1 h-1 rounded-full bg-secondary inline-block shrink-0"></span>
+                Aucun tracking publicitaire
+            </li>
+            <li class="flex items-center gap-2 text-sm text-ink-soft">
+                <span class="w-1 h-1 rounded-full bg-secondary inline-block shrink-0"></span>
+                Seulement la passion du plateau
+            </li>
+        </ul>
+    </section>
+
+    <!-- Tarifs -->
+    <section>
+        <h2 class="font-display font-bold text-ink text-xs uppercase tracking-[0.18em] mb-5 border-b border-ink/10 pb-3">
+            Combien ça coûte ?
+        </h2>
+        <div class="grid sm:grid-cols-3 gap-4">
+            <div class="border border-ink/12 p-5 space-y-1">
+                <p class="font-display font-bold text-2xl text-ink">3 €</p>
+                <p class="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">La journée</p>
+                <p class="text-xs text-ink-soft mt-2">Parfait pour un dernier rappel avant la première.</p>
+            </div>
+            <div class="border border-secondary/40 bg-secondary/4 p-5 space-y-1">
+                <p class="font-display font-bold text-2xl text-ink">10 €</p>
+                <p class="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">La semaine</p>
+                <p class="text-xs text-ink-soft mt-2">Idéal pour couvrir un week-end de représentations.</p>
+            </div>
+            <div class="border border-ink/12 p-5 space-y-1">
+                <p class="font-display font-bold text-2xl text-ink">30 €</p>
+                <p class="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">Le mois</p>
+                <p class="text-xs text-ink-soft mt-2">Pour une longue série ou une tournée locale.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comment procéder -->
+    <section>
+        <h2 class="font-display font-bold text-ink text-xs uppercase tracking-[0.18em] mb-5 border-b border-ink/10 pb-3">
+            Comment procéder ?
+        </h2>
+        <p class="text-sm text-ink-soft leading-relaxed mb-6">
+            Dans cette phase d'essai, tout se fait à l'ancienne. Envoyez simplement un courriel en précisant
+            le spectacle à mettre en lumière et la durée d'affichage souhaitée.
+            Nous vous répondrons aussi vite que possible.
+        </p>
+        <a href="mailto:admin@petites-annonces-theatre.fr"
+           class="inline-flex items-center gap-2 px-5 py-3
+                  bg-ink text-white text-[11px] font-display font-bold uppercase tracking-[0.14em]
+                  hover:opacity-80 transition-opacity">
+            <i class="fa-solid fa-envelope text-[10px]"></i>
+            Écrire à l'équipe
+        </a>
+    </section>
+
+    <!-- Note de bas de page -->
+    <p class="text-xs text-ink/30 border-t border-ink/8 pt-8">
+        <span class="font-bold text-ink/40">Ce site reste votre maison</span> — gratuit, sans publicité tierce, bâti pour les amateurs.
+        À très bientôt, et… <span class="font-bold text-ink/40">merde</span> pour vos prochaines représentations !
+    </p>
+
+</div>
+
+{% endblock main %}

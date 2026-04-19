@@ -17,11 +17,26 @@ Including another URLconf
 import os
 
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
 from django.urls import path, include
+from django.views.generic import TemplateView
 
 import core.views
+from core.sitemaps import CitySitemap, DepartmentSitemap, OfferSitemap, StaticSitemap
+from shows.sitemaps import PlaySitemap
+
+sitemaps = {
+    'annonces': OfferSitemap,
+    'villes': CitySitemap,
+    'departements': DepartmentSitemap,
+    'pieces': PlaySitemap,
+    'pages': StaticSitemap,
+}
 
 urlpatterns = [
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
+    path('llms.txt', TemplateView.as_view(template_name='llms.txt', content_type='text/plain')),
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('signup/', core.views.signup, name='signup'),
@@ -34,10 +49,19 @@ urlpatterns = [
     path('fill_offer/<int:offer_id>', core.views.fill_offer, name='fill_offer'),
     path('unfill_offer/<int:offer_id>', core.views.unfill_offer, name='unfill_offer'),
     path('delete_offer/<int:offer_id>', core.views.delete_offer, name='delete_offer'),
+    path('annonces/', core.views.city_list, name='city_list'),
+    path('annonces/<slug:city_slug>', core.views.city_offers, name='city_offers'),
+    path('departements/', core.views.department_list, name='department_list'),
+    path('departements/<slug:dept_slug>', core.views.department_offers, name='department_offers'),
     path('about', core.views.about, name='about'),
     path('tou', core.views.tou, name='tou'),
     path('announcement', core.views.announcement, name='announcement'),
-    path('alert', core.views.alert, name='alert'),
+    path('alertes', core.views.alert, name='alert'),
+    path('alertes/mes-alertes', core.views.alert_user, name='alert_user'),
+    path('alertes/confirmer/<uuid:token>', core.views.alert_confirm, name='alert_confirm'),
+    path('alertes/desactiver/<uuid:token>', core.views.alert_unsubscribe, name='alert_unsubscribe'),
+    path('alertes/gerer/<uuid:token>', core.views.alert_manage, name='alert_manage'),
+    path('alert', core.views.alert, name='alert_legacy'),
     path("", include("promote.urls", namespace="promote")),
     path("__reload__/", include("django_browser_reload.urls")),
 ]
@@ -53,4 +77,7 @@ urlpatterns += htmx_urlpatterns
 DEBUG = os.environ.get("DJANGO_DEBUG") == 'True'
 if DEBUG:
     from debug_toolbar.toolbar import debug_toolbar_urls
+    from django.conf import settings
+    from django.conf.urls.static import static
     urlpatterns += debug_toolbar_urls()
+    urlpatterns += static(settings.MEDIA_URL, document_root=getattr(settings, 'MEDIA_ROOT', None))

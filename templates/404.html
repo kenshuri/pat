@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Page introuvable — Petites Annonces Théâtre{% endblock %}
+
+{% block main %}
+<div class="flex flex-col items-center justify-center text-center px-4 py-24">
+
+    <img src="{% static 'core/mask.svg' %}"
+         alt="Masque de théâtre"
+         class="w-16 h-16 opacity-10 mb-8">
+
+    <p class="font-display font-bold text-ink/15 text-7xl md:text-9xl uppercase tracking-[0.06em] leading-none mb-6">
+        404
+    </p>
+
+    <h1 class="font-display font-bold text-ink text-xl md:text-2xl uppercase tracking-[0.06em] mb-3">
+        Page introuvable
+    </h1>
+
+    <p class="text-sm text-ink-muted max-w-sm mb-10">
+        Cette page n'existe pas ou a été supprimée.<br>
+        L'annonce a peut-être été pourvue.
+    </p>
+
+    <div class="flex flex-wrap gap-3 justify-center">
+        <a href="{% url 'index' %}"
+           class="inline-flex items-center gap-2 px-6 py-2.5 bg-ink text-white
+                  text-[11px] font-display font-bold uppercase tracking-[0.14em]
+                  hover:opacity-80 transition-opacity">
+            Voir les annonces
+        </a>
+        <a href="{% url 'add_offer' %}"
+           class="inline-flex items-center gap-2 px-6 py-2.5 border border-ink/20
+                  text-[11px] font-display font-bold uppercase tracking-[0.14em] text-ink-soft
+                  hover:border-ink hover:text-ink transition-colors">
+            <i class="fa-solid fa-plus text-[9px]"></i>
+            Déposer une annonce
+        </a>
+    </div>
+
+</div>
+{% endblock %}

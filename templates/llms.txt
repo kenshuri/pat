@@ -1,0 +1,39 @@
+# Petites Annonces Théâtre
+
+> Plateforme de petites annonces dédiée au théâtre amateur francophone. Gratuite, sans publicité tierce, hébergée en Europe.
+
+## À propos
+
+Petites Annonces Théâtre est un site communautaire permettant aux comédien·nes amateurs, troupes et compagnies de théâtre de publier et consulter des annonces gratuitement. Le site est indépendant, financé par de rares partenariats et le soutien des utilisateurs.
+
+**URL :** https://petites-annonces-theatre.fr
+**Langue :** Français
+**Hébergement :** Railway (Amsterdam, Europe)
+**Données :** NeonDB (Francfort, Europe) — aucune donnée ne quitte l'infrastructure européenne
+
+## Rubriques
+
+- **Comédien·nes & Troupes** — recherche de comédiens, formation de troupes, castings amateurs
+- **Cours & Formations** — cours de théâtre, ateliers, stages
+- **Appels & Événements** — appels à projets, festivals, événements
+- **Services & Matériel** — location de costumes, décors, services techniques
+
+## Agenda
+
+L'agenda recense les spectacles de théâtre amateur à venir en France. Les compagnies peuvent y référencer leurs représentations avec dates, lieux et tarifs.
+
+## Pages utiles
+
+- Annonces : https://petites-annonces-theatre.fr/
+- Agenda : https://petites-annonces-theatre.fr/shows/agenda/
+- Déposer une annonce : https://petites-annonces-theatre.fr/add_offer
+- À propos : https://petites-annonces-theatre.fr/about
+- Contact : admin@petites-annonces-theatre.fr
+
+## Éthique & données
+
+- Pas de cookies de tracking
+- Pas de publicité tierce
+- Données hébergées en Europe (Railway + NeonDB)
+- Images modérées automatiquement par un modèle open-source exécuté sur nos propres serveurs européens
+- Statistiques via GoatCounter (privacy-friendly, sans cookies)

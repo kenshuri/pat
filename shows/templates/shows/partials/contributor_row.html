@@ -1,27 +1,24 @@
-{# templates/shows/partials/contributor_row.html #}
-<div class="flex border border-base-300 rounded p-3 bg-base-100 w-full gap-2"
-     data-contributor-row>
-
-    {# champs cachés éventuels générés par le formset #}
+<div class="flex gap-3 items-start" data-contributor-row>
     {% if form.id %}{{ form.id }}{% endif %}
+    {% if form.DELETE %}
+    <div class="hidden">{{ form.DELETE }}</div>
+    {% endif %}
 
-    <div class="flex flex-col md:flex-row gap-2 w-full">
-        <div class="w-full">
-            <label class="label"><span class="label-text">{{ form.role.label }}</span></label>
+    <div class="flex-1 grid sm:grid-cols-2 gap-3">
+        <div class="space-y-1">
+            <label class="block text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">Rôle</label>
             {{ form.role }}
-            {% if form.role.errors %}<p class="text-error text-sm mt-1">{{ form.role.errors.0 }}</p>{% endif %}
+            {% if form.role.errors %}<p class="text-red-500 text-xs mt-0.5">{{ form.role.errors.0 }}</p>{% endif %}
         </div>
-
-        <div class="w-full">
-            <label class="label"><span class="label-text">{{ form.name.label }}</span></label>
+        <div class="space-y-1">
+            <label class="block text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">Nom(s)</label>
             {{ form.name }}
-            {% if form.name.errors %}<p class="text-error text-sm mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+            {% if form.name.errors %}<p class="text-red-500 text-xs mt-0.5">{{ form.name.errors.0 }}</p>{% endif %}
         </div>
     </div>
 
-    <div class="flex items-center">
-        <button type="button" class="btn btn-sm btn-error ml-2" onclick="removeContributor(this)">
-            <i class="fa-solid fa-trash"></i>
-        </button>
-    </div>
+    <button type="button" onclick="removeContributor(this)"
+            class="mt-6 shrink-0 w-8 h-8 flex items-center justify-center border border-ink/20 text-ink-muted hover:border-ink hover:text-ink transition-colors">
+        <i class="fa-solid fa-xmark text-[11px]"></i>
+    </button>
 </div>

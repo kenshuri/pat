@@ -1,34 +1,111 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block title %}
-    Petites annonces dédiées au théâtre amateur pour connecter troupes et comédiens à la recherche d'un projet théatral
-{% endblock title %}
+{% block title %}Petites Annonces Théâtre — Auditions, castings et troupes amateurs{% endblock title %}
+
+{% block meta_description %}Trouvez vos prochains comédiens, rejoignez une troupe ou publiez une annonce de théâtre amateur. Gratuit, sans pub, hébergé en Europe.{% endblock %}
+
+{% block canonical_tag %}<link rel="canonical" href="{{ SITE_URL }}/">{% endblock %}
+
+{% block og_tags %}
+<meta property="og:site_name" content="Petites Annonces Théâtre">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Petites Annonces Théâtre — Auditions, castings et troupes amateurs">
+<meta property="og:description" content="Trouvez vos prochains comédiens, rejoignez une troupe ou publiez une annonce de théâtre amateur. Gratuit, sans pub, hébergé en Europe.">
+<meta property="og:url" content="{{ SITE_URL }}/">
+<meta name="twitter:card" content="summary_large_image">
+{% endblock og_tags %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "{{ SITE_URL }}/#organization",
+      "name": "Petites Annonces Théâtre",
+      "url": "{{ SITE_URL }}",
+      "description": "Plateforme de petites annonces pour le théâtre amateur francophone. Gratuite, sans publicité tierce, hébergée en Europe.",
+      "email": "admin@petites-annonces-theatre.fr"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "{{ SITE_URL }}/#website",
+      "url": "{{ SITE_URL }}",
+      "name": "Petites Annonces Théâtre",
+      "inLanguage": "fr",
+      "publisher": { "@id": "{{ SITE_URL }}/#organization" },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "{{ SITE_URL }}/?search={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ]
+}
+</script>
+{% endblock jsonld %}
 
 {% block main %}
-    <div class="p-2 md:p-0 md:mt-2">
+<div class="px-4 md:px-8 py-6">
 
-        <!--        Promo -->
-        <div class="flex flex-col gap-2">
+    <!-- Bannière promo -->
+    {% with "promote/banner_"|add:promo.slug|add:".html" as template_name %}
+        {% include template_name %}
+    {% endwith %}
 
-            {% with "promote/banner_"|add:promo.slug|add:".html" as template_name %}
-                {% include template_name %}
-            {% endwith %}
+    <!-- En-tête + recherche -->
+    <div class="mb-1">
+        <h1 class="font-display font-bold text-ink text-xl md:text-2xl uppercase tracking-[0.06em] mb-4">
+            Les annonces du moment
+        </h1>
+        {% include "core/components/search_offer.html" %}
+    </div>
+
+    <!-- Grille d'annonces -->
+    <div id="id_offers">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6" id="list_offers">
+            {% include "core/partials/offers_partials.html" %}
         </div>
 
-
-        <!--Search Offer-->
-        {% include "core/components/search_offer.html" %}
-
-        <!--Offers cards-->
-        <div id="id_offers">
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 mt-2 gap-2" id="list_offers">
-                {% include "core/partials/offers_partials.html" %}
+        <div id="pagination-zone">
+            <div class="flex flex-col items-center gap-3 pt-8 pb-2">
+                {% if has_more %}
+                <button
+                    hx-get="{% url 'index' %}"
+                    hx-target="#list_offers"
+                    hx-swap="beforeend"
+                    hx-include="#search-form"
+                    hx-vals='{"page": "{{ page_next }}"}'
+                    hx-indicator="#spinner"
+                    class="inline-flex items-center gap-2 px-6 py-2.5
+                           border border-ink/20 text-[11px] font-display font-bold uppercase tracking-[0.14em]
+                           text-ink-soft hover:border-ink hover:text-ink transition-colors">
+                    Charger plus
+                    <i class="fa-solid fa-chevron-down text-[9px]"></i>
+                </button>
+                {% endif %}
+                <a href="{% url 'alert' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}"
+                   class="inline-flex items-center gap-1.5 text-[11px] text-ink/35
+                          hover:text-ink transition-colors">
+                    <i class="fa-solid fa-bell text-[9px]"></i>
+                    Créer une alerte pour ces critères
+                </a>
             </div>
-            <div id="spinner" class="text-center my-4 htmx-indicator">
-                <i class="fa-solid fa-circle-notch fa-spin text-xl text-primary"></i>
-            </div>
+        </div>
+
+        <div id="spinner" class="flex justify-center py-6 htmx-indicator">
+            <svg class="w-5 h-5 text-ink/25 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
         </div>
     </div>
 
+</div>
 {% endblock main %}

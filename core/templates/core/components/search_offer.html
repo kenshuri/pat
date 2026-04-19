@@ -1,241 +1,357 @@
-<!--Search Offer-->
-<div class="flex grow">
-    <form
-            class="w-full grow"
-            action=""
-            hx-post="{% url 'offer_search' %}"
-            hx-trigger="change, keyup delay:300ms"
-            hx-target="#list_offers"
-            hx-include="this"
-    >
+{% comment %}
+  Recherche et filtres — design éditorial, sans DaisyUI.
+  Onglets rubrique en underline, filtres secondaires en accordéon.
+{% endcomment %}
+<div
+    x-data="{
+        section: '',
+        type: '',
+        category: '',
+        gender: '',
+        ageMin: '',
+        ageMax: '',
+        freshness: '',
+        searchQuery: '',
+        showMore: false,
+        init() {
+            const p = new URLSearchParams(window.location.search);
+            this.section     = p.get('section')   || '';
+            this.type        = p.get('type')       || '';
+            this.category    = p.get('category')   || '';
+            this.gender      = p.get('gender')     || '';
+            this.ageMin      = p.get('age_min')    || '';
+            this.ageMax      = p.get('age_max')    || '';
+            this.freshness   = p.get('freshness')  || '';
+            this.searchQuery = p.get('search')     || '';
+            if (this.gender || this.ageMin || this.ageMax) this.showMore = true;
+        },
+        get typeLabels() {
+            switch (this.section) {
+                case 'artists_groups':     return { offer: 'Je recrute',   demand: 'Je postule' };
+                case 'courses_training':   return { offer: 'Je propose',   demand: 'Je recherche' };
+                case 'calls_events':       return { offer: 'Je programme', demand: 'Je me produis' };
+                case 'services_equipment': return { offer: 'Je propose',   demand: 'Je recherche' };
+                default:                   return { offer: 'Offre',        demand: 'Demande' };
+            }
+        },
+        get categoryLabels() {
+            return ['artists_groups','calls_events'].includes(this.section)
+                ? { unpaid: 'Bénévole', paid: 'Rémunéré' }
+                : { unpaid: 'Gratuit',  paid: 'Payant' };
+        },
+        get genderLabel() {
+            return { male: 'Homme', female: 'Femme', other: 'Non-binaire' }[this.gender] || '';
+        },
+        get freshnessLabel() {
+            return { week: 'Cette semaine', month: 'Ce mois' }[this.freshness] || '';
+        },
+        get hasFilters() {
+            return this.section || this.type || this.category || this.gender || this.ageMin || this.ageMax || this.freshness;
+        },
+        get secondaryFilterCount() {
+            return [this.gender, this.ageMin || this.ageMax].filter(Boolean).length;
+        }
+    }"
+    class="mb-6"
+>
+<form
+    id="search-form"
+    hx-get="{% url 'index' %}"
+    hx-trigger="change, keyup delay:300ms"
+    hx-target="#list_offers"
+    hx-swap="innerHTML"
+    hx-replace-url="true"
+    class="space-y-0"
+>
 
-        <fieldset class="fieldset w-full grow bg-base-300 border border-base-300 px-4 pb-2 rounded-box">
-            <legend class="fieldset-legend">Rechercher des annonces</legend>
-            <label class="input input-bordered grow items-center gap-2 w-full">
-                <input type="text" placeholder="Rechercher des annonces par titre, ville..."
-                       name="search"/>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 opacity-70"><path fill-rule="evenodd" d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clip-rule="evenodd" /></svg>
-                <div id="loading-indicator" class="hidden text-center my-4">
-                    <i class="fa-solid fa-circle-notch fa-spin text-xl text-primary"></i>
+    <!-- ── Champ de recherche ── -->
+    <div class="flex items-center gap-3 border-b border-ink/12 pb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
+             class="w-3.5 h-3.5 text-ink/30 shrink-0" aria-hidden="true">
+            <path fill-rule="evenodd"
+                  d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+                  clip-rule="evenodd"/>
+        </svg>
+        <input
+            type="text"
+            name="search"
+            x-model="searchQuery"
+            placeholder="Ville, titre, compagnie…"
+            class="flex-1 bg-transparent text-sm text-ink placeholder:text-ink/25
+                   focus:outline-none py-1"
+        >
+        <div id="loading-indicator" class="hidden shrink-0">
+            <svg class="w-4 h-4 text-ink/30 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- ── Onglets de rubrique ── -->
+    <div class="flex overflow-x-auto scroll-no-bar -mx-1 px-1" role="tablist" aria-label="Filtrer par rubrique">
+
+        <label class="shrink-0 relative cursor-pointer group/tab" role="tab" :aria-selected="section === ''">
+            <input type="radio" name="section" value="" x-model="section" class="sr-only">
+            <span class="block px-4 py-3 text-[11px] uppercase tracking-[0.10em] font-medium transition-colors duration-150
+                          whitespace-nowrap border-b-2"
+                  :class="section === '' ? 'text-ink border-ink' : 'text-ink/35 border-transparent hover:text-ink/65 hover:border-ink/20'">
+                Tout
+            </span>
+        </label>
+
+        <label class="shrink-0 relative cursor-pointer group/tab" role="tab" :aria-selected="section === 'artists_groups'">
+            <input type="radio" name="section" value="artists_groups" x-model="section" class="sr-only">
+            <span class="block px-4 py-3 text-[11px] uppercase tracking-[0.10em] font-medium transition-colors duration-150
+                          whitespace-nowrap border-b-2"
+                  :class="section === 'artists_groups' ? 'text-ink border-ink' : 'text-ink/35 border-transparent hover:text-ink/65 hover:border-ink/20'">
+                🎭 Comédien·nes
+            </span>
+        </label>
+
+        <label class="shrink-0 relative cursor-pointer group/tab" role="tab" :aria-selected="section === 'courses_training'">
+            <input type="radio" name="section" value="courses_training" x-model="section" class="sr-only">
+            <span class="block px-4 py-3 text-[11px] uppercase tracking-[0.10em] font-medium transition-colors duration-150
+                          whitespace-nowrap border-b-2"
+                  :class="section === 'courses_training' ? 'text-ink border-ink' : 'text-ink/35 border-transparent hover:text-ink/65 hover:border-ink/20'">
+                🎓 Cours
+            </span>
+        </label>
+
+        <label class="shrink-0 relative cursor-pointer group/tab" role="tab" :aria-selected="section === 'calls_events'">
+            <input type="radio" name="section" value="calls_events" x-model="section" class="sr-only">
+            <span class="block px-4 py-3 text-[11px] uppercase tracking-[0.10em] font-medium transition-colors duration-150
+                          whitespace-nowrap border-b-2"
+                  :class="section === 'calls_events' ? 'text-ink border-ink' : 'text-ink/35 border-transparent hover:text-ink/65 hover:border-ink/20'">
+                📣 Appels
+            </span>
+        </label>
+
+        <label class="shrink-0 relative cursor-pointer group/tab" role="tab" :aria-selected="section === 'services_equipment'">
+            <input type="radio" name="section" value="services_equipment" x-model="section" class="sr-only">
+            <span class="block px-4 py-3 text-[11px] uppercase tracking-[0.10em] font-medium transition-colors duration-150
+                          whitespace-nowrap border-b-2"
+                  :class="section === 'services_equipment' ? 'text-ink border-ink' : 'text-ink/35 border-transparent hover:text-ink/65 hover:border-ink/20'">
+                🛠️ Services
+            </span>
+        </label>
+
+        <!-- Bouton filtres -->
+        <div class="flex-1 flex items-center justify-end border-b-2 border-transparent pl-4">
+            <button type="button"
+                    @click="showMore = !showMore"
+                    class="shrink-0 text-[10px] uppercase tracking-[0.10em] text-ink/35 hover:text-ink/65
+                           flex items-center gap-1.5 transition-colors pb-3 whitespace-nowrap">
+                <i class="fa-solid fa-sliders text-[10px]"></i>
+                Filtres
+                <template x-if="type || category || gender || ageMin || ageMax">
+                    <span class="w-1.5 h-1.5 rounded-full bg-ink inline-block"></span>
+                </template>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Fraîcheur (toujours visible) ── -->
+    <div class="flex items-center gap-2 pt-3 pb-1">
+        <span class="text-[10px] uppercase tracking-[0.12em] text-ink/30 font-medium shrink-0">Publiée :</span>
+
+        <!-- hidden input transmis si freshness vide -->
+        <input type="hidden" name="freshness" :value="freshness">
+
+        <label class="cursor-pointer">
+            <input type="radio" name="freshness" value="" x-model="freshness" class="sr-only">
+            <span class="block px-2.5 py-1 text-[10px] uppercase tracking-[0.08em] font-medium border transition-colors"
+                  :class="freshness === '' ? 'border-ink text-ink' : 'border-ink/15 text-ink/40 hover:border-ink/35 hover:text-ink/65'">
+                Tout
+            </span>
+        </label>
+        <label class="cursor-pointer">
+            <input type="radio" name="freshness" value="week" x-model="freshness" class="sr-only">
+            <span class="block px-2.5 py-1 text-[10px] uppercase tracking-[0.08em] font-medium border transition-colors"
+                  :class="freshness === 'week' ? 'border-ink text-ink' : 'border-ink/15 text-ink/40 hover:border-ink/35 hover:text-ink/65'">
+                Cette semaine
+            </span>
+        </label>
+        <label class="cursor-pointer">
+            <input type="radio" name="freshness" value="month" x-model="freshness" class="sr-only">
+            <span class="block px-2.5 py-1 text-[10px] uppercase tracking-[0.08em] font-medium border transition-colors"
+                  :class="freshness === 'month' ? 'border-ink text-ink' : 'border-ink/15 text-ink/40 hover:border-ink/35 hover:text-ink/65'">
+                Ce mois
+            </span>
+        </label>
+    </div>
+
+    <!-- ── Filtres secondaires (accordéon) ── -->
+    <div x-show="showMore" x-collapse>
+        <div class="space-y-5 py-4 border-b border-ink/8">
+
+            <!-- Type + Rémunération -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[10px] uppercase tracking-[0.12em] text-ink/35 font-medium block mb-2">Type</label>
+                    <div class="relative">
+                        <select name="type" x-model="type"
+                                class="w-full appearance-none bg-transparent border-b border-ink/20
+                                       text-sm text-ink pb-1 pr-6 focus:outline-none focus:border-ink
+                                       cursor-pointer transition-colors">
+                            <option value="">Tous</option>
+                            <option value="offer"  x-text="typeLabels.offer"  x-cloak></option>
+                            <option value="demand" x-text="typeLabels.demand" x-cloak></option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-0 top-1 text-[10px] text-ink/30 pointer-events-none"></i>
+                    </div>
                 </div>
-            </label>
-
-            {# Below div only used to remove solve flicker issue#}
-            <div x-data="{ready: false}",
-                 x-init="$nextTick(() => ready = true)"
-                 x-show="!ready" >
-                <button
-                        x-disclosure:button
-                        type="button"
-                        class="group flex w-full items-center justify-between text-left font-medium text-gray-800 px-1 cursor-pointer">
-                    <span class="flex-1">Plus de filtres</span>
-
-                    <!-- Heroicons mini chevron-down -->
-                    <i class="fa-solid fa-chevron-down"></i>
-                </button>
-            </div>
-
-            <div
-                    class="mx-auto w-full grow"
-                    x-data="{
-            ready: false,
-            section: '',
-                type: '',
-                category: '',
-                get typeLabels() {
-                switch (this.section) {
-                case 'artists_groups':
-                return { offer: 'Je recrute', demand: 'Je postule' };
-                case 'courses_training':
-                return { offer: 'Je propose', demand: 'Je recherche' };
-                case 'calls_events':
-                return { offer: 'Je programme', demand: 'Je me produis' };
-                case 'services_equipment':
-                return { offer: 'Je propose', demand: 'Je recherche' };
-                default:
-                return { offer: 'Offre', demand: 'Demande' };
-                }
-                },
-                get categoryLabels() {
-                if (['artists_groups', 'calls_events'].includes(this.section)) {
-                return { unpaid: 'Bénévole', paid: 'Rémunéré' };
-                } else {
-                return { unpaid: 'Gratuit', paid: 'Payant' };
-                }
-                }
-                }"
-                    x-init="$nextTick(() => ready = true)"
-                    x-cloak
-                    x-show="ready"
-            >
-                <!-- Disclosure -->
-                <div x-disclosure class="block border-b border-gray-800/10 pb-4 pt-4 first:pt-0 last:border-b-0 last:pb-0">
-                    <!-- Disclosure Button -->
-                    <button
-                            x-disclosure:button
-                            type="button"
-                            class="group flex w-full items-center justify-between text-left font-medium text-gray-800 px-1 cursor-pointer">
-                        <span class="flex-1">Plus de filtres</span>
-
-                        <!-- Heroicons mini chevron-up -->
-                        <i x-show="$disclosure.isOpen" class="fa-solid fa-chevron-up"></i>
-
-                        <!-- Heroicons mini chevron-down -->
-                        <i x-show="!$disclosure.isOpen" class="fa-solid fa-chevron-down"></i>
-                    </button>
-
-                    <!-- Disclosure Panel -->
-                    <div x-disclosure:panel x-collapse>
-                        <div class="grid grid-cols-1 md:grid-cols-3 mt-2 gap-2">
-                            <div class="">
-                                <label class="fieldset-label" for="id_section">Rubrique</label>
-                                <div class="flex">
-                                    <select class="select grow" name="section" id="id_section" x-model="section">
-                                        <option value="">---</option>
-                                        <option value="artists_groups">Comédiens & Troupes</option>
-                                        <option value="courses_training">Cours & Formations</option>
-                                        <option value="calls_events">Appels & Événements</option>
-                                        <option value="services_equipment">Services & Matériel</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="block sm:hidden" role="region" aria-live="polite" aria-atomic="true">
-                                <template x-if="section === 'artists_groups'">
-                                    <div
-                                            class="rounded bg-base-100 p-2"
-                                            tabindex="0"
-                                    >
-                                        <h3 class="font-semibold text-lg">🎭 Comédiens & Troupes</h3>
-                                        <p>
-                                            Offres et recherches de rôles, auditions, troupes cherchant des comédien·nes, comédien·nes cherchant une troupe, projets de création collective, collaborations artistiques.
-                                        </p>
-                                    </div>
-                                </template>
-
-                                <template x-if="section === 'courses_training'">
-                                    <div
-                                            class="rounded bg-base-100 p-2"
-                                            tabindex="0"
-                                    >
-                                        <h3 class="font-semibold text-lg">🎓 Cours & Formations</h3>
-                                        <p>
-                                            Annonces de cours de théâtre, stages, ateliers, formations professionnelles ou amateurs, coaching, interventions pédagogiques.
-                                        </p>
-                                    </div>
-                                </template>
-
-                                <template x-if="section === 'calls_events'">
-                                    <div
-                                            class="rounded bg-base-100 p-2"
-                                            tabindex="0"
-                                    >
-                                        <h3 class="font-semibold text-lg">📣 Appels & Événements</h3>
-                                        <p>
-                                            Résidences artistiques, appels à projets, festivals, représentations, événements associatifs ou culturels, collaborations ponctuelles.
-                                        </p>
-                                    </div>
-                                </template>
-
-                                <template x-if="section === 'services_equipment'">
-                                    <div
-                                            class="rounded bg-base-100 p-2"
-                                            tabindex="0"
-                                    >
-                                        <h3 class="font-semibold text-lg">🛠️ Services & Matériel</h3>
-                                        <p>
-                                            Locations de salles de répétition ou de spectacle, prêt ou vente de costumes, décors, accessoires, services techniques, captations, mise en scène, etc.
-                                        </p>
-                                    </div>
-                                </template>
-                            </div>
-
-                            <div class="">
-                                <label class="fieldset-label" for="id_type">Type d'annonce</label>
-                                <div class="flex">
-                                    <select class="select grow" name="type" id="id_type" x-model="type">
-                                        <option value="">---</option>
-                                        <option value="offer" x-text="typeLabels.offer" x-cloak></option>
-                                        <option value="demand" x-text="typeLabels.demand" x-cloak></option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="">
-                                <label class="fieldset-label" for="id_category">Rémunération</label>
-                                <div class="flex">
-                                    <select class="select grow" name="category" id="id_category" x-model="category">
-                                        <option value="">---</option>
-                                        <option value="unpaid" x-text="categoryLabels.unpaid" x-cloak></option>
-                                        <option value="paid" x-text="categoryLabels.paid" x-cloak></option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-2 hidden sm:block" role="region" aria-live="polite" aria-atomic="true">
-                            <template x-if="section === 'artists_groups'">
-                                <div
-                                        class="rounded bg-base-100 p-2"
-                                        tabindex="0"
-                                >
-                                    <h3 class="font-semibold text-lg">🎭 Comédiens & Troupes</h3>
-                                    <p>
-                                        Offres et recherches de rôles, auditions, troupes cherchant des comédien·nes, comédien·nes cherchant une troupe, projets de création collective, collaborations artistiques.
-                                    </p>
-                                </div>
-                            </template>
-
-                            <template x-if="section === 'courses_training'">
-                                <div
-                                        class="rounded bg-base-100 p-2"
-                                        tabindex="0"
-                                >
-                                    <h3 class="font-semibold text-lg">🎓 Cours & Formations</h3>
-                                    <p>
-                                        Annonces de cours de théâtre, stages, ateliers, formations professionnelles ou amateurs, coaching, interventions pédagogiques.
-                                    </p>
-                                </div>
-                            </template>
-
-                            <template x-if="section === 'calls_events'">
-                                <div
-                                        class="rounded bg-base-100 p-2"
-                                        tabindex="0"
-                                >
-                                    <h3 class="font-semibold text-lg">📣 Appels & Événements</h3>
-                                    <p>
-                                        Résidences artistiques, appels à projets, festivals, représentations, événements associatifs ou culturels, collaborations ponctuelles.
-                                    </p>
-                                </div>
-                            </template>
-
-                            <template x-if="section === 'services_equipment'">
-                                <div
-                                        class="rounded bg-base-100 p-2"
-                                        tabindex="0"
-                                >
-                                    <h3 class="font-semibold text-lg">🛠️ Services & Matériel</h3>
-                                    <p>
-                                        Locations de salles de répétition ou de spectacle, prêt ou vente de costumes, décors, accessoires, services techniques, captations, mise en scène, etc.
-                                    </p>
-                                </div>
-                            </template>
-                        </div>
+                <div>
+                    <label class="text-[10px] uppercase tracking-[0.12em] text-ink/35 font-medium block mb-2">Rémunération</label>
+                    <div class="relative">
+                        <select name="category" x-model="category"
+                                class="w-full appearance-none bg-transparent border-b border-ink/20
+                                       text-sm text-ink pb-1 pr-6 focus:outline-none focus:border-ink
+                                       cursor-pointer transition-colors">
+                            <option value="">Toutes</option>
+                            <option value="unpaid" x-text="categoryLabels.unpaid" x-cloak></option>
+                            <option value="paid"   x-text="categoryLabels.paid"   x-cloak></option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-0 top-1 text-[10px] text-ink/30 pointer-events-none"></i>
                     </div>
                 </div>
             </div>
 
-        </fieldset>
-    </form>
+            <!-- Genre -->
+            <div>
+                <p class="text-[10px] uppercase tracking-[0.12em] text-ink/35 font-medium mb-2">
+                    Genre
+                    <span class="normal-case tracking-normal font-normal text-ink/25 ml-1">— inclut les annonces sans genre précisé</span>
+                </p>
+                <!-- hidden input pour soumettre la valeur vide si besoin -->
+                <input type="hidden" name="gender" :value="gender">
+                <div class="flex flex-wrap gap-2">
+                    {% for val, label in form_gender_choices %}
+                    <label class="cursor-pointer">
+                        <input type="radio" name="gender" value="{{ val }}" x-model="gender" class="sr-only">
+                        <span class="block px-2.5 py-1 text-[10px] uppercase tracking-[0.08em] font-medium border transition-colors"
+                              :class="gender === '{{ val }}' ? 'border-ink text-ink' : 'border-ink/15 text-ink/40 hover:border-ink/35 hover:text-ink/65'">
+                            {{ label }}
+                        </span>
+                    </label>
+                    {% empty %}
+                    <label class="cursor-pointer">
+                        <input type="radio" name="gender" value="male" x-model="gender" class="sr-only">
+                        <span class="block px-2.5 py-1 text-[10px] uppercase tracking-[0.08em] font-medium border transition-colors"
+                              :class="gender === 'male' ? 'border-ink text-ink' : 'border-ink/15 text-ink/40 hover:border-ink/35 hover:text-ink/65'">Homme</span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="gender" value="female" x-model="gender" class="sr-only">
+                        <span class="block px-2.5 py-1 text-[10px] uppercase tracking-[0.08em] font-medium border transition-colors"
+                              :class="gender === 'female' ? 'border-ink text-ink' : 'border-ink/15 text-ink/40 hover:border-ink/35 hover:text-ink/65'">Femme</span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="gender" value="other" x-model="gender" class="sr-only">
+                        <span class="block px-2.5 py-1 text-[10px] uppercase tracking-[0.08em] font-medium border transition-colors"
+                              :class="gender === 'other' ? 'border-ink text-ink' : 'border-ink/15 text-ink/40 hover:border-ink/35 hover:text-ink/65'">Non-binaire</span>
+                    </label>
+                    {% endfor %}
+                    <label class="cursor-pointer" x-show="gender">
+                        <input type="radio" name="gender" value="" x-model="gender" class="sr-only">
+                        <span @click="gender = ''"
+                              class="block px-2.5 py-1 text-[10px] uppercase tracking-[0.08em] font-medium border border-ink/15
+                                     text-ink/30 hover:border-red-300 hover:text-red-400 transition-colors cursor-pointer">
+                            Effacer
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Tranche d'âge -->
+            <div>
+                <p class="text-[10px] uppercase tracking-[0.12em] text-ink/35 font-medium mb-2">
+                    Tranche d'âge
+                    <span class="normal-case tracking-normal font-normal text-ink/25 ml-1">— inclut les annonces sans âge précisé</span>
+                </p>
+                <div class="flex items-center gap-3">
+                    <div class="relative flex-1">
+                        <input type="number" name="age_min" x-model="ageMin" min="0" max="99"
+                               placeholder="De"
+                               class="w-full bg-transparent border-b border-ink/20 text-sm text-ink pb-1
+                                      focus:outline-none focus:border-ink transition-colors placeholder:text-ink/25">
+                    </div>
+                    <span class="text-ink/20 text-sm shrink-0">—</span>
+                    <div class="relative flex-1">
+                        <input type="number" name="age_max" x-model="ageMax" min="0" max="99"
+                               placeholder="à"
+                               class="w-full bg-transparent border-b border-ink/20 text-sm text-ink pb-1
+                                      focus:outline-none focus:border-ink transition-colors placeholder:text-ink/25">
+                    </div>
+                    <span class="text-[10px] text-ink/25 shrink-0">ans</span>
+                    <button type="button" x-show="ageMin || ageMax" @click="ageMin = ''; ageMax = ''; $dispatch('change')"
+                            class="text-[9px] text-ink/30 hover:text-red-400 transition-colors shrink-0">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── Chips filtres actifs ── -->
+    <div x-show="hasFilters" x-cloak class="flex flex-wrap gap-2 pt-3">
+        <template x-if="type">
+            <button type="button" @click="type = ''"
+                    class="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.10em]
+                           border border-ink/20 text-ink/55 hover:border-red-400/60 hover:text-red-500
+                           px-2.5 py-1 transition-colors">
+                <span x-text="type === 'offer' ? typeLabels.offer : typeLabels.demand"></span>
+                <i class="fa-solid fa-xmark text-[9px]"></i>
+            </button>
+        </template>
+        <template x-if="category">
+            <button type="button" @click="category = ''"
+                    class="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.10em]
+                           border border-ink/20 text-ink/55 hover:border-red-400/60 hover:text-red-500
+                           px-2.5 py-1 transition-colors">
+                <span x-text="category === 'paid' ? categoryLabels.paid : categoryLabels.unpaid"></span>
+                <i class="fa-solid fa-xmark text-[9px]"></i>
+            </button>
+        </template>
+        <template x-if="gender">
+            <button type="button" @click="gender = ''"
+                    class="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.10em]
+                           border border-ink/20 text-ink/55 hover:border-red-400/60 hover:text-red-500
+                           px-2.5 py-1 transition-colors">
+                <span x-text="genderLabel"></span>
+                <i class="fa-solid fa-xmark text-[9px]"></i>
+            </button>
+        </template>
+        <template x-if="ageMin || ageMax">
+            <button type="button" @click="ageMin = ''; ageMax = ''; $dispatch('change')"
+                    class="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.10em]
+                           border border-ink/20 text-ink/55 hover:border-red-400/60 hover:text-red-500
+                           px-2.5 py-1 transition-colors">
+                <span>
+                    <template x-if="ageMin && ageMax"><span x-text="ageMin + '–' + ageMax + ' ans'"></span></template>
+                    <template x-if="ageMin && !ageMax"><span x-text="ageMin + '+ ans'"></span></template>
+                    <template x-if="!ageMin && ageMax"><span x-text="'–' + ageMax + ' ans'"></span></template>
+                </span>
+                <i class="fa-solid fa-xmark text-[9px]"></i>
+            </button>
+        </template>
+        <template x-if="section || type || category || gender || ageMin || ageMax || freshness">
+            <button type="button"
+                    @click="section=''; type=''; category=''; gender=''; ageMin=''; ageMax=''; freshness=''; searchQuery=''; $dispatch('change')"
+                    class="text-[10px] uppercase tracking-[0.10em] text-ink/25 hover:text-ink/50 transition-colors px-1 py-1">
+                Tout effacer
+            </button>
+        </template>
+    </div>
+
+</form>
 </div>
 
 <script>
-    document.body.addEventListener('htmx:configRequest', function(evt) {
+    document.body.addEventListener('htmx:configRequest', function () {
         document.getElementById('loading-indicator')?.classList.remove('hidden');
     });
-
-    document.body.addEventListener('htmx:afterRequest', function(evt) {
+    document.body.addEventListener('htmx:afterRequest', function () {
         document.getElementById('loading-indicator')?.classList.add('hidden');
     });
 </script>

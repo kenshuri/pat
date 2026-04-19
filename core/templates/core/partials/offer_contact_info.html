@@ -1,33 +1,50 @@
-<div class="flex flex-col p-2 border rounded gap-2 bg-base-200">
-    <div class="font-semibold">Informations de contact</div>
+<div class="border border-ink/10 p-5 space-y-3">
+    <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-muted mb-4">
+        Informations de contact
+    </p>
+
     {% if offer.contact_name %}
-    <div class="flex gap-2 items-center">
-        <i class="fa-solid fa-user"></i> {{offer.contact_name}}
+    <div class="flex items-center gap-3">
+        <i class="fa-solid fa-user text-[11px] text-ink-muted w-4 text-center shrink-0"></i>
+        <span class="text-sm text-ink">{{ offer.contact_name }}</span>
     </div>
     {% endif %}
+
     {% if offer.contact_email %}
-    <div class="flex gap-2 items-center">
-        <i class="fa-solid fa-envelope"></i> <a class="link" href="mailto:{{offer.contact_email}}">{{offer.contact_email}}</a>
+    <div class="flex items-center gap-3">
+        <i class="fa-solid fa-envelope text-[11px] text-ink-muted w-4 text-center shrink-0"></i>
+        <a class="text-sm text-ink underline underline-offset-2 hover:text-ink-soft transition-colors"
+           href="mailto:{{ offer.contact_email }}">{{ offer.contact_email }}</a>
     </div>
     {% endif %}
+
     {% if offer.author and offer.show_author_mail %}
-    <div class="flex gap-2 items-center">
-        <i class="fa-solid fa-envelope"></i> <a class="link" href="mailto:{{offer.author.email}}">{{offer.author.email}}</a>
+    <div class="flex items-center gap-3">
+        <i class="fa-solid fa-envelope text-[11px] text-ink-muted w-4 text-center shrink-0"></i>
+        <a class="text-sm text-ink underline underline-offset-2 hover:text-ink-soft transition-colors"
+           href="mailto:{{ offer.author.email }}">{{ offer.author.email }}</a>
     </div>
     {% endif %}
+
     {% if offer.contact_phone %}
-    <div class="flex gap-2 items-center">
-        <i class="fa-solid fa-phone"></i> {{offer.contact_phone}}
+    <div class="flex items-center gap-3">
+        <i class="fa-solid fa-phone text-[11px] text-ink-muted w-4 text-center shrink-0"></i>
+        <span class="text-sm text-ink">{{ offer.contact_phone }}</span>
     </div>
     {% endif %}
+
     {% if offer.contact_website %}
-    <div class="flex gap-2 items-center">
-        <i class="fa-solid fa-link"></i> <a class="link" href="{{offer.contact_website}}">{{offer.contact_website}}</a>
+    <div class="flex items-center gap-3">
+        <i class="fa-solid fa-link text-[11px] text-ink-muted w-4 text-center shrink-0"></i>
+        <a class="text-sm text-ink underline underline-offset-2 hover:text-ink-soft transition-colors break-all"
+           href="{{ offer.contact_website }}" target="_blank" rel="noopener">{{ offer.contact_website }}</a>
     </div>
     {% endif %}
+
     {% if offer.contact_details %}
-    <div class="flex gap-2 items-center">
-        <i class="fa-solid fa-info"></i> {{offer.contact_details}}
+    <div class="flex items-start gap-3 pt-1 border-t border-ink/8 mt-3">
+        <i class="fa-solid fa-circle-info text-[11px] text-ink-muted w-4 text-center shrink-0 mt-0.5"></i>
+        <p class="text-sm text-ink-soft leading-relaxed">{{ offer.contact_details }}</p>
     </div>
     {% endif %}
 </div>

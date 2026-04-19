@@ -1,177 +1,338 @@
 {% load static %}
+<link rel="stylesheet" href="https://unpkg.com/trix@2.1.10/dist/trix.css">
+<script type="text/javascript" src="https://unpkg.com/trix@2.1.10/dist/trix.umd.min.js"></script>
+<style>
+    trix-editor.pat-editor {
+        min-height: 180px;
+        border: 1px solid oklch(10% 0.008 260 / 0.20);
+        border-top: none;
+        background: oklch(100% 0 0);
+        padding: 0.625rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.7;
+        color: oklch(10% 0.008 260);
+        outline: none;
+        border-radius: 0;
+    }
+    trix-editor.pat-editor:focus { border-color: oklch(10% 0.008 260); }
+    trix-toolbar {
+        border: 1px solid oklch(10% 0.008 260 / 0.20);
+        border-bottom: none;
+        background: oklch(96.5% 0.002 240);
+        padding: 0.3rem 0.5rem;
+    }
+    trix-toolbar .trix-button-group { border: none; margin-bottom: 0; }
+    trix-toolbar .trix-button {
+        border: none; background: transparent;
+        padding: 0.25rem 0.4rem; font-size: 0.75rem;
+        color: oklch(35% 0.006 260); border-radius: 2px;
+    }
+    trix-toolbar .trix-button:hover       { background: oklch(10% 0.008 260 / 0.08); }
+    trix-toolbar .trix-button.trix-active { background: oklch(10% 0.008 260 / 0.12); color: oklch(10% 0.008 260); }
+    trix-toolbar .trix-button-group--file-tools { display: none; }
+    trix-editor ul { list-style-type: disc;    padding-left: 1.4rem; }
+    trix-editor ol { list-style-type: decimal; padding-left: 1.4rem; }
+</style>
 
-<form method="post" enctype="multipart/form-data" class="space-y-6">
-    {% csrf_token %}
-    <fieldset class="fieldset bg-base-200 border border-base-300 p-4 rounded-box">
-        <legend class="fieldset-legend">Ajouter une pièce</legend>
+<form method="post" enctype="multipart/form-data"
+      x-data="{
+          ready: false,
+          submitting: false,
+          genre: '{{ form.instance.genre|default:'theatre' }}'
+      }"
+      x-init="$nextTick(() => ready = true)"
+      x-cloak x-show="ready"
+      @submit="submitting = true">
+{% csrf_token %}
 
-        <!-- 🔴 Bloc d'erreurs globales -->
-        {% if form.errors %}
-            <div class="alert alert-error shadow-sm mb-4 flex flex-col items-start justify-start">
-                <span class="font-semibold">Merci de corriger les erreurs suivantes :</span>
-                <ul class="list-disc list-inside space-y-1">
-                    {# erreurs non liées à un champ #}
-                    {% for error in form.non_field_errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                    {# erreurs liées aux champs #}
-                    {% for field in form %}
-                        {% for error in field.errors %}
-                            <li><strong>{{ field.label }} :</strong> {{ error }}</li>
-                        {% endfor %}
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
+<div class="space-y-8">
 
-        <div class="flex flex-col gap-4">
-            <div class="form-control">
-                <label for="id_title" class="label">
-                    <span class="label-text">Titre de la pièce*</span>
-                </label>
-                {{ form.title }}
-            </div>
+    <!-- ── Titre ── -->
+    <div class="space-y-1.5">
+        <label for="id_title" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">
+            Titre *
+        </label>
+        <input type="text" id="id_title" name="title" maxlength="200" required
+               value="{{ form.instance.title }}"
+               placeholder="Ex. : Le Misanthrope, Phèdre, Notre classe…"
+               class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
+                      focus:outline-none focus:border-ink transition-colors bg-surface">
+        {% for error in form.title.errors %}
+        <p class="text-red-500 text-xs">{{ error }}</p>
+        {% endfor %}
+    </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="form-control">
-                    <label for="id_author" class="label">
-                        <span class="label-text">Auteur</span>
-                    </label>
-                    {{ form.author }}
+    <!-- ── Genre ── -->
+    <div>
+        <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted mb-3">Genre *</p>
+        <div class="flex overflow-x-auto scroll-no-bar -mx-1 px-1 border-b border-ink/10">
+            {% for value, label in form.fields.genre.choices %}
+            <label class="shrink-0 relative cursor-pointer">
+                <input type="radio" name="genre" value="{{ value }}" x-model="genre" class="sr-only"
+                       {% if form.instance.genre == value %}checked{% elif not form.instance.genre and value == 'theatre' %}checked{% endif %}>
+                <span class="block px-4 py-3 text-[11px] uppercase tracking-[0.10em] font-medium transition-colors whitespace-nowrap border-b-2 -mb-px"
+                      :class="genre === '{{ value }}'
+                          ? 'text-ink border-ink'
+                          : 'text-ink/40 border-transparent hover:text-ink/70 hover:border-ink/25'">
+                    {{ label }}
+                </span>
+            </label>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ── Auteur & Compagnie ── -->
+    <div class="grid sm:grid-cols-2 gap-4">
+        <div class="space-y-1.5">
+            <label for="id_author" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Auteur·e</label>
+            <input type="text" id="id_author" name="author" maxlength="200"
+                   value="{{ form.instance.author|default:'' }}"
+                   placeholder="Molière, Racine…"
+                   class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
+                          focus:outline-none focus:border-ink transition-colors bg-surface">
+        </div>
+        <div class="space-y-1.5">
+            <label for="id_company" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Compagnie</label>
+            <input type="text" id="id_company" name="company" maxlength="200"
+                   value="{{ form.instance.company|default:'' }}"
+                   placeholder="Nom de la compagnie"
+                   class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
+                          focus:outline-none focus:border-ink transition-colors bg-surface">
+        </div>
+    </div>
+
+    <!-- ── Description ── -->
+    <div class="space-y-1.5">
+        <label for="id_description_trix" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Synopsis</label>
+        <input id="id_description_trix" type="hidden" name="description"
+               value="{{ form.instance.description }}">
+        <trix-editor input="id_description_trix"
+                     class="trix-content pat-editor"
+                     placeholder="Décris la pièce : thème, intentions, synopsis…"></trix-editor>
+    </div>
+
+    <!-- ── Détails ── -->
+    <div x-data="{ open: false }" class="border-t border-ink/8 pt-4">
+        <button type="button" @click="open = !open"
+                class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted hover:text-ink transition-colors w-full text-left">
+            <i class="fa-solid fa-circle-info text-[9px]"></i>
+            Détails (durée, année, site web)
+            <i class="fa-solid fa-chevron-down text-[9px] ml-auto transition-transform" :class="open ? 'rotate-180' : ''"></i>
+        </button>
+        <div x-show="open" x-collapse class="pt-4 space-y-4">
+            <div class="grid sm:grid-cols-2 gap-4">
+                <div x-data="{
+                    dh: 0, dm: 0,
+                    init() {
+                        const raw = '{% if form.instance.duration %}{{ form.instance.duration }}{% endif %}';
+                        if (raw) {
+                            const parts = raw.split(':');
+                            this.dh = parseInt(parts[0]) || 0;
+                            this.dm = parseInt(parts[1]) || 0;
+                        }
+                    },
+                    get combined() {
+                        if (this.dh === 0 && this.dm === 0) return '';
+                        return String(this.dh).padStart(2,'0') + ':' + String(this.dm).padStart(2,'0') + ':00';
+                    }
+                }">
+                    <label class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted mb-1.5">Durée</label>
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <input type="number" min="0" max="12" x-model.number="dh"
+                                   class="w-16 border border-ink/20 px-3 py-2.5 text-sm text-ink text-center
+                                          focus:outline-none focus:border-ink transition-colors bg-surface">
+                            <span class="text-sm text-ink-muted">h</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="number" min="0" max="59" x-model.number="dm"
+                                   class="w-16 border border-ink/20 px-3 py-2.5 text-sm text-ink text-center
+                                          focus:outline-none focus:border-ink transition-colors bg-surface">
+                            <span class="text-sm text-ink-muted">min</span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="duration" :value="combined">
                 </div>
-
-                <div class="form-control">
-                    <label for="id_company" class="label">
-                        <span class="label-text">Compagnie</span>
-                    </label>
-                    {{ form.company }}
+                <div class="space-y-1.5">
+                    <label for="id_year_created" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Année de création</label>
+                    <input type="number" id="id_year_created" name="year_created" min="1800" max="2100"
+                           value="{{ form.instance.year_created|default:'' }}"
+                           placeholder="2024"
+                           class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
+                                  focus:outline-none focus:border-ink transition-colors bg-surface">
                 </div>
             </div>
-
-            <div class="form-control">
-                <label for="id_genre" class="label">
-                    <span class="label-text">Genre*</span>
-                </label>
-                {{ form.genre }}
-            </div>
-
-            <div class="form-control">
-                <label for="id_duration" class="label">
-                    <span class="label-text">Durée (hh:mm)</span>
-                </label>
-                {{ form.duration }}
-            </div>
-
-            <div class="form-control">
-                <label for="id_year_created" class="label">
-                    <span class="label-text">Année de création</span>
-                </label>
-                {{ form.year_created }}
-            </div>
-
-            <div class="form-control">
-                <label for="id_website" class="label">
-                    <span class="label-text">Site web</span>
-                </label>
-                {{ form.website }}
-            </div>
-
-            <div class="form-control">
-                <label for="id_poster" class="label">
-                    <span class="label-text">Affiche (max 2 Mo)</span>
-                </label>
-
-                {# Aperçu si on édite et qu'il y a déjà une affiche #}
-                {% if play and play.pk and play.poster %}
-                    <figure class="mb-2">
-                        <img src="{{ play.poster.url }}" alt="Affiche actuelle" class="rounded shadow w-40 object-cover">
-                    </figure>
-                    <label class="label cursor-pointer gap-2">
-                        <input type="checkbox" name="poster-clear" class="checkbox checkbox-sm">
-                        <span class="label-text">Supprimer l’affiche existante</span>
-                    </label>
-                {% endif %}
-
-                <input
-                        type="file"
-                        name="poster"
-                        id="id_poster"
-                        accept="image/*"
-                        class="file-input file-input-bordered w-full"
-                />
-                {% if form.poster.errors %}
-                    <p class="text-error text-sm mt-1">{{ form.poster.errors.0 }}</p>
-                {% endif %}
-            </div>
-
-            <div class="form-control">
-                <label for="id_description" class="label">
-                    <span class="label-text">Description</span>
-                </label>
-                {{ form.description }}
+            <div class="space-y-1.5">
+                <label for="id_website" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Site web</label>
+                <input type="url" id="id_website" name="website"
+                       value="{{ form.instance.website|default:'' }}"
+                       placeholder="https://macompagnie.fr"
+                       class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
+                              focus:outline-none focus:border-ink transition-colors bg-surface">
             </div>
         </div>
+    </div>
 
-        {# === Distribution === #}
-        <div class="mt-6">
-            <h3 class="text-lg font-semibold mb-2">Distribution</h3>
-
-            {# Management form obligatoire pour formset #}
+    <!-- ── Distribution ── -->
+    <div x-data="{ open: {% if form.instance.pk %}true{% else %}false{% endif %} }" class="border-t border-ink/8 pt-4">
+        <button type="button" @click="open = !open"
+                class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted hover:text-ink transition-colors w-full text-left">
+            <i class="fa-solid fa-users text-[9px]"></i>
+            Distribution
+            <i class="fa-solid fa-chevron-down text-[9px] ml-auto transition-transform" :class="open ? 'rotate-180' : ''"></i>
+        </button>
+        <div x-show="open" x-collapse class="pt-4">
             {{ formset.management_form }}
-
-            {# erreurs globales du formset #}
             {% if formset.non_form_errors %}
-                <div class="alert alert-error mb-3">
-                    <ul class="list-disc list-inside">
-                        {% for e in formset.non_form_errors %}<li>{{ e }}</li>{% endfor %}
-                    </ul>
-                </div>
+            <div class="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 mb-3">
+                {% for e in formset.non_form_errors %}<p>{{ e }}</p>{% endfor %}
+            </div>
             {% endif %}
 
             <div id="contributors-forms" class="space-y-3">
-                {# ré-affiche les lignes en cas d’erreurs/redisplay #}
                 {% for cform in formset.forms %}
                     {% include "shows/partials/contributor_row.html" with form=cform %}
                 {% endfor %}
             </div>
 
-            {# PROTOTYPE caché basé sur empty_form (contient __prefix__) #}
             <template id="contributor-prototype">
                 {% include "shows/partials/contributor_row.html" with form=formset.empty_form %}
             </template>
 
-            <div class="mt-3">
-                <button type="button" class="btn btn-outline btn-sm" onclick="addContributor()">
-                    ➕ Ajouter un membre
-                </button>
-            </div>
+            <button type="button" onclick="addContributor()"
+                    class="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-ink/20 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted hover:border-ink hover:text-ink transition-colors">
+                <i class="fa-solid fa-plus text-[9px]"></i> Ajouter un membre
+            </button>
         </div>
+    </div>
 
-        <button type="submit" class="btn btn-neutral btn-block mt-6">
-            {% if play and play.pk %}Enregistrer les modifications{% else %}Valider la création de la pièce{% endif %}
+    <!-- ── Photos ── -->
+    <div x-data="{ open: {% if form.instance.pk %}true{% else %}false{% endif %} }" class="border-t border-ink/8 pt-4">
+        <button type="button" @click="open = !open"
+                class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted hover:text-ink transition-colors w-full text-left">
+            <i class="fa-solid fa-image text-[9px]"></i>
+            Photos <span class="font-normal normal-case tracking-normal">(conseillées)</span>
+            <i class="fa-solid fa-chevron-down text-[9px] ml-auto transition-transform" :class="open ? 'rotate-180' : ''"></i>
         </button>
-    </fieldset>
+        <div x-show="open" x-collapse class="pt-4 space-y-6">
+
+            <!-- Affiche -->
+            <div>
+                <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted mb-1">Affiche</p>
+                <p class="text-xs text-ink-muted mb-3">L'affiche de la pièce — format portrait recommandé. Apparaît en sidebar sur la fiche.</p>
+                {% if form.instance.poster %}
+                <div class="flex items-start gap-4 mb-3">
+                    <img src="{{ form.instance.poster.url }}" alt="Affiche actuelle" class="h-28 object-cover">
+                    <label class="flex items-center gap-2 text-xs text-ink-muted cursor-pointer mt-1">
+                        <input type="checkbox" name="poster-clear" class="w-3.5 h-3.5 accent-red-500">
+                        Supprimer l'affiche
+                    </label>
+                </div>
+                {% endif %}
+                <input type="file" name="poster" accept="image/*"
+                       class="block w-full text-sm text-ink-soft border border-ink/20 cursor-pointer bg-surface
+                              file:mr-4 file:py-2 file:px-4 file:border-0 file:border-r file:border-ink/10
+                              file:text-[10px] file:font-bold file:uppercase file:tracking-[0.12em]
+                              file:bg-surface-2 file:text-ink-muted hover:file:bg-ink/5 file:cursor-pointer">
+                {% for error in form.poster.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
+            </div>
+
+            <!-- Photo de couverture -->
+            <div class="border-t border-ink/8 pt-4">
+                <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted mb-1">Photo de couverture</p>
+                <p class="text-xs text-ink-muted mb-3">Photo en format paysage, utilisée comme bandeau en haut de la fiche — ambiance de scène, répétitions…</p>
+                {% if form.instance.cover_image %}
+                <div class="flex items-start gap-4 mb-3">
+                    <img src="{{ form.instance.cover_image.url }}" alt="Couverture actuelle" class="h-20 object-cover">
+                    <label class="flex items-center gap-2 text-xs text-ink-muted cursor-pointer mt-1">
+                        <input type="checkbox" name="cover-clear" class="w-3.5 h-3.5 accent-red-500">
+                        Supprimer la couverture
+                    </label>
+                </div>
+                {% endif %}
+                <input type="file" name="cover_image" accept="image/*"
+                       class="block w-full text-sm text-ink-soft border border-ink/20 cursor-pointer bg-surface
+                              file:mr-4 file:py-2 file:px-4 file:border-0 file:border-r file:border-ink/10
+                              file:text-[10px] file:font-bold file:uppercase file:tracking-[0.12em]
+                              file:bg-surface-2 file:text-ink-muted hover:file:bg-ink/5 file:cursor-pointer">
+                {% for error in form.cover_image.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
+            </div>
+
+            <!-- Photos supplémentaires -->
+            <div class="border-t border-ink/8 pt-4">
+                <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted mb-1">Photos supplémentaires</p>
+                <p class="text-xs text-ink-muted mb-3">Vous pouvez sélectionner plusieurs fichiers à la fois.</p>
+                {% if form.instance.pk and form.instance.photos.exists %}
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                    {% for photo in form.instance.photos.all %}
+                    <div class="relative group">
+                        <img src="{{ photo.image.url }}" alt="" class="aspect-square object-cover w-full">
+                        <label class="absolute top-1 right-1 flex items-center gap-1.5 bg-white/90 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.08em] cursor-pointer hover:bg-red-50 transition-colors">
+                            <input type="checkbox" name="delete_photo_{{ photo.pk }}" class="w-3 h-3 accent-red-500">
+                            Supprimer
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <input type="file" name="extra_photos" accept="image/*" multiple
+                       class="block w-full text-sm text-ink-soft border border-ink/20 cursor-pointer bg-surface
+                              file:mr-4 file:py-2 file:px-4 file:border-0 file:border-r file:border-ink/10
+                              file:text-[10px] file:font-bold file:uppercase file:tracking-[0.12em]
+                              file:bg-surface-2 file:text-ink-muted hover:file:bg-ink/5 file:cursor-pointer">
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── Erreurs globales ── -->
+    {% if form.errors %}
+    <div class="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p class="font-semibold mb-1">Merci de corriger les erreurs suivantes :</p>
+        <ul class="list-disc list-inside space-y-1">
+            {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+            {% for field in form %}
+                {% for error in field.errors %}<li><strong>{{ field.label }} :</strong> {{ error }}</li>{% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- ── Soumettre ── -->
+    <div class="border-t border-ink/8 pt-6">
+        <button type="submit" :disabled="submitting"
+                class="w-full py-3 bg-ink text-white text-[11px] font-display font-bold uppercase tracking-[0.14em]
+                       hover:opacity-80 transition-opacity disabled:opacity-50">
+            <span x-show="!submitting" x-cloak>
+                {% if play_id == -1 %}Créer la pièce{% else %}Enregistrer les modifications{% endif %}
+            </span>
+            <span x-show="submitting" x-cloak class="inline-flex items-center gap-2 justify-center">
+                <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                </svg>
+                {% if play_id == -1 %}Création en cours…{% else %}Modification en cours…{% endif %}
+            </span>
+        </button>
+    </div>
+
+</div>
 </form>
-{# Script utilitaire #}
+
 <script>
-    function addContributor(){
+    function addContributor() {
         const container = document.getElementById('contributors-forms');
         const totalInput = document.getElementById('id_contributors-TOTAL_FORMS');
         let index = parseInt(totalInput.value || '0', 10);
-
-        // clone le prototype et remplace __prefix__ par l’index courant
         const tpl = document.getElementById('contributor-prototype').innerHTML;
         const html = tpl.replaceAll('__prefix__', index.toString());
-
         container.insertAdjacentHTML('beforeend', html);
         totalInput.value = (index + 1).toString();
     }
 
-    // suppression d’une ligne (gère DELETE s’il existe)
-    function removeContributor(btn){
+    function removeContributor(btn) {
         const row = btn.closest('[data-contributor-row]');
-        if(!row) return;
-
+        if (!row) return;
         const del = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
         if (del) {
             del.checked = true;
@@ -179,9 +340,5 @@
             return;
         }
         row.remove();
-
-        // NB: on ne décrémente pas TOTAL_FORMS quand on supprime une "nouvelle" ligne
-        // déjà ajoutée : ce n’est pas nécessaire si la ligne a été retirée avant submit,
-        // mais si tu veux être ultra strict, tu peux décrémenter ici.
     }
 </script>

@@ -7,8 +7,24 @@ from django.http import HttpResponseForbidden, HttpResponse
 from django.db import transaction
 from django.utils import timezone
 from datetime import datetime, time
-from .models import Play, Representation, PublicationCredit
+from .models import Play, PlayPhoto, Representation, PublicationCredit
 from .forms import RepresentationForm, PlayForm, ContributorFormSet, ContributorForm
+
+
+def _save_play_extra_photos(play, files):
+    existing_count = play.photos.count()
+    for i, file in enumerate(files):
+        photo = PlayPhoto(play=play, order=existing_count + i)
+        photo.save()
+        photo.image = file
+        photo.save(update_fields=['image'])
+
+
+def _delete_play_extra_photos(play, post_data):
+    for key in post_data:
+        if key.startswith('delete_photo_'):
+            pk = key.removeprefix('delete_photo_')
+            play.photos.filter(pk=pk).delete()
 
 
 def agenda(request):
@@ -224,25 +240,24 @@ def delete_representation(request, pk):
 @login_required
 def add_play(request):
     if request.method == "POST":
-        # instance Play "temp" pour binder le formset, on sauvegardera après
         play = Play(user=request.user)
         form = PlayForm(request.POST, request.FILES, instance=play)
         formset = ContributorFormSet(request.POST, prefix="contributors", instance=play)
 
         if form.is_valid() and formset.is_valid():
             with transaction.atomic():
-                play = form.save()  # déclenche ton save() -> poster compressé + nommage
+                play = form.save()
                 formset.instance = play
                 formset.save()
+            _save_play_extra_photos(play, request.FILES.getlist('extra_photos'))
             return redirect("shows:play_detail", pk=play.pk)
     else:
         form = PlayForm()
-        # instance vide juste pour initialiser le formset
         play = Play()
         formset = ContributorFormSet(prefix="contributors", instance=play)
 
     return render(request, "shows/add_play.html", {
-        "form": form, "formset": formset
+        "form": form, "formset": formset, "play_id": -1,
     })
 
 @login_required
@@ -273,23 +288,21 @@ def edit_play(request, pk):
         form = PlayForm(request.POST, request.FILES, instance=play)
         formset = ContributorFormSet(request.POST, prefix="contributors", instance=play)
 
-        # gestion explicite de la suppression d'affiche si on garde un input custom
-        poster_clear = request.POST.get("poster-clear") == "on"
-
         if form.is_valid() and formset.is_valid():
             with transaction.atomic():
                 play = form.save(commit=False)
-
-                if poster_clear:
-                    # supprime l'ancien fichier sans sauver tout de suite
-                    if play.poster:
-                        play.poster.delete(save=False)
-                    play.poster = None  # et remet le champ à vide
-
-                play.save()          # déclenche le save() avec pipeline image si nouveau fichier
+                if request.POST.get("poster-clear") == "on" and play.poster:
+                    play.poster.delete(save=False)
+                    play.poster = None
+                if request.POST.get("cover-clear") == "on" and play.cover_image:
+                    play.cover_image.delete(save=False)
+                    play.cover_image = None
+                play.save()
                 formset.instance = play
                 formset.save()
 
+            _delete_play_extra_photos(play, request.POST)
+            _save_play_extra_photos(play, request.FILES.getlist('extra_photos'))
             return redirect("shows:play_detail", pk=play.pk)
     else:
         form = PlayForm(instance=play)
@@ -299,6 +312,7 @@ def edit_play(request, pk):
         "form": form,
         "formset": formset,
         "play": play,
+        "play_id": play.pk,
     })
 
 

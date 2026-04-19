@@ -11,6 +11,55 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 
+
+def _play_poster_path(instance, filename):
+    env = getattr(settings, 'STORAGE_ENV', 'dev')
+    return f"{env}/posters/{instance.pk}/poster.webp"
+
+
+def _play_cover_path(instance, filename):
+    env = getattr(settings, 'STORAGE_ENV', 'dev')
+    return f"{env}/posters/{instance.pk}/cover.webp"
+
+
+def _play_photo_path(instance, filename):
+    env = getattr(settings, 'STORAGE_ENV', 'dev')
+    return f"{env}/posters/{instance.play_id}/photos/{instance.pk}.webp"
+
+
+def _process_image(source_field, target_name):
+    """Resize, EXIF-correct, encode as WebP and save back to the field."""
+    buffer = None
+    try:
+        img = Image.open(source_field)
+        img = ImageOps.exif_transpose(img)
+        if img.mode == "P":
+            img = img.convert("RGBA" if "transparency" in img.info else "RGB")
+        elif img.mode == "LA":
+            img = img.convert("RGBA")
+        elif img.mode not in ("RGB", "RGBA"):
+            img = img.convert("RGBA" if "transparency" in img.info else "RGB")
+        try:
+            resample = Image.Resampling.LANCZOS
+        except AttributeError:
+            resample = Image.LANCZOS
+        img.thumbnail((1200, 800), resample=resample)
+        buffer = BytesIO()
+        save_kwargs = {"format": "WEBP", "quality": 80, "method": 6, "lossless": False}
+        icc = img.info.get("icc_profile")
+        if icc:
+            save_kwargs["icc_profile"] = icc
+        img.save(buffer, **save_kwargs)
+        buffer.seek(0)
+        source_field.save(target_name, ContentFile(buffer.getvalue()), save=False)
+    finally:
+        if buffer is not None:
+            try:
+                buffer.close()
+            except Exception:
+                pass
+
+
 class Play(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='plays')
     title = models.CharField(_("Titre de la pièce"), max_length=200)
@@ -28,7 +77,8 @@ class Play(models.Model):
 
     genre = models.CharField(_("Genre"), max_length=20, choices=Genre.choices)
     duration = models.DurationField(_("Durée"), blank=True, null=True)
-    poster = models.ImageField(_("Affiche"), upload_to="posters/%Y/%m/", blank=True, null=True,)
+    poster = models.ImageField(_("Affiche"), upload_to=_play_poster_path, blank=True, null=True)
+    cover_image = models.ImageField(_("Photo de couverture"), upload_to=_play_cover_path, blank=True, null=True)
     website = models.URLField(_("Site web"), blank=True, null=True)
     year_created = models.PositiveIntegerField(_("Année de création"), blank=True, null=True)
 
@@ -42,117 +92,49 @@ class Play(models.Model):
     def __str__(self):
         return self.title
 
-    # --- helper pour fabriquer un nom unique "slug-genre-YYYY[-N].webp" ---
-    def _build_poster_name(self) -> str:
-        """
-        Construit un NOM DE FICHIER (sans répertoire) de la forme :
-        '<slug>-<genre>-<année>[-N].webp'
-
-        - Collision-safe via storage.exists() en testant le chemin complet.
-        - On retourne UNIQUEMENT le nom (sans répertoire) : Django préfixe avec upload_to.
-        """
-        directory = timezone.now().strftime("posters/%Y/%m").strip("/")  # ex: 'posters/2025/10'
-        base_slug = slugify(self.title)[:60] or "piece"
-        date_str = self.year_created or timezone.now().year
-        genre = self.genre or "other"
-        base = f"{base_slug}-{genre}-{date_str}"
-        ext = ".webp"
-
-        storage = self.poster.storage
-
-        candidate = f"{directory}/{base}{ext}"
-        file_name = f"{base}{ext}"
-
-        i = 1
-        while storage.exists(candidate):
-            candidate = f"{directory}/{base}-{i}{ext}"
-            file_name = f"{base}-{i}{ext}"
-            i += 1
-
-        return file_name
-
     def save(self, *args, **kwargs):
-        """
-        Pipeline image côté serveur (sortie WebP) :
+        pending_poster = self.poster and not getattr(self.poster, '_committed', True)
+        pending_cover = self.cover_image and not getattr(self.cover_image, '_committed', True)
+        is_new = self.pk is None
 
-        - Ouverture Pillow + correction orientation EXIF.
-        - Conservation de l’alpha si présent (WebP le supporte).
-        - Redimension proportionnel max 1200x800 (LANCZOS).
-        - Encodage WebP (quality=80, method=6 ; lossless=False).
-        - Attribution d’un nom collision-safe (.webp) via _build_poster_name().
-        - Enregistrement du fichier via FieldFile.save(save=False).
-        - super().save() pour persister l’instance.
+        if is_new and (pending_poster or pending_cover):
+            saved_poster = self.poster if pending_poster else None
+            saved_cover = self.cover_image if pending_cover else None
+            if pending_poster:
+                self.poster = None
+            if pending_cover:
+                self.cover_image = None
+            super().save(*args, **kwargs)
 
-        NOTE :
-        - Si vous utilisez save(update_fields=...), incluez "poster".
-        - Nécessite Pillow compilé avec support WebP (libwebp).
-        """
-        if self.poster:
-            buffer = None
-            try:
-                # 1) Ouvrir + corriger orientation EXIF (smartphones)
-                img = Image.open(self.poster)
-                img = ImageOps.exif_transpose(img)
+            update_fields = []
+            if saved_poster:
+                self.poster = saved_poster
+                _process_image(self.poster, "poster.webp")
+                update_fields.append('poster')
+            if saved_cover:
+                self.cover_image = saved_cover
+                _process_image(self.cover_image, "cover.webp")
+                update_fields.append('cover_image')
 
-                # 2) Normaliser le mode pour WebP
-                #    - Si transparence -> conserver alpha (RGBA/LA)
-                #    - Sinon, RGB suffit
-                if img.mode == "P":
-                    # Palette : si transparence attachée -> RGBA, sinon RGB
-                    if "transparency" in img.info:
-                        img = img.convert("RGBA")
-                    else:
-                        img = img.convert("RGB")
-                elif img.mode == "LA":
-                    img = img.convert("RGBA")
-                elif img.mode not in ("RGB", "RGBA"):
-                    # YCbCr, CMYK, etc. -> convertir
-                    img = img.convert("RGBA" if "transparency" in img.info else "RGB")
+            super(Play, self).save(update_fields=update_fields)
+        else:
+            if pending_poster:
+                _process_image(self.poster, "poster.webp")
+            if pending_cover:
+                _process_image(self.cover_image, "cover.webp")
+            super().save(*args, **kwargs)
 
-                # 3) Redimension proportionnel : tient DANS 1200x800, sans crop
-                try:
-                    resample = Image.Resampling.LANCZOS
-                except AttributeError:
-                    resample = Image.LANCZOS
-                img.thumbnail((1200, 800), resample=resample)
 
-                # 4) Encodage WebP dans un buffer mémoire
-                buffer = BytesIO()
+class PlayPhoto(models.Model):
+    play = models.ForeignKey(Play, on_delete=models.CASCADE, related_name='photos')
+    image = models.ImageField(upload_to=_play_photo_path)
+    order = models.PositiveSmallIntegerField(default=0)
 
-                # Paramètres WebP :
-                # - quality : 0–100 (80 = bon compromis)
-                # - method : 0–6 (6 = plus lent mais meilleur)
-                # - lossless : False (lossy) ; peut être mis à True pour graphiques plats
-                save_kwargs = {
-                    "format": "WEBP",
-                    "quality": 80,
-                    "method": 6,
-                    "lossless": False,
-                }
+    class Meta:
+        ordering = ['order', 'pk']
 
-                # Si profil ICC présent, on le transmet (si supporté)
-                icc = img.info.get("icc_profile")
-                if icc:
-                    save_kwargs["icc_profile"] = icc
-
-                img.save(buffer, **save_kwargs)
-                buffer.seek(0)
-
-                # 5) Nom de fichier collision-safe (sans dossier)
-                file_name = self._build_poster_name()
-
-                # 6) Enregistrer le fichier sur le storage (Django ajoutera upload_to)
-                self.poster.save(file_name, ContentFile(buffer.getvalue()), save=False)
-
-            finally:
-                if buffer is not None:
-                    try:
-                        buffer.close()
-                    except Exception:
-                        pass
-
-        # 7) Sauvegarde du modèle (avec champ poster peuplé du chemin final)
-        super().save(*args, **kwargs)
+    def __str__(self):
+        return f"Photo #{self.pk} — {self.play.title}"
 
 
 class Contributor(models.Model):
@@ -211,4 +193,3 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.credits_purchased} crédits - {self.amount} €"
-

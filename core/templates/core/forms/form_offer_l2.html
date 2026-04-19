@@ -8,8 +8,8 @@
         <div class="form-control">
             <label class="label" for="id_type">{{ form.type.label }}*</label>
             <select class="select select-bordered" name="type" id="id_type">
-                <option value="offer" {% if form.instance.type == 'offer' %}selected{% elif form.instance.type == 'demand' %} {% else %}selected{% endif %}>Troupe cherche comédien.ne</option>
-                <option value="demand" {% if form.instance.type == 'demand' %}selected{% endif %}>Comédien.ne cherche troupe</option>
+                <option value="offer" {% if form.instance.type == 'offer' %}selected{% elif form.instance.type == 'demand' %} {% else %}selected{% endif %}>Troupe cherche comédien·ne</option>
+                <option value="demand" {% if form.instance.type == 'demand' %}selected{% endif %}>Comédien·ne cherche troupe</option>
             </select>
         </div>
         <div class="form-control">

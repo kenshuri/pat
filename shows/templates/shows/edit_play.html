@@ -1,10 +1,23 @@
-{# templates/shows/edit_play.html #}
 {% extends "core/base.html" %}
+{% load static %}
 
-{% block title %}Modifier la pièce – {{ play.title }}{% endblock %}
+{% block title %}Modifier — {{ play.title }} — Petites Annonces Théâtre{% endblock %}
 
 {% block main %}
-  <div class="bg-base-100 rounded p-2 mt-2">
+
+<div class="relative overflow-hidden w-full bg-ink py-10 md:py-14">
+    <div class="absolute inset-0 pointer-events-none"
+         style="background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 12px);"></div>
+    <div class="relative max-w-screen-xl mx-auto px-4 md:px-8">
+        <h1 class="font-display font-bold text-white text-2xl sm:text-3xl uppercase tracking-[0.04em]">
+            Modifier la pièce
+        </h1>
+        <p class="text-white/40 text-sm mt-2">{{ play.title }}</p>
+    </div>
+</div>
+
+<div class="max-w-2xl mx-auto px-4 md:px-6 py-10">
     {% include 'shows/forms/play_form.html' %}
-  </div>
-{% endblock %}
+</div>
+
+{% endblock main %}

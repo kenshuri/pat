@@ -36,6 +36,8 @@ ALLOWED_HOSTS = ['pat-production-b5b4.up.railway.app',
                  'pat-dev.up.railway.app',
                  'petites-annonces-theatre.fr']
 
+SITE_URL = 'https://petites-annonces-theatre.fr'
+
 
 # Application definition
 
@@ -46,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'core',
     'accounts',
     'moderation',
@@ -95,6 +98,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'config.context_processors.site_url',
             ],
         },
     },
@@ -225,6 +229,7 @@ AWS_S3_REGION_NAME = os.getenv("SCW_S3_REGION", "fr-par")
 AWS_S3_ENDPOINT_URL = f"https://s3.{AWS_S3_REGION_NAME}.scw.cloud"
 
 AWS_S3_SIGNATURE_VERSION = "s3v4"
+STORAGE_ENV = os.getenv('STORAGE_ENV', 'dev')
 AWS_S3_ADDRESSING_STYLE = "virtual"
 
 # URLs publiques lisibles
@@ -234,13 +239,24 @@ AWS_S3_OBJECT_PARAMETERS = {
     "CacheControl": "public, max-age=31536000, immutable",
 }
 
-MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.scw.cloud/"
-
-STORAGES = {
-    "default": {      # <— requis en Django 5
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+if os.getenv("SCW_S3_KEY"):
+    MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.scw.cloud/"
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+else:
+    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_URL = "/media/"
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }

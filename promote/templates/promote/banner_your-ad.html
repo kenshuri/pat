@@ -1,33 +1,28 @@
 {% load static %}
+<a href="{% url 'announcement' %}" class="group flex items-stretch mb-6 bg-primary hover:opacity-90 transition-opacity">
 
-{% with bg_color="stone" %}
-    {% with text_color="white" %}
-        <a href="{% url 'promote:banner_click' promo.slug %}">
-            <div role="alert" class="alert bg-{{ bg_color }}-500 border-{{ bg_color }}-500 text-{{ text_color }}">
-                <div class="flex gap-3 items-center">
-                    <!-- Libellé publicité -->
-                    <span class="text-xs px-2 py-0.5 bg-gray-900/20 rounded ">
-                    Publicité
-                    </span>
-                    <!-- Vignette d’affiche -->
-                    <img
-                            src="{% static 'promote/poster_'|add:promo.slug|add:'.jpg' %}"
-                            alt="Affiche exemple : Votre pièce"
-                            class="w-12 h-16 object-cover rounded"
-                    />
-                </div>
-                <div>
-                    <div class="font-bold text-base">Votre pièce ici !<span class="text-sm  sm:text-base"></span></div>
-                    <div class="text-sm italic block lg:hidden">Faîtes-vous connaître...</div>
-                    <div class="text-sm italic hidden lg:block">Mettez votre spectacle en avant — cet espace est pour vous.</div>
-                </div>
-                <div>
-                    <button class="btn bg-{{ bg_color }}-200 border-{{ bg_color }}-200 text-{{ bg_color }}-600 hover:bg-{{ bg_color }}-400 hover:border-{{ bg_color }}-400  hover:text-{{ bg_color }}-900">
-                        <span class="hidden sm:block">En savoir plus</span>
-                        <span class="sm:hidden"><i class="fa-solid fa-chevron-right"></i></span>
-                    </button>
-                </div>
-            </div>
-        </a>
-    {% endwith %}
-{% endwith %}
+    <!-- Placeholder affiche -->
+    <div class="w-16 sm:w-20 shrink-0 flex items-center justify-center bg-white/6 border-r border-white/10"
+         style="min-height: 88px;">
+        <i class="fa-solid fa-masks-theater text-white/20 text-3xl"></i>
+    </div>
+
+    <!-- Texte -->
+    <div class="flex flex-1 items-center justify-between px-4 py-3 gap-3 min-w-0">
+        <div class="min-w-0">
+            <span class="font-display text-[9px] font-bold uppercase tracking-[0.20em] text-white/25 block mb-1.5">Publicité</span>
+            <p class="font-display font-bold text-white text-sm sm:text-base leading-tight uppercase tracking-wide">
+                Votre spectacle ici
+            </p>
+            <p class="text-white/45 text-xs mt-1 hidden sm:block">
+                Mettez votre pièce en avant auprès de toute la communauté.
+            </p>
+        </div>
+
+        <span class="shrink-0 font-display text-[10px] font-bold uppercase tracking-[0.12em]
+                     border border-white/20 text-white/40 group-hover:border-white/50 group-hover:text-white
+                     px-3 py-1.5 transition-colors whitespace-nowrap">
+            En savoir plus →
+        </span>
+    </div>
+</a>

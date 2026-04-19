@@ -1,29 +1,43 @@
 {% extends "core/base.html" %}
 
-{% block title %}Répertoire – Toutes les pièces{% endblock %}
+{% block title %}Répertoire — Toutes les pièces{% endblock %}
 
 {% block main %}
-    <div class="px-2 md:px-4">
 
-        <!-- Titre -->
-        <div class="text-center my-6">
-            <h1 class="text-2xl md:text-3xl font-bold flex items-center justify-center gap-2">
-                <i class="fa-solid fa-book text-primary"></i>
-                <span>Répertoire</span>
-            </h1>
-            <p class="text-base-content/70 mt-2">
-                Toutes les pièces ajoutées sur la plateforme, y compris celles sans représentations programmées.
-            </p>
-            <hr class="w-24 mx-auto border-t-2 border-primary/40 mt-4">
-        </div>
-
-
-        <!-- Résultats -->
-        <div id="id_plays">
-            <div class="mt-4 w-full" id="plays_table">
-                {% include "shows/partials/plays_table.html" %}
-            </div>
-        </div>
-
+<!-- Strip d'en-tête -->
+<div class="relative overflow-hidden w-full bg-ink py-10 md:py-14"
+     style="background: linear-gradient(150deg, oklch(17% .065 265) 0%, oklch(25% .085 252) 100%);">
+    <div class="absolute inset-0 pointer-events-none"
+         style="background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 12px);"></div>
+    <div class="relative max-w-screen-xl mx-auto px-4 md:px-8">
+        <span class="text-white/30 text-[10px] font-bold uppercase tracking-[0.20em] block mb-3">
+            🎭&nbsp; Pièces
+        </span>
+        <h1 class="font-display font-bold text-white text-2xl sm:text-3xl md:text-4xl uppercase tracking-[0.04em]">
+            Répertoire
+        </h1>
+        <p class="text-white/40 text-sm mt-2">
+            Toutes les pièces ajoutées sur la plateforme, y compris sans représentations programmées.
+        </p>
     </div>
+</div>
+
+<div class="max-w-screen-xl mx-auto px-4 md:px-8 py-8">
+
+    <div class="flex justify-end mb-6">
+        <a href="{% url 'shows:agenda' %}"
+           class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em]
+                  text-ink-muted hover:text-ink transition-colors">
+            ← Agenda (avec représentations)
+        </a>
+    </div>
+
+    <!-- Résultats -->
+    <div id="id_plays">
+        <div class="w-full" id="plays_table">
+            {% include "shows/partials/plays_table.html" %}
+        </div>
+    </div>
+
+</div>
 {% endblock main %}

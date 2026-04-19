@@ -1,0 +1,25 @@
+User-agent: *
+Disallow: /accounts/
+Disallow: /admin/
+Disallow: /add_offer
+Disallow: /update_offer/
+Disallow: /delete_offer/
+Disallow: /fill_offer/
+Disallow: /unfill_offer/
+Disallow: /offer_user/
+Disallow: /offer_search/
+Disallow: /offers/
+Disallow: /signup/
+Disallow: /shows/play/add/
+Disallow: /shows/plays/
+Disallow: /shows/agenda/user/
+
+Allow: /offer/
+Allow: /shows/play/
+Allow: /shows/agenda/
+Allow: /shows/repertoire/
+Allow: /about
+Allow: /tou
+Allow: /
+
+Sitemap: {{ SITE_URL }}/sitemap.xml

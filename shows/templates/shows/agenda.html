@@ -1,44 +1,54 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block title %}
-    Agenda des représentations de théâtre amateur en France
-{% endblock title %}
+{% block title %}Agenda — Représentations de théâtre amateur en France{% endblock %}
 
 {% block main %}
-    <div class="px-2 md:px-4">
 
-        <!-- Titre principal -->
-        <div class="text-center mt-6 mb-4">
-            <h1 class="text-2xl md:text-3xl font-bold flex items-center justify-center gap-2">
-                <i class="fa-solid fa-calendar-days text-primary"></i>
-                <span>Agenda</span>
-            </h1>
-            <p class="text-base-content/70 mt-2">
-                Découvrez les représentations de théâtre amateur à venir en France.
-            </p>
-            <p class="text-xs sm:text-sm text-base-content/70 mt-2">
-                Accéder à l'ensemble du <a href="{% url 'shows:repertoire' %}" class="link">répertoire ici</a>.
-            </p>
-            <hr class="w-24 mx-auto border-t-2 border-primary/40 mt-4">
-        </div>
-
-        <!-- Filtres HTMX -->
-        {% include "shows/components/search_agenda.html" %}
-
-        <!-- Ajouter une pièce -->
-        <div class="flex justify-end mb-4 mt-2 w-full">
-            <a href="{% url 'shows:add_play' %}" class="btn btn-primary btn-outline btn-sm md:btn-md w-full">
-                <i class="fa-solid fa-plus"></i> Ajouter une nouvelle pièce
+<!-- Strip d'en-tête -->
+<div class="relative overflow-hidden w-full bg-ink py-10 md:py-14"
+     style="background: linear-gradient(150deg, oklch(16% .115 12) 0%, oklch(26% .12 22) 100%);">
+    <div class="absolute inset-0 pointer-events-none"
+         style="background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 12px);"></div>
+    <div class="relative max-w-screen-xl mx-auto px-4 md:px-8">
+        <span class="text-white/30 text-[10px] font-bold uppercase tracking-[0.20em] block mb-3">
+            📣&nbsp; Spectacles
+        </span>
+        <h1 class="font-display font-bold text-white text-2xl sm:text-3xl md:text-4xl uppercase tracking-[0.04em]">
+            Agenda
+        </h1>
+        <p class="text-white/40 text-sm mt-2">
+            Représentations à venir en France —
+            <a href="{% url 'shows:repertoire' %}" class="underline underline-offset-2 hover:text-white/70 transition-colors">
+                voir le répertoire complet
             </a>
-        </div>
-
-        <!-- Résultats -->
-        <div id="id_plays">
-            <div class="mt-4 w-full" id="plays_table">
-                {% include "shows/partials/plays_table.html" %}
-            </div>
-        </div>
-
+        </p>
     </div>
+</div>
+
+<div class="max-w-screen-xl mx-auto px-4 md:px-8 py-8">
+
+    <!-- Filtres -->
+    <div class="mb-6">
+        {% include "shows/components/search_agenda.html" %}
+    </div>
+
+    <!-- Action -->
+    <div class="flex justify-end mb-6">
+        <a href="{% url 'shows:add_play' %}"
+           class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em]
+                  text-ink-muted hover:text-ink transition-colors">
+            <i class="fa-solid fa-plus text-[8px]"></i>
+            Ajouter une pièce
+        </a>
+    </div>
+
+    <!-- Résultats -->
+    <div id="id_plays">
+        <div class="w-full" id="plays_table">
+            {% include "shows/partials/plays_table.html" %}
+        </div>
+    </div>
+
+</div>
 {% endblock main %}

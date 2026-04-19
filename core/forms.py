@@ -1,10 +1,11 @@
 from django.contrib.auth.forms import UserCreationForm
+from django import forms
 from django.forms import ModelForm
 from django_email_blacklist import DisposableEmailChecker
 # from turnstile.fields import TurnstileField
 
 from accounts.models import CustomUser
-from core.models import Offer
+from core.models import Alert, Offer
 
 class OfferForm(ModelForm):
     # turnstile = TurnstileField()
@@ -27,6 +28,7 @@ class OfferForm(ModelForm):
                   'contact_phone',
                   'contact_website',
                   'contact_details',
+                  'cover_image',
                   ]
         labels = {
             'type': "Type d'annonce",
@@ -46,6 +48,47 @@ class OfferForm(ModelForm):
             'contact_details': 'Infos supplémentaires',
         }
 
+
+
+MAX_ALERTS_PER_EMAIL = 5
+
+
+class AlertForm(ModelForm):
+    class Meta:
+        model = Alert
+        fields = ['email', 'search', 'section', 'offer_type', 'category', 'gender', 'age_min', 'age_max', 'frequency']
+        labels = {
+            'email': 'Adresse e-mail',
+            'search': 'Mot-clé',
+            'section': 'Rubrique',
+            'offer_type': 'Type',
+            'category': 'Rémunération',
+            'gender': 'Genre',
+            'age_min': 'Âge min.',
+            'age_max': 'Âge max.',
+            'frequency': 'Fréquence',
+        }
+        widgets = {
+            'email':      forms.EmailInput(attrs={'placeholder': 'votre@email.fr'}),
+            'search':     forms.TextInput(attrs={'placeholder': 'Mot-clé, ville…'}),
+            'section':    forms.Select(),
+            'offer_type': forms.Select(choices=[('', 'Tous'), ('offer', 'Offre'), ('demand', 'Demande')]),
+            'category':   forms.Select(choices=[('', 'Toutes'), ('unpaid', 'Bénévole'), ('paid', 'Rémunéré')]),
+            'gender':     forms.Select(choices=[('', 'Tous'), ('male', 'Homme'), ('female', 'Femme'), ('other', 'Non-binaire')]),
+            'age_min':    forms.NumberInput(attrs={'min': 0, 'max': 99, 'placeholder': '—'}),
+            'age_max':    forms.NumberInput(attrs={'min': 0, 'max': 99, 'placeholder': '—'}),
+            'frequency':  forms.RadioSelect(),
+        }
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        existing = Alert.objects.filter(email=email, confirmed=True, active=True).count()
+        if existing >= MAX_ALERTS_PER_EMAIL:
+            raise forms.ValidationError(
+                f"Vous avez déjà {MAX_ALERTS_PER_EMAIL} alertes actives pour cet email. "
+                "Supprimez-en une avant d'en créer une nouvelle."
+            )
+        return email
 
 
 class SignUpForm(UserCreationForm):

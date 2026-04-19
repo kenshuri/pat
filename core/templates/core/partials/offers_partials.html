@@ -1,8 +1,47 @@
 {% for offer in all_offers %}
-    {% if forloop.last %}
-        {# Implements the infinite scroll logic #}
-        {% include "core/components/card_offer.html" with offer=offer last=1 page=page page_next=page_next %}
-    {% else %}
-        {% include "core/components/card_offer.html" with offer=offer last=0 %}
-    {% endif %}
+    {% include "core/components/card_offer.html" with offer=offer %}
+{% empty %}
+<div class="col-span-full py-14 flex flex-col items-center text-center gap-5">
+    <i class="fa-solid fa-masks-theater text-3xl text-ink/15"></i>
+    <div>
+        <p class="text-sm font-bold text-ink mb-1">Aucune annonce ne correspond à vos critères.</p>
+        <p class="text-sm text-ink-muted">Essayez d'élargir vos filtres ou créez une alerte pour être notifié.</p>
+    </div>
+    <a href="{% url 'alert' %}"
+       class="inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-white
+              text-[11px] font-display font-bold uppercase tracking-[0.14em]
+              hover:opacity-80 transition-opacity">
+        <i class="fa-solid fa-bell text-[9px]"></i>
+        Créer une alerte
+    </a>
+</div>
 {% endfor %}
+
+{% if is_htmx %}
+{% url 'index' as default_pagination_url %}
+<div id="pagination-zone" hx-swap-oob="innerHTML">
+    <div class="flex flex-col items-center gap-3 pt-8 pb-2">
+        {% if has_more %}
+        <button
+            hx-get="{{ pagination_url|default:default_pagination_url }}"
+            hx-target="#list_offers"
+            hx-swap="beforeend"
+            hx-include="#search-form"
+            hx-vals='{"page": "{{ page_next }}"}'
+            hx-indicator="#spinner"
+            class="inline-flex items-center gap-2 px-6 py-2.5
+                   border border-ink/20 text-[11px] font-display font-bold uppercase tracking-[0.14em]
+                   text-ink-soft hover:border-ink hover:text-ink transition-colors">
+            Charger plus
+            <i class="fa-solid fa-chevron-down text-[9px]"></i>
+        </button>
+        {% endif %}
+        <a href="{% url 'alert' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}"
+           class="inline-flex items-center gap-1.5 text-[11px] text-ink/35
+                  hover:text-ink transition-colors">
+            <i class="fa-solid fa-bell text-[9px]"></i>
+            Créer une alerte pour ces critères
+        </a>
+    </div>
+</div>
+{% endif %}

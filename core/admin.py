@@ -5,7 +5,7 @@ from django.contrib import admin, messages
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from .models import Offer
+from .models import Alert, Offer
 
 
 # ---- Filtre "Récent" (< 7 j, < 30 j) ----
@@ -26,6 +26,23 @@ class RecentFilter(admin.SimpleListFilter):
         if self.value() == "30d":
             return queryset.filter(created_on__gte=now - datetime.timedelta(days=30))
         return queryset
+
+
+@admin.register(Alert)
+class AlertAdmin(admin.ModelAdmin):
+    list_display = ('email', 'filter_summary', 'frequency', 'confirmed', 'active', 'created_at', 'last_sent_at')
+    list_filter = ('frequency', 'confirmed', 'active')
+    search_fields = ('email', 'search', 'section')
+    readonly_fields = ('token', 'created_at', 'last_sent_at')
+    actions = ('confirm_alerts', 'deactivate_alerts')
+
+    @admin.action(description="Marquer comme confirmées")
+    def confirm_alerts(self, request, queryset):
+        queryset.update(confirmed=True)
+
+    @admin.action(description="Désactiver")
+    def deactivate_alerts(self, request, queryset):
+        queryset.update(active=False)
 
 
 @admin.register(Offer)

@@ -1,0 +1,50 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Annonces théâtre amateur par département — Petites Annonces Théâtre{% endblock %}
+
+{% block meta_description %}Explorez les annonces de théâtre amateur par département : Paris, Rhône, Gironde et partout en France. Castings, cours et troupes près de chez vous.{% endblock %}
+
+{% block canonical_tag %}<link rel="canonical" href="{{ SITE_URL }}/departements/">{% endblock %}
+
+{% block main %}
+<div class="px-4 md:px-8 py-6">
+
+    <nav class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-6 flex items-center gap-2">
+        <a href="{% url 'index' %}" class="hover:text-ink transition-colors">Toutes les annonces</a>
+        <span>›</span>
+        <span class="text-ink">Par département</span>
+    </nav>
+
+    <h1 class="font-display font-bold text-ink text-xl md:text-2xl uppercase tracking-[0.06em] mb-8">
+        Explorer par département
+    </h1>
+
+    {% if departments %}
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        {% for dept_name, dept_slug, count in departments %}
+        <a href="{% url 'department_offers' dept_slug=dept_slug %}"
+           class="group border border-ink/12 p-4 hover:border-ink/40 transition-colors">
+            <p class="font-display font-bold text-sm uppercase tracking-[0.08em] text-ink group-hover:text-ink transition-colors truncate">
+                {{ dept_name }}
+            </p>
+            <p class="text-[10px] text-ink-muted mt-1">
+                {{ count }} annonce{% if count > 1 %}s{% endif %}
+            </p>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-ink-muted">Aucun département actif pour le moment.</p>
+    {% endif %}
+
+    <div class="mt-12 pt-8 border-t border-ink/8">
+        <a href="{% url 'index' %}"
+           class="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em]
+                  text-ink-muted hover:text-ink transition-colors">
+            ← Voir toutes les annonces
+        </a>
+    </div>
+
+</div>
+{% endblock main %}

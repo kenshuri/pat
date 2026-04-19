@@ -1,61 +1,85 @@
 {% extends "core/base.html" %}
 
-{% block title %}
-Petites Annonces Théâtre
-{% endblock title %}
+{% block title %}Se connecter — Petites Annonces Théâtre{% endblock %}
 
 {% block main %}
-{% if request.get_full_path == '/accounts/login/?next=/add_offer' %}
-<div class="bg-error flex p-2 rounded items-center gap-3 mt-2">
-    <div>
-        <i class="fa-solid fa-circle-exclamation"></i>
-    </div>
-    <div class="flex flex-col gap-0.5">
-        Il faut s'inscrire et être connecté pour déposer une annonce.
+
+<!-- Strip d'en-tête -->
+<div class="relative overflow-hidden w-full bg-ink py-10 md:py-14">
+    <div class="absolute inset-0 pointer-events-none"
+         style="background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 12px);"></div>
+    <div class="relative max-w-screen-xl mx-auto px-4 md:px-8">
+        <h1 class="font-display font-bold text-white text-2xl sm:text-3xl uppercase tracking-[0.04em]">
+            Se connecter
+        </h1>
+        <p class="text-white/40 text-sm mt-2">Accédez à votre espace personnel.</p>
     </div>
 </div>
-{% endif %}
-<div class="bg-base-100 rounded p-4 mt-2">
-    {% if form.errors %}
-    <div class="bg-error flex p-2 rounded items-center gap-3 mt-2">
-        <div>
-            <i class="fa-solid fa-circle-exclamation"></i>
-        </div>
-        <div class="flex flex-col gap-0.5">
-            Nom d'utilisateur et mot de passe ne correspondent pas. Essaie encore !
-        </div>
+
+<div class="max-w-sm mx-auto px-4 py-10">
+
+    {% if request.get_full_path == '/accounts/login/?next=/add_offer' %}
+    <div class="border-l-4 border-amber-400 bg-amber-50 px-4 py-3 mb-6 text-sm text-amber-700">
+        <i class="fa-solid fa-circle-exclamation mr-1.5"></i>
+        Connectez-vous pour déposer une annonce.
     </div>
     {% endif %}
-    <form action="{% url 'login' %}" class="form-control" method="post">
+
+    {% if form.errors %}
+    <div class="border-l-4 border-red-400 bg-red-50 px-4 py-3 mb-6 text-sm text-red-600">
+        <i class="fa-solid fa-circle-exclamation mr-1.5"></i>
+        Email et mot de passe incorrects. Réessayez.
+    </div>
+    {% endif %}
+
+    <form action="{% url 'login' %}" method="post" class="space-y-5">
         {% csrf_token %}
-        <fieldset class="fieldset bg-base-200 border border-base-300 p-4 rounded-box">
-            <legend class="fieldset-legend">Se connecter</legend>
 
-            <label for="id_username" class="fieldset-label">Email</label>
-            <div class="flex">
-                <input class="input grow" type="email" id="id_username" name="username"
-                       autofocus autocapitalize="none" autocomplete="username"
-                       maxlength="254" required placeholder="abcde@xyz.fr"/>
-            </div>
+        <div class="space-y-1.5">
+            <label for="id_username"
+                   class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">
+                Email
+            </label>
+            <input type="email" id="id_username" name="username"
+                   class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
+                          focus:outline-none focus:border-ink transition-colors bg-surface"
+                   autofocus autocapitalize="none" autocomplete="username"
+                   maxlength="254" required placeholder="vous@exemple.fr">
+        </div>
 
-            <label class="fieldset-label mt-2" for="id_password">Mot de passe</label>
-            <div class="flex">
-                <input class="input grow" type="password"  id="id_password" name="password"
-                       autocomplete="current-password" required placeholder="*************"/>
-            </div>
+        <div class="space-y-1.5">
+            <label class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted"
+                   for="id_password">
+                Mot de passe
+            </label>
+            <input type="password" id="id_password" name="password"
+                   class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
+                          focus:outline-none focus:border-ink transition-colors bg-surface"
+                   autocomplete="current-password" required placeholder="••••••••••••">
+            <a href="{% url 'password_reset' %}"
+               class="block text-[10px] text-ink-muted hover:text-ink transition-colors mt-1">
+                Mot de passe oublié ?
+            </a>
+        </div>
 
-            <a class="link" href="{% url 'password_reset' %}">Mot de passe oublié ?</a>
+        <input type="hidden" name="next" value="{% url 'index' %}">
 
-
-            <button class="btn btn-primary mt-4" type="submit">Se connecter</button>
-            <input type="hidden" name="next" value="{% url 'index'%}">
-        </fieldset>
+        <button type="submit"
+                class="w-full py-3 bg-ink text-white text-[11px] font-bold uppercase tracking-[0.14em]
+                       hover:opacity-80 transition-opacity">
+            Se connecter
+        </button>
     </form>
-    <div class="mt-4">
-        Pas encore inscrit ?
-        <a href="{% url 'signup' %}" class="btn btn-block btn-soft mt-2">
-            S'inscrire
+
+    <div class="border-t border-ink/8 mt-8 pt-8 text-center">
+        <p class="text-xs text-ink-muted mb-4">Pas encore inscrit·e ?</p>
+        <a href="{% url 'signup' %}"
+           class="inline-flex items-center justify-center w-full py-3
+                  border border-ink/20 text-[11px] font-bold uppercase tracking-[0.14em]
+                  text-ink-soft hover:border-ink hover:text-ink transition-colors">
+            Créer un compte
         </a>
     </div>
+
 </div>
 {% endblock %}

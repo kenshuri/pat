@@ -1,0 +1,32 @@
+{% extends "core/base.html" %}
+
+{% block title %}Alerte activée — Petites Annonces Théâtre{% endblock %}
+
+{% block main %}
+<div class="px-4 md:px-8 py-16 max-w-lg text-center mx-auto">
+    <i class="fa-solid fa-bell text-4xl text-ink/20 mb-6 block"></i>
+    <h1 class="font-display font-bold text-ink text-xl uppercase tracking-[0.06em] mb-4">
+        Alerte activée !
+    </h1>
+    <p class="text-sm text-ink-muted mb-2">
+        Vous serez notifié <strong class="text-ink">{{ alert.get_frequency_display }}</strong> dès qu'une annonce correspond à :
+    </p>
+    <p class="text-sm font-medium text-ink mb-8">{{ alert.filter_summary }}</p>
+
+    <div class="flex flex-wrap gap-3 justify-center">
+        <a href="{% url 'alert_manage' token=alert.token %}"
+           class="inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-white
+                  text-[11px] font-display font-bold uppercase tracking-[0.14em]
+                  hover:opacity-80 transition-opacity">
+            <i class="fa-solid fa-list text-[9px]"></i>
+            Gérer mes alertes
+        </a>
+        <a href="{% url 'index' %}"
+           class="inline-flex items-center gap-2 px-5 py-2.5 border border-ink/20
+                  text-[11px] font-display font-bold uppercase tracking-[0.14em] text-ink-soft
+                  hover:border-ink hover:text-ink transition-colors">
+            Voir les annonces
+        </a>
+    </div>
+</div>
+{% endblock %}

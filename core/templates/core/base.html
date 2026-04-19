@@ -1,10 +1,24 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="fr" data-theme="scene">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5.0, minimum-scale=0.86">
-    <meta name="description" content="Le site de petites annonces pour théâtre amateur destiné à la mise en relation de troupes à la recherche de comédiens et de comédiens à la recherche de leur nouveau projet théâtral. Complétement gratuit et hébergé en France !">
+    <meta name="description" content="{% block meta_description %}Le site de petites annonces pour théâtre amateur — troupes, comédiens, cours, événements. Gratuit et hébergé en Europe.{% endblock %}">
+    {% block canonical_tag %}{% endblock %}
+    {% block og_tags %}
+    <meta property="og:site_name" content="Petites Annonces Théâtre">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Petites Annonces Théâtre — Annonces de théâtre amateur">
+    <meta property="og:description" content="Le site de petites annonces pour théâtre amateur — troupes, comédiens, cours, événements. Gratuit et hébergé en Europe.">
+    <meta property="og:url" content="{{ SITE_URL }}">
+    <meta name="twitter:card" content="summary_large_image">
+    {% endblock og_tags %}
+    {% block jsonld %}{% endblock %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static "core/css/output.css" %}">
     <link rel="icon" type="image/png" href="{% static 'core/mask.svg' %}"/>
     <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
@@ -15,96 +29,204 @@
     <script defer src="https://unpkg.com/alpinejs@3.14.9/dist/cdn.min.js"></script>
     <script data-goatcounter="https://af2tc2zbp.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
     <script id="search-js" defer src="https://api.mapbox.com/search-js/v1.0.0/web.js"></script>
-    <style>[x-cloak] { display: none !important; }</style>
-    <title>
-        {% block title %}
-        {% endblock title %}
-    </title>
+    <style>
+        [x-cloak]            { display: none !important; }
+        .scroll-no-bar       { scrollbar-width: none; }
+        .scroll-no-bar::-webkit-scrollbar { display: none; }
+        /* Trix rich-text content — restore list styles reset by Tailwind */
+        .trix-content ul { list-style-type: disc;     padding-left: 1.4rem; }
+        .trix-content ol { list-style-type: decimal;  padding-left: 1.4rem; }
+        .trix-content li { margin-bottom: 0.2rem; }
+        .trix-content blockquote { border-left: 3px solid oklch(10% 0.008 260 / 0.15); padding-left: 1rem; color: oklch(35% 0.006 260); }
+    </style>
+    <title>{% block title %}Petites Annonces Théâtre — Annonces de théâtre amateur{% endblock title %}</title>
 </head>
-<body class="bg-base-200">
-<header>
-    <div class="flex bg-base-100 max-w-3xl mx-auto lg:max-w-4xl xl:max-w-6xl justify-between gap-2">
-        <div class="flex ">
-            <a class="gap-1 flex items-center" href="{% url 'index' %}">
-                <div class="avatar">
-                    <div class="w-16 md:w-24 rounded">
-                        <img alt="logo" src="{% static 'core/mask.svg' %}" />
-                    </div>
-                </div>
-                <span class="flex font-bold text-base hidden sm:inline text-xs md:text-sm md:text-xl">Petites Annonces Théâtre</span>
+<body class="bg-surface text-ink min-h-screen flex flex-col antialiased">
+
+<!-- ══════════════════════════════════════
+     HEADER
+══════════════════════════════════════ -->
+<header class="bg-surface border-b border-ink/8 sticky top-0 z-40">
+    <div class="max-w-screen-xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between gap-4">
+
+        <!-- Identité -->
+        <a href="{% url 'index' %}" class="flex items-center gap-3 min-w-0 shrink">
+            <img src="{% static 'core/mask.svg' %}"
+                 alt="Masque de théâtre"
+                 class="w-10 h-10 shrink-0 opacity-75">
+            <span class="font-display font-bold text-ink text-sm md:text-base leading-tight tracking-[0.06em] truncate uppercase">
+                Petites Annonces <br class="sm:hidden">Théâtre
+            </span>
+        </a>
+
+        <!-- Navigation -->
+        <nav class="flex items-center gap-0.5 shrink-0">
+            <a href="{% url 'add_offer' %}" class="btn-scene">
+                <i class="fa-solid fa-plus text-[9px]"></i>
+                <span class="hidden sm:inline">Déposer</span>
             </a>
-        </div>
-        <div class="flex gap-2 items-center mr-2">
-            <a href="{% url 'add_offer' %}" class='btn btn-accent' aria-label="déposer une annonce"><i class='fa-solid fa-plus'></i><span class="hidden ml-2 sm:inline-flex">Déposer une annonce</span><span class="ml-2 sm:ml-0 sm:hidden">Annonce</span></a>
-            <a href="{% url 'shows:agenda' %}" class="btn btn-primary gap-2">
+
+            <a href="{% url 'shows:agenda' %}" class="btn-ghost-scene">
                 <i class="fa-solid fa-calendar-days"></i>
-                <span class="hidden sm:inline">Agenda</span>
+                <span class="hidden md:inline">Agenda</span>
             </a>
-            <a href="{% url 'about' %}" class="btn btn-soft btn-info" aria-label="à propos"><i class="fa-solid fa-circle-info"></i><span class="hidden lg:inline ml-2">À propos</span></a>
+
+            <a href="{% url 'about' %}" class="btn-ghost-scene hidden sm:inline-flex">
+                À propos
+            </a>
+
+            <!-- Compte -->
             {% if user.is_authenticated %}
-                <div class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="btn btn-sm btn-circle btn-neutral" aria-label="utilisateur">
-                        <i class="fa-regular fa-user"></i>
-                    </div>
-                    <ul tabindex="0" class="mt-3 z-[1] p-2 shadow-2xl menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                        <li class="p-2 underline">
-                            {{ user.email }}
-                        </li>
-                        <li>
-                            <a href="{% url 'offer_user'%}"><i class="fa-solid fa-envelopes-bulk"></i>Mes annonces</a>
-                        </li>
-                        <li>
-                            <a href="{% url 'shows:agenda-user'%}"><i class="fa-solid fa-ticket"></i>Mes pièces</a>
-                        </li>
+            <div class="relative ml-1" x-data="{ open: false }">
+                <button @click="open = !open"
+                        class="w-8 h-8 rounded-full bg-ink/6 hover:bg-ink/12 flex items-center justify-center transition-colors"
+                        aria-label="Mon compte">
+                    <i class="fa-regular fa-user text-sm text-ink-soft"></i>
+                </button>
+                <div x-show="open"
+                     x-cloak
+                     @click.away="open = false"
+                     class="absolute right-0 top-full mt-2 w-56 bg-surface border border-ink/10 shadow-2xl z-50 py-1">
+                    <p class="px-4 py-2.5 text-[11px] text-ink-muted border-b border-ink/6 truncate">{{ user.email }}</p>
+                    <a href="{% url 'offer_user' %}"
+                       class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft hover:bg-ink/4 hover:text-ink transition-colors">
+                        <i class="fa-solid fa-envelopes-bulk text-[10px] text-ink-muted"></i>
+                        Mes annonces
+                    </a>
+                    <a href="{% url 'shows:agenda-user' %}"
+                       class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft hover:bg-ink/4 hover:text-ink transition-colors">
+                        <i class="fa-solid fa-ticket text-[10px] text-ink-muted"></i>
+                        Mes pièces
+                    </a>
+                    <a href="{% url 'alert_user' %}"
+                       class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft hover:bg-ink/4 hover:text-ink transition-colors">
+                        <i class="fa-solid fa-bell text-[10px] text-ink-muted"></i>
+                        Mes alertes
+                    </a>
+                    <div class="border-t border-ink/6 mt-1 pt-1">
                         <form method="post" action="{% url 'logout' %}">
-                            <li>
-                                {% csrf_token %}
-                                <button type="submit" aria-label="se déconnecter">
-                                    <i class="fa-solid fa-right-from-bracket"></i>
-                                    Se déconnecter
-                                </button>
-                                <input type="hidden" name="next" value="{% url 'index'%}">
-                            </li>
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'index' %}">
+                            <button type="submit"
+                                    class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-muted hover:bg-ink/4 hover:text-ink transition-colors text-left">
+                                <i class="fa-solid fa-right-from-bracket text-[10px]"></i>
+                                Se déconnecter
+                            </button>
                         </form>
-                    </ul>
+                    </div>
                 </div>
+            </div>
             {% else %}
-                <a href="{% url 'login' %}" class="btn btn-sm btn-circle" aria-label="se connecter">
-                    <i class="fa-regular fa-user"></i>
-                </a>
+            <a href="{% url 'login' %}"
+               class="ml-1 w-8 h-8 rounded-full bg-ink/6 hover:bg-ink/12 flex items-center justify-center transition-colors"
+               aria-label="Se connecter">
+                <i class="fa-regular fa-user text-sm text-ink-soft"></i>
+            </a>
             {% endif %}
-        </div>
+        </nav>
     </div>
 </header>
-<main class="min-h-screen max-w-3xl mx-auto lg:max-w-4xl xl:max-w-6xl place-content-start">
-    {%  block main %}
-    {%  endblock main %}
+
+<!-- ══════════════════════════════════════
+     CONTENU
+══════════════════════════════════════ -->
+<main class="flex-1 max-w-screen-xl mx-auto w-full">
+    {% block main %}{% endblock main %}
 </main>
-<footer class="footer sm:footer-horizontal items-center p-4 bg-neutral text-neutral-content max-w-3xl mx-auto lg:max-w-4xl xl:max-w-6xl mt-2">
-    <nav>
-        <div class="flex items-center">
-        <div class="avatar">
-            <div class="w-16 md:w-24 rounded">
-                <img alt="logo" src="{% static 'core/mask.svg' %}" />
+
+<!-- ══════════════════════════════════════
+     FOOTER
+══════════════════════════════════════ -->
+<footer class="bg-ink text-surface/60 mt-16">
+    <div class="max-w-screen-xl mx-auto px-4 md:px-8 pt-10 pb-6">
+
+        <!-- Colonnes principales -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 pb-8">
+            <div>
+                <div class="flex items-center gap-2 mb-3">
+                    <img src="{% static 'core/mask.svg' %}" alt="logo" class="w-5 h-5 opacity-25 invert">
+                    <span class="font-display font-bold text-surface/50 uppercase tracking-tight text-sm">
+                        Petites Annonces Théâtre
+                    </span>
+                </div>
+                <p class="text-surface/30 text-xs leading-relaxed">
+                    Plateforme gratuite dédiée au théâtre<br>
+                    amateur francophone. Hébergé en Europe.
+                </p>
             </div>
+            <nav>
+                <p class="font-display text-surface/20 text-[10px] uppercase tracking-[0.15em] font-bold mb-4">Équipe</p>
+                <ul class="space-y-2.5">
+                    <li><a class="text-sm text-surface/45 hover:text-surface transition-colors" href="mailto:admin@petites-annonces-theatre.fr">Contact</a></li>
+                    <li><a class="text-sm text-surface/45 hover:text-surface transition-colors" href="https://ko-fi.com/petitesannoncestheatre">Soutenir le site</a></li>
+                    <li><a class="text-sm text-surface/45 hover:text-surface transition-colors" href="https://petites-annonces-musique.fr">Petites Annonces Musique</a></li>
+                </ul>
+            </nav>
+            <nav>
+                <p class="font-display text-surface/20 text-[10px] uppercase tracking-[0.15em] font-bold mb-4">Légal</p>
+                <ul class="space-y-2.5">
+                    <li><a class="text-sm text-surface/45 hover:text-surface transition-colors" href="{% url 'announcement' %}">Faire sa promo</a></li>
+                    <li><a class="text-sm text-surface/45 hover:text-surface transition-colors" href="{% url 'tou' %}">Conditions d'utilisation</a></li>
+                </ul>
+            </nav>
         </div>
-            <div class="font-semibold tracking-wide">
-                Petites Annonces Théâtre
+
+        <!-- Accordéons explorer -->
+        {% if top_cities or top_departments %}
+        <div class="border-t border-surface/10 pt-4 flex flex-col">
+
+            {% if top_cities %}
+            <div x-data="{ open: false }">
+                <button @click="open = !open"
+                        class="w-full flex items-center justify-between py-3 text-left group">
+                    <span class="font-display text-surface/30 text-[10px] uppercase tracking-[0.15em] font-bold group-hover:text-surface/50 transition-colors">
+                        Explorer par ville
+                    </span>
+                    <i class="fa-solid fa-chevron-down text-[9px] text-surface/20 transition-transform duration-200 group-hover:text-surface/40"
+                       :class="open ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="open" x-collapse>
+                    <div class="pb-4 flex flex-wrap gap-x-4 gap-y-2">
+                        {% for city_name, city_slug in top_cities %}
+                        <a class="text-sm text-surface/45 hover:text-surface transition-colors"
+                           href="{% url 'city_offers' city_slug=city_slug %}">{{ city_name }}</a>
+                        {% endfor %}
+                        <a class="text-sm text-surface/25 hover:text-surface/50 transition-colors"
+                           href="{% url 'city_list' %}">Toutes les villes →</a>
+                    </div>
+                </div>
             </div>
+            {% endif %}
+
+            {% if top_departments %}
+            <div x-data="{ open: false }">
+                <button @click="open = !open"
+                        class="w-full flex items-center justify-between py-3 text-left group">
+                    <span class="font-display text-surface/30 text-[10px] uppercase tracking-[0.15em] font-bold group-hover:text-surface/50 transition-colors">
+                        Explorer par département
+                    </span>
+                    <i class="fa-solid fa-chevron-down text-[9px] text-surface/20 transition-transform duration-200 group-hover:text-surface/40"
+                       :class="open ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="open" x-collapse>
+                    <div class="pb-4 flex flex-wrap gap-x-4 gap-y-2">
+                        {% for dept_name, dept_slug in top_departments %}
+                        <a class="text-sm text-surface/45 hover:text-surface transition-colors"
+                           href="{% url 'department_offers' dept_slug=dept_slug %}">{{ dept_name }}</a>
+                        {% endfor %}
+                        <a class="text-sm text-surface/25 hover:text-surface/50 transition-colors"
+                           href="{% url 'department_list' %}">Tous les départements →</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
         </div>
-    </nav>
-    <nav>
-        <h6 class="footer-title">équipe</h6>
-        <a class="link" href="mailto:admin@petites-annonces-theatre.fr">Contact</a>
-        <a class="link" href="https://ko-fi.com/petitesannoncestheatre">Soutenir</a>
-        <a class="link" href="https://petites-annonces-musique.fr">Petites Annonces Musique</a>
-    </nav>
-    <nav>
-        <h6 class="footer-title">Légal</h6>
-        <a class="link" href="{% url 'announcement' %}">Faire sa promo</a>
-        <a class="link" href="{% url 'tou' %}">Conditions Générales d'utilisations</a>
-    </nav>
+        {% endif %}
+
+    </div>
 </footer>
+
 <script>
     document.body.addEventListener('htmx:configRequest', (event) => {
         event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';

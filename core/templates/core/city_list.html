@@ -1,0 +1,51 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Annonces théâtre amateur par ville — Petites Annonces Théâtre{% endblock %}
+
+{% block meta_description %}Explorez les annonces de théâtre amateur par ville : Paris, Lyon, Bordeaux et partout en France. Castings, cours et troupes près de chez vous.{% endblock %}
+
+{% block canonical_tag %}<link rel="canonical" href="{{ SITE_URL }}/annonces/">{% endblock %}
+
+{% block main %}
+<div class="px-4 md:px-8 py-6">
+
+    <!-- Fil d'Ariane -->
+    <nav class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-6 flex items-center gap-2">
+        <a href="{% url 'index' %}" class="hover:text-ink transition-colors">Toutes les annonces</a>
+        <span>›</span>
+        <span class="text-ink">Par ville</span>
+    </nav>
+
+    <h1 class="font-display font-bold text-ink text-xl md:text-2xl uppercase tracking-[0.06em] mb-8">
+        Explorer par ville
+    </h1>
+
+    {% if cities %}
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        {% for city_name, city_slug, count in cities %}
+        <a href="{% url 'city_offers' city_slug=city_slug %}"
+           class="group border border-ink/12 p-4 hover:border-ink/40 transition-colors">
+            <p class="font-display font-bold text-sm uppercase tracking-[0.08em] text-ink group-hover:text-ink transition-colors truncate">
+                {{ city_name }}
+            </p>
+            <p class="text-[10px] text-ink-muted mt-1">
+                {{ count }} annonce{% if count > 1 %}s{% endif %}
+            </p>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-ink-muted">Aucune ville active pour le moment.</p>
+    {% endif %}
+
+    <div class="mt-12 pt-8 border-t border-ink/8">
+        <a href="{% url 'index' %}"
+           class="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em]
+                  text-ink-muted hover:text-ink transition-colors">
+            ← Voir toutes les annonces
+        </a>
+    </div>
+
+</div>
+{% endblock main %}

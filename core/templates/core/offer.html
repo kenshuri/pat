@@ -1,198 +1,346 @@
 {% extends "core/base.html" %}
 
-{% block title %}
-    Petites Annonces Théâtre
-{% endblock title %}
+{% block title %}{{ offer.title|capfirst }}{% if offer.city %} — {{ offer.city }}{% endif %} | Petites Annonces Théâtre{% endblock title %}
+
+{% block meta_description %}{{ offer.summary|truncatewords:28 }} — Annonce publiée sur Petites Annonces Théâtre.{% endblock %}
+
+{% block canonical_tag %}<link rel="canonical" href="{{ SITE_URL }}{% url 'offer' offer_id=offer.pk %}">{% endblock %}
+
+{% block og_tags %}
+<meta property="og:site_name" content="Petites Annonces Théâtre">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ offer.title|capfirst }}{% if offer.city %} — {{ offer.city }}{% endif %} | Petites Annonces Théâtre">
+<meta property="og:description" content="{{ offer.summary|truncatewords:28 }}">
+<meta property="og:url" content="{{ SITE_URL }}{% url 'offer' offer_id=offer.pk %}">
+{% if offer.cover_image %}<meta property="og:image" content="{{ offer.cover_image.url }}">{% endif %}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ offer.title|capfirst }}{% if offer.city %} — {{ offer.city }}{% endif %}">
+<meta name="twitter:description" content="{{ offer.summary|truncatewords:28 }}">
+{% if offer.cover_image %}<meta name="twitter:image" content="{{ offer.cover_image.url }}">{% endif %}
+{% endblock og_tags %}
+
+{% block jsonld %}
+{% if offer.section == "artists_groups" and offer.type == "offer" %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "JobPosting",
+  "title": "{{ offer.title|capfirst }}",
+  "description": "{{ offer.summary }}",
+  "datePosted": "{{ offer.created_on|date:'Y-m-d' }}",
+  "hiringOrganization": {
+    "@type": "Organization",
+    "name": "Petites Annonces Théâtre",
+    "sameAs": "{{ SITE_URL }}"
+  },
+  "jobLocation": {
+    "@type": "Place",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "{{ offer.city }}",
+      "addressCountry": "FR"
+    }
+  },
+  "employmentType": "{% if offer.category == 'paid' %}CONTRACTOR{% else %}VOLUNTEER{% endif %}",
+  "url": "{{ SITE_URL }}{% url 'offer' offer_id=offer.pk %}"
+}
+</script>
+{% endif %}
+{% endblock jsonld %}
 
 {% block main %}
-    <div class="bg-base-100 rounded p-4 mt-2 flex flex-col gap-2">
-        <div class="flex flex-col gap-1">
-            <div class="flex flex-wrap items-center justify-between tracking-wide">
-                <h1 class="font-bold text-xl">
-                    {% if offer.section == "artists_groups" %}
-                        🎭
-                    {% elif offer.section == "courses_training" %}
-                        🎓
-                    {% elif offer.section == "calls_events" %}
-                        📣
-                    {% elif offer.section == "services_equipment" %}
-                        🛠️
-                    {% else %}
-                        ❓
-                    {% endif %}
-                    {{ offer.title|capfirst }}
-                </h1>
-                <div>{{ offer.created_on }}</div>
-            </div>
-            <div class="flex flex-row flex-wrap gap-2">
-                {% if offer.type == 'offer' %}
-                    {% if offer.section == 'artists_groups' %}
-                        <div class="badge badge-primary badge-soft flex gap-0.5">Je recrute</div>
-                    {% elif offer.section == 'courses_training' %}
-                        <div class="badge badge-primary badge-soft flex gap-0.5">Je propose</div>
-                    {% elif offer.section == 'calls_events' %}
-                        <div class="badge badge-primary badge-soft flex gap-0.5">Je programme</div>
-                    {% elif offer.section == 'services_equipment' %}
-                        <div class="badge badge-primary badge-soft flex gap-0.5">Je propose</div>
-                    {% else %}
-                    {% endif %}
-                {% else %}
-                    {% if offer.section == 'artists_groups' %}
-                        <div class="badge badge-primary flex gap-0.5">Je postule</div>
-                    {% elif offer.section == 'courses_training' %}
-                        <div class="badge badge-primary flex gap-0.5">Je recherche</div>
-                    {% elif offer.section == 'calls_events' %}
-                        <div class="badge badge-primary flex gap-0.5">Je me produis</div>
-                    {% elif offer.section == 'services_equipment' %}
-                        <div class="badge badge-primary flex gap-0.5">Je recherche</div>
-                    {% else %}
-                    {% endif %}
-                {% endif %}
-                {% if offer.category == 'paid' %}
-                    {% if offer.section == 'artists_groups' or offer.section == 'calls_events' %}
-                        <div class="badge badge-secondary">Rémunéré</div>
-                    {% else %}
-                        <div class="badge badge-secondary">Payant</div>
-                    {% endif %}
-                {% else %}
-                    {% if offer.section == 'artists_groups' or offer.section == 'calls_events' %}
-                        <div class="badge badge-soft badge-secondary">Bénévole</div>
-                    {% else %}
-                        <div class="badge badge-soft badge-secondary">Gratuit</div>
-                    {% endif %}
-                {% endif %}
-                {% if offer.city %}
-                    <div class="badge badge-neutral badge-soft">
-                        <i class="fa-solid fa-house"></i>
-                        <span class="">{{ offer.city }}</span>
-                    </div>
-                {% endif %}
-                {% if offer.min_age or offer.max_age %}
-                    <div class="badge badge-outline">
-                        <i class="fa-solid fa-user"></i>
-                        {% if offer.min_age and offer.max_age %}
-                            <span class="">
-                            {{ offer.min_age }}
-                        </span>
-                            <span>-</span>
-                            <span>
-                        {{ offer.max_age }}
-                        </span>
-                        {% endif %}
-                        {% if offer.min_age and not offer.max_age%}
-                            <span class="ml-1">+ de {{ offer.min_age }}</span>
-                        {% endif %}
-                        {% if offer.max and not offer.min_age %}
-                            <span class="ml-1">- de {{ offer.max_age }}</span>
-                        {% endif %}
-                        <span class="ml-1">ans</span>
-                    </div>
-                {% endif %}
-                {% if offer.gender %}
-                    <div class="badge badge-neutral badge-dash">
-                        <i class="fa-solid fa-person-half-dress"></i>
-                        <span class="">
-                    {% if offer.gender == 'female' %}
-                        Femme
-                    {% elif offer.gender == 'male' %}
-                        Homme
-                    {% else %}
-                        Non-Binaire
-                    {% endif %}
-                        </span>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-        <p class="italic text-lg">{{ offer.summary }}</p>
-        <p class="overflow-hidden text-ellipsis">{{ offer.description|linebreaksbr}}</p>
-        <div class="mt-4" id="contact_info">
-            <button class="btn btn-info"
-                    hx-post="{% url 'offer_contact_info' offer.id %}" hx-swap="outerHTML">
-                Afficher les informations de contact
-            </button>
-        </div>
-        {% if offer.author == request.user %}
-            <div class="mt-4">
-                {% if not offer.filled %}
-                    {% if offer.moderation and not offer.moderation.passed %}
-                        <div role="alert" class="alert alert-error">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <div class="flex flex-col gap-1">
-                                <h4 class="font-bold">
-                                    Votre annonce n’a pas été acceptée.
-                                </h4>
-                                <p>
-                                    Notre système de modération automatique a détecté que son contenu pourrait appartenir
-                                    à l’une des catégories suivantes :
-                                <ul>
-                                    {% for reason in offer.moderation.get_localized_reasons %}
-                                        <li>- {{ reason }}</li>
-                                    {% endfor %}
-                                </ul>
-                                <p class="mt-2">
-                                    Nous vous invitons à modifier votre annonce afin de respecter nos règles de publication,
-                                    puis à la soumettre de nouveau pour une nouvelle vérification.
-                                </p>
-                                </p>
-                            </div>
-                        </div>
-                    {% else %}
-                        <div role="alert" class="alert">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info h-6 w-6 shrink-0">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span>Votre annonce est en ligne !</span>
-                        </div>
-                    {% endif %}
-                {% else %}
-                    <div role="alert" class="alert alert-success">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>Cette annonce a été marquée comme pourvue, elle n'est donc plus en ligne.</span>
-                    </div>
-                {% endif %}
-            </div>
 
-            <div class="flex gap-2 flex-wrap mt-4">
-                <div class="grow">
-                    <a href="{% url 'update_offer' offer.id %}" class="btn btn-soft btn-block">
-                        <i class="fa-solid fa-pen"></i>
-                        <span class="ml-2">
-                    Modifier l'annonce
-                    </span>
-                    </a>
-                </div>
-                <div class="grow">
-                    {% if not offer.filled %}
-                        <a href="{% url 'fill_offer' offer.id %}" class="btn btn-success btn-block">
-                            <i class="fa-solid fa-handshake-simple"></i>
-                            <span class="ml-2">
-                    Annonce pourvue
-                    </span>
-                        </a>
-                    {% else %}
-                        <a href="{% url 'unfill_offer' offer.id %}" class="btn btn-warning btn-block">
-                            <i class="fa-solid fa-handshake-slash"></i>
-                            <span class="ml-2">
-                    Annonce non pourvue
-                    </span>
-                        </a>
-                    {% endif %}
-                </div>
-                <div class="grow">
-                    <a href="{% url 'delete_offer' offer.id %}" class="btn btn-error btn-block">
-                        <i class="fa-solid fa-trash"></i>
-                        <span class="ml-2">
-                    Supprimer l'annonce
-                    </span>
-                    </a>
-                </div>
-            </div>
+<!-- ══════════════════════════════════════
+     COUVERTURE : image réelle ou strip coloré
+══════════════════════════════════════ -->
+{% if offer.cover_image %}
+<div class="relative w-full overflow-hidden bg-ink" style="max-height: 420px;">
+    <img src="{{ offer.cover_image.url }}"
+         alt="Couverture — {{ offer.title }}"
+         class="w-full object-cover"
+         style="max-height: 420px;"
+         loading="eager">
+    <!-- Dégradé bas pour la lisibilité du titre -->
+    <div class="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent pointer-events-none"></div>
 
+    <!-- Titre sur l'image -->
+    <div class="absolute bottom-0 inset-x-0 max-w-screen-xl mx-auto px-4 md:px-8 py-8">
+        <span class="text-white/40 text-[10px] font-bold uppercase tracking-[0.20em] block mb-3">
+            {% if offer.section == "artists_groups" %}🎭&nbsp; Comédien·nes &amp; Troupes
+            {% elif offer.section == "courses_training" %}🎓&nbsp; Cours &amp; Formations
+            {% elif offer.section == "calls_events" %}📣&nbsp; Appels &amp; Événements
+            {% elif offer.section == "services_equipment" %}🛠️&nbsp; Services &amp; Matériel
+            {% endif %}
+        </span>
+        <h1 class="font-display font-bold text-white text-2xl sm:text-3xl md:text-4xl uppercase
+                    tracking-[0.04em] leading-tight max-w-3xl">
+            {{ offer.title|capfirst }}
+        </h1>
+        {% if offer.city %}
+        <p class="text-white/40 text-xs uppercase tracking-[0.18em] mt-3">
+            <i class="fa-solid fa-location-dot text-[10px] mr-1"></i>{{ offer.city }}
+        </p>
         {% endif %}
     </div>
+
+    <time class="absolute top-4 right-4 md:right-8 text-white/30 text-[10px] tracking-wide"
+          datetime="{{ offer.created_on|date:'Y-m-d' }}">
+        {{ offer.created_on|date:"d/m/Y" }}
+    </time>
+</div>
+
+{% else %}
+<!-- Strip coloré (fallback sans image) -->
+<div class="relative overflow-hidden w-full"
+     style="min-height: 200px;
+        {% if offer.section == 'artists_groups' %}
+            background: linear-gradient(150deg, oklch(17% .065 265) 0%, oklch(25% .085 252) 100%);
+        {% elif offer.section == 'courses_training' %}
+            background: linear-gradient(150deg, oklch(16% .09 152) 0%, oklch(24% .11 158) 100%);
+        {% elif offer.section == 'calls_events' %}
+            background: linear-gradient(150deg, oklch(16% .115 12) 0%, oklch(26% .12 22) 100%);
+        {% elif offer.section == 'services_equipment' %}
+            background: linear-gradient(150deg, oklch(14% .03 50) 0%, oklch(22% .05 60) 100%);
+        {% else %}
+            background: linear-gradient(150deg, #111 0%, #222 100%);
+        {% endif %}
+     "
+>
+    <div class="absolute inset-0 pointer-events-none"
+         style="background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 12px);"></div>
+
+    <div class="relative max-w-screen-xl mx-auto px-4 md:px-8 py-8 flex flex-col justify-between"
+         style="min-height: 200px;">
+        <div class="flex items-start justify-between gap-4">
+            <span class="text-white/35 text-[10px] font-bold uppercase tracking-[0.20em]">
+                {% if offer.section == "artists_groups" %}🎭&nbsp; Comédien·nes &amp; Troupes
+                {% elif offer.section == "courses_training" %}🎓&nbsp; Cours &amp; Formations
+                {% elif offer.section == "calls_events" %}📣&nbsp; Appels &amp; Événements
+                {% elif offer.section == "services_equipment" %}🛠️&nbsp; Services &amp; Matériel
+                {% endif %}
+            </span>
+            <time class="text-white/25 text-[10px] tracking-wide shrink-0"
+                  datetime="{{ offer.created_on|date:'Y-m-d' }}">
+                {{ offer.created_on|date:"d/m/Y" }}
+            </time>
+        </div>
+        <div class="mt-8">
+            <h1 class="font-display font-bold text-white text-2xl sm:text-3xl md:text-4xl uppercase
+                        tracking-[0.04em] leading-tight max-w-3xl">
+                {{ offer.title|capfirst }}
+            </h1>
+            {% if offer.city %}
+            <p class="text-white/35 text-xs uppercase tracking-[0.18em] mt-3">
+                <i class="fa-solid fa-location-dot text-[10px] mr-1"></i>{{ offer.city }}
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════
+     CONTENU
+══════════════════════════════════════ -->
+<div class="max-w-2xl mx-auto px-4 md:px-6 py-8 md:py-10">
+
+    <!-- Retour -->
+    <a href="{% url 'index' %}"
+       class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em]
+              text-ink-muted hover:text-ink transition-colors mb-8">
+        ← Toutes les annonces
+    </a>
+
+    <!-- ── Tags ── -->
+    <div class="flex flex-wrap gap-2 mb-8">
+        {% if offer.type == 'offer' %}
+            {% if offer.section == 'artists_groups' %}   <span class="tag-fill">Je recrute</span>
+            {% elif offer.section == 'courses_training' %}<span class="tag-fill">Je propose</span>
+            {% elif offer.section == 'calls_events' %}   <span class="tag-fill">Je programme</span>
+            {% elif offer.section == 'services_equipment' %}<span class="tag-fill">Je propose</span>
+            {% endif %}
+        {% else %}
+            {% if offer.section == 'artists_groups' %}   <span class="tag-outline">Je postule</span>
+            {% elif offer.section == 'courses_training' %}<span class="tag-outline">Je recherche</span>
+            {% elif offer.section == 'calls_events' %}   <span class="tag-outline">Je me produis</span>
+            {% elif offer.section == 'services_equipment' %}<span class="tag-outline">Je recherche</span>
+            {% endif %}
+        {% endif %}
+
+        {% if offer.category == 'paid' %}
+            {% if offer.section == 'artists_groups' or offer.section == 'calls_events' %}
+                <span class="tag-amber">Rémunéré</span>
+            {% else %}
+                <span class="tag-amber">Payant</span>
+            {% endif %}
+        {% else %}
+            {% if offer.section == 'artists_groups' or offer.section == 'calls_events' %}
+                <span class="tag-outline">Bénévole</span>
+            {% else %}
+                <span class="tag-outline">Gratuit</span>
+            {% endif %}
+        {% endif %}
+
+        {% if offer.gender %}
+        <span class="tag-outline">
+            {% if offer.gender == 'female' %}Femme
+            {% elif offer.gender == 'male' %}Homme
+            {% else %}Non-Binaire{% endif %}
+        </span>
+        {% endif %}
+
+        {% if offer.min_age or offer.max_age %}
+        <span class="tag-outline">
+            {% if offer.min_age and offer.max_age %}{{ offer.min_age }}–{{ offer.max_age }} ans
+            {% elif offer.min_age %}+{{ offer.min_age }} ans
+            {% elif offer.max_age %}-{{ offer.max_age }} ans{% endif %}
+        </span>
+        {% endif %}
+
+        {% if offer.filled %}
+        <span class="inline-flex items-center px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] bg-ink-muted/15 text-ink-muted">
+            Pourvue
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- ── Résumé ── -->
+    <p class="text-base md:text-lg italic text-ink-soft leading-relaxed mb-8">
+        {{ offer.summary }}
+    </p>
+
+    <div class="border-t border-ink/8 mb-8"></div>
+
+    <!-- ── Description ── -->
+    <div class="trix-content prose-offer text-sm md:text-[15px] text-ink leading-relaxed md:leading-loose mb-12">
+        {{ offer.description|safe }}
+    </div>
+
+    <!-- ── Galerie photos supplémentaires ── -->
+    {% if offer.photos.exists %}
+    <div class="mb-12">
+        <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-muted mb-4">
+            Photos
+        </p>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {% for photo in offer.photos.all %}
+            <a href="{{ photo.image.url }}" target="_blank" rel="noopener"
+               class="block aspect-square overflow-hidden group">
+                <img src="{{ photo.image.url }}"
+                     alt="Photo {{ forloop.counter }} — {{ offer.title }}"
+                     width="400" height="400"
+                     loading="lazy"
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ── Contact ── -->
+    <div class="border-t border-ink/8 pt-8 mb-8" id="contact_info">
+        <button class="w-full flex items-center justify-center gap-2
+                       py-3 px-6
+                       text-[11px] font-bold uppercase tracking-[0.14em]
+                       bg-ink text-white
+                       hover:opacity-80 transition-opacity"
+                hx-post="{% url 'offer_contact_info' offer.id %}"
+                hx-swap="outerHTML">
+            <i class="fa-solid fa-address-card text-[11px]"></i>
+            Afficher les informations de contact
+        </button>
+    </div>
+
+    <!-- ── Zone propriétaire ── -->
+    <!-- Liens géo SEO -->
+    {% if offer.city or offer.department %}
+    <div class="border-t border-ink/8 pt-6 pb-2 flex flex-wrap gap-4">
+        {% if offer.city %}
+        <a href="{% url 'city_offers' city_slug=offer.city|slugify %}"
+           class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em]
+                  text-ink-muted hover:text-ink transition-colors">
+            <i class="fa-solid fa-location-dot text-[9px]"></i>
+            Toutes les annonces à {{ offer.city }}
+        </a>
+        {% endif %}
+        {% if offer.department %}
+        <a href="{% url 'department_offers' dept_slug=offer.department|slugify %}"
+           class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em]
+                  text-ink-muted hover:text-ink transition-colors">
+            <i class="fa-solid fa-map text-[9px]"></i>
+            Toutes les annonces — {{ offer.department }}
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if offer.author == request.user %}
+    <div class="border-t border-ink/8 pt-8 space-y-4">
+
+        {% if not offer.filled %}
+            {% if offer.moderation and not offer.moderation.passed %}
+            <div class="border-l-4 border-red-400 bg-red-50 px-4 py-3">
+                <p class="text-sm font-bold text-red-700 mb-2">Annonce non publiée — modération</p>
+                <p class="text-sm text-red-600 mb-2">Notre système a détecté un contenu potentiellement problématique :</p>
+                <ul class="text-sm text-red-600 space-y-0.5 mb-2">
+                    {% for reason in offer.moderation.get_localized_reasons %}
+                    <li class="flex items-start gap-1.5"><span class="mt-0.5 shrink-0">–</span> {{ reason }}</li>
+                    {% endfor %}
+                </ul>
+                <p class="text-sm text-red-500">Modifiez votre annonce pour respecter les règles, puis soumettez-la à nouveau.</p>
+            </div>
+            {% else %}
+            <div class="border-l-4 border-ink/15 bg-ink/3 px-4 py-3">
+                <p class="text-sm text-ink-soft">
+                    <i class="fa-solid fa-circle-check text-green-500 mr-1.5"></i>
+                    Votre annonce est en ligne.
+                </p>
+            </div>
+            {% endif %}
+        {% else %}
+        <div class="border-l-4 border-ink/15 bg-ink/3 px-4 py-3">
+            <p class="text-sm text-ink-muted">
+                <i class="fa-solid fa-handshake-simple mr-1.5"></i>
+                Cette annonce a été marquée comme pourvue — elle n'est plus visible en ligne.
+            </p>
+        </div>
+        {% endif %}
+
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'update_offer' offer.id %}"
+               class="flex items-center gap-2 px-4 py-2
+                      text-[11px] font-bold uppercase tracking-[0.12em]
+                      border border-ink/20 text-ink-soft hover:border-ink hover:text-ink transition-colors">
+                <i class="fa-solid fa-pen text-[10px]"></i>Modifier
+            </a>
+
+            {% if not offer.filled %}
+            <a href="{% url 'fill_offer' offer.id %}"
+               class="flex items-center gap-2 px-4 py-2
+                      text-[11px] font-bold uppercase tracking-[0.12em]
+                      bg-green-600 text-white hover:bg-green-700 transition-colors">
+                <i class="fa-solid fa-handshake-simple text-[10px]"></i>Marquer pourvue
+            </a>
+            {% else %}
+            <a href="{% url 'unfill_offer' offer.id %}"
+               class="flex items-center gap-2 px-4 py-2
+                      text-[11px] font-bold uppercase tracking-[0.12em]
+                      border border-amber-400/60 text-amber-600 hover:bg-amber-50 transition-colors">
+                <i class="fa-solid fa-handshake-slash text-[10px]"></i>Marquer non pourvue
+            </a>
+            {% endif %}
+
+            <a href="{% url 'delete_offer' offer.id %}"
+               class="flex items-center gap-2 px-4 py-2
+                      text-[11px] font-bold uppercase tracking-[0.12em]
+                      text-red-400 hover:text-red-600 hover:bg-red-50
+                      border border-transparent hover:border-red-200 transition-colors ml-auto">
+                <i class="fa-solid fa-trash text-[10px]"></i>Supprimer
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
 {% endblock main %}

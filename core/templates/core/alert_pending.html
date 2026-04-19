@@ -1,0 +1,24 @@
+{% extends "core/base.html" %}
+
+{% block title %}Vérifiez votre email — Petites Annonces Théâtre{% endblock %}
+
+{% block main %}
+<div class="px-4 md:px-8 py-16 max-w-lg text-center mx-auto">
+    <i class="fa-solid fa-envelope-circle-check text-4xl text-ink/20 mb-6 block"></i>
+    <h1 class="font-display font-bold text-ink text-xl uppercase tracking-[0.06em] mb-4">
+        Vérifiez votre email
+    </h1>
+    <p class="text-sm text-ink-muted mb-3">
+        Un email de confirmation a été envoyé à <strong class="text-ink">{{ email }}</strong>.
+    </p>
+    <p class="text-sm text-ink-muted mb-8">
+        Cliquez sur le lien dans l'email pour activer votre alerte.
+    </p>
+    <a href="{% url 'index' %}"
+       class="inline-flex items-center gap-2 px-5 py-2.5 border border-ink/20 text-[11px]
+              font-display font-bold uppercase tracking-[0.14em] text-ink-soft
+              hover:border-ink hover:text-ink transition-colors">
+        Retour aux annonces
+    </a>
+</div>
+{% endblock %}

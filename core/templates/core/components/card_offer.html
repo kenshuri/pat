@@ -1,129 +1,147 @@
 <a
     href="{% url 'offer' offer.id %}"
+    class="group block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
     tabindex="0"
-    class="card
-           {% if offer.filled %}
-               bg-base-300
-           {% elif offer.moderation and not offer.moderation.passed %}
-               bg-error
-           {% else %}
-               bg-base-100
-           {% endif %}
-           transition-all duration-300 cursor-pointer select-none w-full
-           focus-visible:outline-none
-           focus-visible:ring-4 focus-visible:ring-primary/80
-           focus-visible:ring-offset-2 focus-visible:ring-offset-base-100
-           rounded-box"
-    x-data="{ pressed:false, sx:0, sy:0 }"
-
-    /* ---- souris / clavier ---- */
-    @mousedown="pressed = true"
-    @mouseup="pressed = false"
-    @mouseleave="pressed = false"
-
-    /* ---- tactile ---- */
-    @touchstart="
-        pressed = true;
-        sx = $event.touches[0].clientX;
-        sy = $event.touches[0].clientY;
-    "
-    @touchmove.passive="
-        if (Math.abs($event.touches[0].clientX - sx) > 6
-            || Math.abs($event.touches[0].clientY - sy) > 6) {
-            pressed = false;   // on considère que c’est un scroll, pas un tap
-        }
-    "
-    @touchend="pressed = false"
-    @touchcancel="pressed = false"
-
-    {% if last == 1 %}
-        hx-get="/offers/{{ page_next }}"
-        hx-trigger="revealed"
-        hx-target="#list_offers"
-        hx-swap="beforeend"
-        hx-indicator="#spinner"
-    {% endif %}
-    :class="{
-        /* affichage normal */
-        'shadow-md hover:shadow-xl translate-y-0 hover:-translate-y-1': !pressed,
-        /* affichage pressé (clic ou tap) */
-        'opacity-50 shadow-sm translate-y-1': pressed
-    }"
+    x-data="{ pressed: false, sx: 0, sy: 0 }"
+    @mousedown="pressed = true" @mouseup="pressed = false" @mouseleave="pressed = false"
+    @touchstart="pressed = true; sx=$event.touches[0].clientX; sy=$event.touches[0].clientY;"
+    @touchmove.passive="if(Math.abs($event.touches[0].clientX-sx)>8||Math.abs($event.touches[0].clientY-sy)>8){pressed=false}"
+    @touchend="pressed = false" @touchcancel="pressed = false"
+    :class="pressed ? 'opacity-60 scale-[0.985]' : ''"
+    style="transition: opacity .1s, transform .1s;"
 >
-    <div class="card-body">
-        <!-- Titre + icône + badge NEW -->
-        <h2 class="card-title flex justify-between">
-            {% if offer.section == "artists_groups" %}
-                🎭
-            {% elif offer.section == "courses_training" %}
-                🎓
-            {% elif offer.section == "calls_events" %}
-                📣
-            {% elif offer.section == "services_equipment" %}
-                🛠️
-            {% else %}
-                ❓
-            {% endif %}
 
+<!-- ══ VIGNETTE (2:1 paysage) ══ -->
+{% if offer.cover_image %}
+<div class="relative overflow-hidden w-full" style="aspect-ratio: 2 / 1;">
+    <img src="{{ offer.cover_image.url }}"
+         alt="{{ offer.title }}"
+         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+         loading="lazy">
+
+    <!-- Dégradé + titre -->
+    <div class="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-transparent"></div>
+    <div class="absolute bottom-0 inset-x-0 px-3 pb-2.5">
+        <h2 class="text-white text-xs font-bold leading-snug line-clamp-2 group-hover:text-white/90 transition-colors">
             {{ offer.title|capfirst }}
-
-            {% if offer.recent %}
-                <span class="badge badge-accent">NEW</span>
-            {% endif %}
         </h2>
-
-        <!-- Résumé -->
-        <p class="overflow-hidden text-ellipsis">
-            {{ offer.summary }}
-        </p>
-
-        <!-- Bas de carte : date + badges -->
-        <div class="flex items-center justify-between">
-            <time class="italic">
-                {{ offer.created_on|date:"d/m/Y" }}
-            </time>
-
-            <div class="flex flex-wrap justify-end items-center gap-2">
-
-                {# TYPE / SECTION #}
-                {% if offer.type == 'offer' %}
-                    {% if offer.section == 'artists_groups' %}
-                        <span class="badge badge-primary badge-soft">Je recrute</span>
-                    {% elif offer.section == 'courses_training' %}
-                        <span class="badge badge-primary badge-soft">Je propose</span>
-                    {% elif offer.section == 'calls_events' %}
-                        <span class="badge badge-primary badge-soft">Je programme</span>
-                    {% elif offer.section == 'services_equipment' %}
-                        <span class="badge badge-primary badge-soft">Je propose</span>
-                    {% endif %}
-                {% else %}
-                    {% if offer.section == 'artists_groups' %}
-                        <span class="badge badge-primary">Je postule</span>
-                    {% elif offer.section == 'courses_training' %}
-                        <span class="badge badge-primary">Je recherche</span>
-                    {% elif offer.section == 'calls_events' %}
-                        <span class="badge badge-primary">Je me produis</span>
-                    {% elif offer.section == 'services_equipment' %}
-                        <span class="badge badge-primary">Je recherche</span>
-                    {% endif %}
-                {% endif %}
-
-                {# GRATUIT / PAYANT, etc. #}
-                {% if offer.category == 'paid' %}
-                    {% if offer.section in 'artists_groups calls_events' %}
-                        <span class="badge badge-secondary">Rémunéré</span>
-                    {% else %}
-                        <span class="badge badge-secondary">Payant</span>
-                    {% endif %}
-                {% else %}
-                    {% if offer.section in 'artists_groups calls_events' %}
-                        <span class="badge badge-soft badge-secondary">Bénévole</span>
-                    {% else %}
-                        <span class="badge badge-soft badge-secondary">Gratuit</span>
-                    {% endif %}
-                {% endif %}
-
-            </div>
-        </div>
     </div>
+
+    <!-- Overlay "Pourvue" -->
+    {% if offer.filled %}
+    <div class="absolute inset-0 bg-ink/65 flex items-center justify-center">
+        <span class="text-white/70 font-bold text-sm uppercase tracking-widest border border-white/20 px-3 py-1">
+            Pourvue
+        </span>
+    </div>
+    {% endif %}
+
+    <!-- Indicateur modération -->
+    {% if offer.moderation and not offer.moderation.passed %}
+    <div class="absolute inset-x-0 bottom-0 h-0.5 bg-red-400/80"></div>
+    {% endif %}
+
+    <!-- Hover surbrillance -->
+    <div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-200 pointer-events-none"></div>
+</div>
+{% else %}
+<!-- Strip coloré (fallback sans image) -->
+<div
+    class="relative overflow-hidden w-full"
+    style="aspect-ratio: 2 / 1;
+        {% if offer.section == 'artists_groups' %}
+            background: linear-gradient(150deg, oklch(17% .065 265) 0%, oklch(25% .085 252) 100%);
+        {% elif offer.section == 'courses_training' %}
+            background: linear-gradient(150deg, oklch(16% .09 152) 0%, oklch(24% .11 158) 100%);
+        {% elif offer.section == 'calls_events' %}
+            background: linear-gradient(150deg, oklch(16% .115 12) 0%, oklch(26% .12 22) 100%);
+        {% elif offer.section == 'services_equipment' %}
+            background: linear-gradient(150deg, oklch(14% .03 50) 0%, oklch(22% .05 60) 100%);
+        {% else %}
+            background: linear-gradient(150deg, #111 0%, #222 100%);
+        {% endif %}
+    "
+>
+    <!-- Rubrique + emoji (haut) -->
+    <div class="absolute top-0 inset-x-0 flex items-center justify-between px-3 pt-2.5">
+        <span class="text-white/25 text-[8px] uppercase tracking-[0.18em] font-semibold leading-none">
+            {% if offer.section == "artists_groups" %}Comédien·nes
+            {% elif offer.section == "courses_training" %}Cours
+            {% elif offer.section == "calls_events" %}Appels
+            {% elif offer.section == "services_equipment" %}Services
+            {% endif %}
+        </span>
+        <span class="text-lg leading-none" aria-hidden="true">
+            {% if offer.section == "artists_groups" %}🎭
+            {% elif offer.section == "courses_training" %}🎓
+            {% elif offer.section == "calls_events" %}📣
+            {% elif offer.section == "services_equipment" %}🛠️
+            {% else %}🎪{% endif %}
+        </span>
+    </div>
+
+    <!-- Titre (bas, avec dégradé) -->
+    <div class="absolute bottom-0 inset-x-0 px-3 pb-2.5 pt-6
+                bg-gradient-to-t from-black/60 via-black/20 to-transparent">
+        <h2 class="text-white text-xs font-bold leading-snug line-clamp-2 group-hover:text-white/90 transition-colors">
+            {{ offer.title|capfirst }}
+        </h2>
+    </div>
+
+    <!-- Overlay "Pourvue" -->
+    {% if offer.filled %}
+    <div class="absolute inset-0 bg-ink/65 flex items-center justify-center">
+        <span class="text-white/70 font-bold text-sm uppercase tracking-widest border border-white/20 px-3 py-1">
+            Pourvue
+        </span>
+    </div>
+    {% endif %}
+
+    <!-- Indicateur modération -->
+    {% if offer.moderation and not offer.moderation.passed %}
+    <div class="absolute inset-x-0 bottom-0 h-0.5 bg-red-400/80"></div>
+    {% endif %}
+
+    <!-- Hover : légère surbrillance -->
+    <div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-200 pointer-events-none"></div>
+</div>
+{% endif %}
+
+<!-- ══ MÉTADONNÉES ══ -->
+<div class="pt-2 pb-3 px-0.5">
+    <!-- Type + rémunération + ville -->
+    <div class="flex items-center gap-1.5 flex-wrap">
+        {% if offer.type == 'offer' %}
+            {% if offer.section == 'artists_groups' %}   <span class="tag-fill">Je recrute</span>
+            {% elif offer.section == 'courses_training' %}<span class="tag-fill">Je propose</span>
+            {% elif offer.section == 'calls_events' %}   <span class="tag-fill">Je programme</span>
+            {% elif offer.section == 'services_equipment' %}<span class="tag-fill">Je propose</span>
+            {% endif %}
+        {% else %}
+            {% if offer.section == 'artists_groups' %}   <span class="tag-outline">Je postule</span>
+            {% elif offer.section == 'courses_training' %}<span class="tag-outline">Je recherche</span>
+            {% elif offer.section == 'calls_events' %}   <span class="tag-outline">Je me produis</span>
+            {% elif offer.section == 'services_equipment' %}<span class="tag-outline">Je recherche</span>
+            {% endif %}
+        {% endif %}
+
+        {% if offer.category == 'paid' %}
+            {% if offer.section == 'artists_groups' or offer.section == 'calls_events' %}
+                <span class="tag-amber">Rémunéré</span>
+            {% else %}
+                <span class="tag-amber">Payant</span>
+            {% endif %}
+        {% endif %}
+
+        {% if offer.city %}
+        <span class="text-[9px] text-ink-muted ml-auto">{{ offer.city }}</span>
+        {% endif %}
+    </div>
+
+    <!-- Date -->
+    <time class="text-[9px] text-ink/25 mt-1 block" datetime="{{ offer.created_on|date:'Y-m-d' }}">
+        {{ offer.created_on|date:"d/m/Y" }}
+    </time>
+</div>
+
 </a>

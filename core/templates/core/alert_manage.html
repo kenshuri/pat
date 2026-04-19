@@ -1,0 +1,66 @@
+{% extends "core/base.html" %}
+
+{% block title %}Mes alertes — Petites Annonces Théâtre{% endblock %}
+
+{% block main %}
+<div class="px-4 md:px-8 py-8 max-w-2xl">
+
+    <h1 class="font-display font-bold text-ink text-xl uppercase tracking-[0.06em] mb-2">
+        Mes alertes
+    </h1>
+    <p class="text-sm text-ink-muted mb-8">{{ alerts.0.email }}</p>
+
+    {% if alerts %}
+    <div class="space-y-3">
+        {% for a in alerts %}
+        <div class="border border-ink/10 p-5 flex items-start justify-between gap-4">
+            <div class="min-w-0">
+                <p class="text-sm font-medium text-ink mb-1">{{ a.filter_summary }}</p>
+                <div class="flex flex-wrap gap-3 text-[11px] text-ink-muted">
+                    <span>
+                        <i class="fa-solid fa-clock text-[9px] mr-1"></i>
+                        {{ a.get_frequency_display }}
+                    </span>
+                    {% if a.last_sent_at %}
+                    <span>
+                        <i class="fa-solid fa-paper-plane text-[9px] mr-1"></i>
+                        Dernier envoi {{ a.last_sent_at|date:"d/m/Y" }}
+                    </span>
+                    {% else %}
+                    <span class="text-ink/30">Aucun envoi encore</span>
+                    {% endif %}
+                    {% if not a.active %}
+                    <span class="text-amber-500">
+                        <i class="fa-solid fa-pause text-[9px] mr-1"></i>
+                        Désactivée
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="delete_token" value="{{ a.token }}">
+                <button type="submit"
+                        onclick="return confirm('Supprimer cette alerte ?')"
+                        class="shrink-0 text-[10px] text-ink/30 hover:text-red-500 transition-colors px-2 py-1">
+                    <i class="fa-solid fa-trash text-[10px]"></i>
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-ink-muted">Aucune alerte active.</p>
+    {% endif %}
+
+    <div class="mt-8">
+        <a href="{% url 'alert' %}"
+           class="inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-white
+                  text-[11px] font-display font-bold uppercase tracking-[0.14em]
+                  hover:opacity-80 transition-opacity">
+            <i class="fa-solid fa-plus text-[9px]"></i>
+            Nouvelle alerte
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -5,9 +5,28 @@ from django.core.files.images import get_image_dimensions
 from .models import Play, Contributor, Representation
 
 
-MAX_POSTER_BYTES = 10_000_000  # 10 Mo
+MAX_IMAGE_BYTES = 10_000_000
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp", "image/mpo"}
-MAX_W, MAX_H = 8000, 8000  # bornes de sécurité facultatives
+MAX_W, MAX_H = 8000, 8000
+
+
+def _validate_image_field(f):
+    if not f:
+        return f
+    size = getattr(f, "size", 0) or 0
+    if size > MAX_IMAGE_BYTES:
+        raise ValidationError("L'image dépasse la taille maximale autorisée (10 Mo).")
+    ctype = getattr(f, "content_type", None)
+    if ctype and ctype.lower() not in ALLOWED_CONTENT_TYPES:
+        raise ValidationError("Format non supporté (formats acceptés : JPG, PNG, WEBP).")
+    try:
+        w, h = get_image_dimensions(f)
+        if w and h and (w > MAX_W or h > MAX_H):
+            raise ValidationError("L'image est trop grande (dimensions maximum 8000×8000 px).")
+    except Exception:
+        pass
+    return f
+
 
 class RepresentationForm(forms.ModelForm):
     class Meta:
@@ -42,83 +61,15 @@ class PlayForm(forms.ModelForm):
     class Meta:
         model = Play
         fields = [
-            "title",
-            "author",
-            "company",
-            "genre",
-            "duration",
-            "poster",
-            "website",
-            "year_created",
-            "description",
+            "title", "author", "company", "genre", "duration",
+            "poster", "cover_image", "website", "year_created", "description",
         ]
-        widgets = {
-            "title": forms.TextInput(attrs={
-                "class": "input input-bordered w-full",
-                "placeholder": "Titre de la pièce",
-                "maxlength": 200
-            }),
-            "author": forms.TextInput(attrs={
-                "class": "input input-bordered w-full",
-                "placeholder": "Auteur·e (facultatif)"
-            }),
-            "company": forms.TextInput(attrs={
-                "class": "input input-bordered w-full",
-                "placeholder": "Nom de la compagnie (facultatif)"
-            }),
-            "genre": forms.Select(attrs={
-                "class": "select select-bordered w-full"
-            }),
-            "duration": forms.TimeInput(attrs={
-                "class": "input input-bordered w-full",
-                "type": "time",
-                "step": "60"
-            }),
-            "poster": forms.ClearableFileInput(attrs={
-                "class": "file-input file-input-bordered w-full"
-            }),
-            "website": forms.URLInput(attrs={
-                "class": "input input-bordered w-full",
-                "placeholder": "https://site-web-de-la-pièce.com"
-            }),
-            "year_created": forms.NumberInput(attrs={
-                "class": "input input-bordered w-full",
-                "placeholder": "Année de création",
-                "min": 1800,
-                "max": 2100
-            }),
-            "description": forms.Textarea(attrs={
-                "class": "textarea textarea-bordered w-full",
-                "placeholder": "Décris la pièce : thème, intentions, synopsis...",
-                "rows": 5
-            }),
-        }
 
     def clean_poster(self):
-        f = self.cleaned_data.get("poster")
-        if not f:
-            return f
+        return _validate_image_field(self.cleaned_data.get("poster"))
 
-        # 1) Taille
-        size = getattr(f, "size", 0) or 0
-        if size > MAX_POSTER_BYTES:
-            raise ValidationError("L'image dépasse la taille maximale autorisée (10 Mo).")
-
-        # 2) Type MIME (si disponible)
-        ctype = getattr(f, "content_type", None)
-        if ctype and ctype.lower() not in ALLOWED_CONTENT_TYPES:
-            raise ValidationError("Format non supporté (formats acceptés : JPG, PNG, WEBP).")
-
-        # 3) Dimensions (évite les images anormales)
-        try:
-            w, h = get_image_dimensions(f)
-            if w and h and (w > MAX_W or h > MAX_H):
-                raise ValidationError("L'image est trop grande (dimensions maximum 8000×8000 px).")
-        except Exception:
-            # Si on ne peut pas lire les dimensions, on laisse PIL gérer plus loin
-            pass
-
-        return f
+    def clean_cover_image(self):
+        return _validate_image_field(self.cleaned_data.get("cover_image"))
 
 
 class ContributorForm(forms.ModelForm):
@@ -126,8 +77,16 @@ class ContributorForm(forms.ModelForm):
         model = Contributor
         fields = ["role", "name"]
         widgets = {
-            "role": forms.TextInput(attrs={"class": "input input-bordered w-full", "placeholder": "Rôle (ex. Mise en scène, Acteur, Soprano…)", "maxlength": 100}),
-            "name": forms.TextInput(attrs={"class": "input input-bordered w-full", "placeholder": "Nom(s)", "maxlength": 255}),
+            "role": forms.TextInput(attrs={
+                "class": "w-full border border-ink/20 px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-ink transition-colors bg-surface",
+                "placeholder": "Ex. Mise en scène, Acteur, Soprano…",
+                "maxlength": 100,
+            }),
+            "name": forms.TextInput(attrs={
+                "class": "w-full border border-ink/20 px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-ink transition-colors bg-surface",
+                "placeholder": "Nom(s)",
+                "maxlength": 255,
+            }),
         }
         labels = {"role": "Rôle", "name": "Nom(s)"}
 
@@ -137,8 +96,8 @@ ContributorFormSet = inlineformset_factory(
     model=Contributor,
     form=ContributorForm,
     fields=["role", "name"],
-    extra=0,            # pas de lignes par défaut; on ajoute dynamiquement
-    can_delete=True,    # permet de marquer une ligne à supprimer
+    extra=0,
+    can_delete=True,
     validate_min=False,
     validate_max=False,
 )
