@@ -18,6 +18,9 @@
         {% csrf_token %}
 
         <!-- Email -->
+        {% if authenticated %}
+        <input type="hidden" name="email" value="{{ request.user.email }}">
+        {% else %}
         <div>
             <label class="block text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-2">
                 Adresse e-mail <span class="text-red-400">*</span>
@@ -32,6 +35,7 @@
             <p class="mt-1.5 text-xs text-red-500">{{ form.email.errors.0 }}</p>
             {% endif %}
         </div>
+        {% endif %}
 
         <!-- Critères de filtrage -->
         <div class="border border-ink/10 p-5 space-y-5">
@@ -165,7 +169,11 @@
         </button>
 
         <p class="text-xs text-ink/30">
+            {% if authenticated %}
+            L'alerte sera créée pour <strong class="text-ink/50">{{ request.user.email }}</strong>.
+            {% else %}
             Un email de confirmation vous sera envoyé. Pas de compte requis.
+            {% endif %}
             Maximum {{ max_alerts }} alertes par adresse email.
         </p>
     </form>

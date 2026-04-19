@@ -299,18 +299,33 @@ def announcement(request):
 
 def alert(request):
     """Création d'une alerte email."""
+    authenticated = request.user.is_authenticated
     if request.method == 'POST':
-        form = AlertForm(request.POST)
+        data = request.POST.copy()
+        if authenticated:
+            data['email'] = request.user.email
+        form = AlertForm(data)
         if form.is_valid():
-            alert_obj = form.save()
+            alert_obj = form.save(commit=False)
+            if authenticated:
+                alert_obj.confirmed = True
+            alert_obj.save()
+            if authenticated:
+                return redirect('alert_user')
             _send_alert_confirmation(alert_obj, request)
             return render(request, 'core/alert_pending.html', {'email': alert_obj.email})
     else:
         initial = {k: request.GET.get(k, '') for k in
                    ('search', 'section', 'offer_type', 'category', 'gender', 'age_min', 'age_max')}
         initial['offer_type'] = request.GET.get('type', '')
+        if authenticated:
+            initial['email'] = request.user.email
         form = AlertForm(initial=initial)
-    return render(request, 'core/alert.html', {'form': form, 'max_alerts': MAX_ALERTS_PER_EMAIL})
+    return render(request, 'core/alert.html', {
+        'form': form,
+        'max_alerts': MAX_ALERTS_PER_EMAIL,
+        'authenticated': authenticated,
+    })
 
 
 def alert_confirm(request, token):
