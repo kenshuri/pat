@@ -1,0 +1,65 @@
+{% extends "core/base.html" %}
+
+{% block title %}Envoyer un message | Petites Annonces Théâtre{% endblock %}
+
+{% block main %}
+<div class="max-w-2xl mx-auto px-4 py-10">
+
+    <!-- Retour à l'annonce -->
+    <a href="{% url 'offer' offer_id=offer.pk %}"
+       class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted hover:text-ink transition-colors mb-8">
+        <i class="fa-solid fa-arrow-left text-[9px]"></i>
+        Retour à l'annonce
+    </a>
+
+    <!-- Contexte annonce -->
+    <div class="border border-ink/10 px-4 py-3 mb-8 flex items-start gap-3 bg-ink/[0.015]">
+        <i class="fa-solid fa-tag text-[10px] text-ink-muted mt-0.5 shrink-0"></i>
+        <div class="min-w-0">
+            <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted mb-0.5">Concernant</p>
+            <p class="text-sm font-bold text-ink truncate">{{ offer.title }}</p>
+        </div>
+    </div>
+
+    <div class="mb-6">
+        <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-muted mb-1">Messagerie</p>
+        <h1 class="text-2xl font-display font-bold text-ink">Envoyer un message</h1>
+        <p class="text-sm text-ink-muted mt-2">
+            Votre message sera transmis à l'annonceur de façon privée.
+        </p>
+    </div>
+
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="px-4 py-3 text-sm border border-red-200 bg-red-50 text-red-700">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" x-data="{ sending: false }" @submit="sending = true">
+        {% csrf_token %}
+        <div class="space-y-4">
+            <div class="space-y-1.5">
+                <label class="block text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">
+                    Votre message
+                </label>
+                {{ form.body }}
+                {% if form.body.errors %}
+                <p class="text-xs text-red-600">{{ form.body.errors }}</p>
+                {% endif %}
+            </div>
+            <button type="submit" :disabled="sending"
+                    class="w-full py-3 bg-ink text-white text-[11px] font-bold uppercase tracking-[0.14em]
+                           hover:opacity-80 transition-opacity disabled:opacity-50 cursor-pointer disabled:cursor-default">
+                <span x-show="!sending" x-cloak>
+                    <i class="fa-solid fa-paper-plane text-[10px] mr-2"></i>
+                    Envoyer le message
+                </span>
+                <span x-show="sending" x-cloak>Envoi en cours…</span>
+            </button>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

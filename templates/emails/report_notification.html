@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f4f0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f4f0;padding:40px 16px;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border:1px solid #e8e6e0;max-width:600px;width:100%;">
+
+      <!-- Header -->
+      <tr>
+        <td style="background:#1a1814;padding:28px 32px;">
+          <p style="margin:0 0 4px;font-family:Georgia,serif;font-size:11px;font-weight:bold;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);">
+            Petites Annonces Théâtre — Administration
+          </p>
+          <p style="margin:0;font-size:18px;font-weight:bold;color:#fff;">
+            🚩 Message signalé
+          </p>
+        </td>
+      </tr>
+
+      <!-- Infos signalement -->
+      <tr>
+        <td style="padding:24px 32px 0;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#fef2f2;border:1px solid #fecaca;border-radius:4px;">
+            <tr>
+              <td style="padding:16px;">
+                <p style="margin:0 0 8px;font-size:11px;font-weight:bold;letter-spacing:0.10em;text-transform:uppercase;color:#dc2626;">
+                  Détails du signalement
+                </p>
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding:3px 0;font-size:12px;color:#6b7280;width:140px;">Signalé par</td>
+                    <td style="padding:3px 0;font-size:12px;color:#1a1814;font-weight:bold;">{{ reporter_name }} <span style="font-weight:normal;color:#6b7280;">({{ reporter_email }})</span></td>
+                  </tr>
+                  <tr>
+                    <td style="padding:3px 0;font-size:12px;color:#6b7280;">Auteur du message</td>
+                    <td style="padding:3px 0;font-size:12px;color:#1a1814;font-weight:bold;">{{ sender_name }} <span style="font-weight:normal;color:#6b7280;">({{ sender_email }})</span></td>
+                  </tr>
+                  <tr>
+                    <td style="padding:3px 0;font-size:12px;color:#6b7280;">Raison</td>
+                    <td style="padding:3px 0;font-size:12px;color:#1a1814;">{{ flag_reason|default:"Non précisée" }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:3px 0;font-size:12px;color:#6b7280;">Annonce concernée</td>
+                    <td style="padding:3px 0;font-size:12px;color:#1a1814;">{{ offer_title }}</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- CTA -->
+      <tr>
+        <td style="padding:20px 32px 0;">
+          <p style="margin:0 0 10px;font-size:11px;font-weight:bold;letter-spacing:0.10em;text-transform:uppercase;color:#6b7280;">
+            Actions rapides
+          </p>
+          <table cellpadding="0" cellspacing="0">
+            <tr>
+              {% if offer_url %}
+              <td style="padding-right:8px;">
+                <a href="{{ offer_url }}"
+                   style="display:inline-block;padding:8px 14px;background:#1a1814;color:#fff;font-size:11px;font-weight:bold;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;">
+                  Voir l'annonce
+                </a>
+              </td>
+              {% endif %}
+              {% if sender_profile_url %}
+              <td style="padding-right:8px;">
+                <a href="{{ sender_profile_url }}"
+                   style="display:inline-block;padding:8px 14px;background:#4b5563;color:#fff;font-size:11px;font-weight:bold;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;">
+                  Profil expéditeur
+                </a>
+              </td>
+              {% endif %}
+              {% if reporter_profile_url %}
+              <td style="padding-right:8px;">
+                <a href="{{ reporter_profile_url }}"
+                   style="display:inline-block;padding:8px 14px;background:#4b5563;color:#fff;font-size:11px;font-weight:bold;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;">
+                  Profil signalant
+                </a>
+              </td>
+              {% endif %}
+              {% if admin_url %}
+              <td>
+                <a href="{{ admin_url }}"
+                   style="display:inline-block;padding:8px 14px;border:1px solid #d1d5db;color:#4b5563;font-size:11px;font-weight:bold;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;">
+                  Admin Django
+                </a>
+              </td>
+              {% endif %}
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Conversation -->
+      <tr>
+        <td style="padding:24px 32px 0;">
+          <p style="margin:0 0 12px;font-size:11px;font-weight:bold;letter-spacing:0.10em;text-transform:uppercase;color:#6b7280;">
+            Conversation complète
+          </p>
+          {% for m in messages %}
+          {% if m.pk == reported_message_pk %}
+          <!-- Message signalé — mis en lumière -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;border:2px solid #dc2626;background:#fef2f2;">
+            <tr>
+              <td style="padding:12px 14px;">
+                <p style="margin:0 0 6px;">
+                  <span style="font-size:11px;font-weight:bold;color:#dc2626;text-transform:uppercase;letter-spacing:0.08em;">
+                    🚩 MESSAGE SIGNALÉ
+                  </span>
+                  <span style="font-size:11px;color:#9ca3af;margin-left:8px;">{{ m.sent_at|date:"d/m/Y à H:i" }}</span>
+                </p>
+                <p style="margin:0 0 6px;font-size:11px;font-weight:bold;color:#dc2626;">{{ m.sender_display }}</p>
+                <p style="margin:0;font-size:13px;color:#1a1814;line-height:1.6;white-space:pre-wrap;">{{ m.body }}</p>
+              </td>
+            </tr>
+          </table>
+          {% elif m.is_system %}
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;background:#f9fafb;border:1px solid #e5e7eb;">
+            <tr>
+              <td style="padding:10px 14px;">
+                <p style="margin:0;font-size:11px;color:#9ca3af;font-style:italic;">
+                  — Coordonnées partagées — {{ m.sent_at|date:"d/m/Y à H:i" }}
+                </p>
+              </td>
+            </tr>
+          </table>
+          {% else %}
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;background:#f9fafb;border:1px solid #e5e7eb;">
+            <tr>
+              <td style="padding:10px 14px;">
+                <p style="margin:0 0 4px;font-size:11px;font-weight:bold;color:#4b5563;">{{ m.sender_display }}</p>
+                <p style="margin:0 0 4px;font-size:13px;color:#374151;line-height:1.5;white-space:pre-wrap;">{{ m.body }}</p>
+                <p style="margin:0;font-size:10px;color:#9ca3af;">{{ m.sent_at|date:"d/m/Y à H:i" }}</p>
+              </td>
+            </tr>
+          </table>
+          {% endif %}
+          {% endfor %}
+        </td>
+      </tr>
+
+      <!-- Footer -->
+      <tr>
+        <td style="border-top:1px solid #f0ede8;padding:20px 32px;margin-top:24px;">
+          <p style="margin:0;font-size:11px;color:#c0bdb8;line-height:1.6;">
+            Email automatique — <a href="{{ site_url }}/admin/" style="color:#8a8680;">Accéder à l'admin Django</a>
+          </p>
+        </td>
+      </tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

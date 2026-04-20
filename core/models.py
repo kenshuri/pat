@@ -100,6 +100,7 @@ class Offer(models.Model):
     contact_phone = models.CharField(max_length=255, null=True, blank=True)
     contact_website = models.URLField(null=True, blank=True)
     contact_details = models.TextField(null=True, blank=True)
+    allow_messaging = models.BooleanField(default=True)
     moderation = models.ForeignKey(ModerationResult, null=True, blank=True, on_delete=models.SET_NULL, related_name="offers")
 
     cover_image = models.ImageField(
@@ -123,6 +124,14 @@ class Offer(models.Model):
             if candidate.lower() not in ('france', 'belgique', 'suisse', 'luxembourg', 'canada'):
                 return candidate
         return ''
+
+    @property
+    def has_contact_info(self):
+        return bool(
+            self.contact_name or self.contact_email or self.contact_phone
+            or self.contact_website or self.contact_details
+            or (self.show_author_mail and self.author_id)
+        )
 
     @property
     def recent(self):

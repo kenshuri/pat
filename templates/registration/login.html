@@ -62,11 +62,11 @@
             </a>
         </div>
 
-        <input type="hidden" name="next" value="{% url 'index' %}">
+        <input type="hidden" name="next" value="{{ next|default:'' }}">
 
         <button type="submit"
                 class="w-full py-3 bg-ink text-white text-[11px] font-bold uppercase tracking-[0.14em]
-                       hover:opacity-80 transition-opacity">
+                       hover:opacity-80 transition-opacity cursor-pointer">
             Se connecter
         </button>
     </form>

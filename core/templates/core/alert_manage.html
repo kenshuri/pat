@@ -3,12 +3,12 @@
 {% block title %}Mes alertes — Petites Annonces Théâtre{% endblock %}
 
 {% block main %}
-<div class="px-4 md:px-8 py-8 max-w-2xl">
+<div class="max-w-2xl mx-auto px-4 py-10">
 
-    <h1 class="font-display font-bold text-ink text-xl uppercase tracking-[0.06em] mb-2">
-        Mes alertes
-    </h1>
-    <p class="text-sm text-ink-muted mb-8">{{ alerts.0.email }}</p>
+    <div class="mb-8">
+        <a href="{% url 'profiles:my_account' %}" class="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-muted hover:text-ink transition-colors mb-1 inline-block">Mon compte</a>
+        <h1 class="text-2xl font-display font-bold text-ink">Mes alertes</h1>
+    </div>
 
     {% if alerts %}
     <div class="space-y-3">

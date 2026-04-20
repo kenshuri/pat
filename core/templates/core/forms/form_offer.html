@@ -255,6 +255,12 @@
         <div x-show="open" x-collapse>
             <div class="space-y-4">
 
+                <p class="text-xs text-ink-muted leading-relaxed px-3 py-2.5 border border-ink/10 bg-ink/[0.015]">
+                    Vous n'êtes pas obligé de renseigner vos coordonnées. Si vous préférez être contacté
+                    uniquement via la messagerie du site, laissez ces champs vides — les personnes intéressées
+                    devront créer un compte pour vous écrire.
+                </p>
+
                 <div class="space-y-1.5">
                     <label for="id_contact_name" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Nom / Compagnie</label>
                     <input type="text" id="id_contact_name" name="contact_name"
@@ -312,6 +318,20 @@
                     <span class="text-sm text-ink-soft group-hover:text-ink transition-colors">
                         Afficher mon email de compte dans l'annonce
                         <span class="block text-[10px] text-ink-muted mt-0.5">Ne pas activer si vous souhaitez garder votre email personnel caché.</span>
+                    </span>
+                </label>
+
+                <label class="flex items-start gap-3 cursor-pointer group">
+                    <div class="relative mt-0.5 shrink-0">
+                        <input type="checkbox" id="id_allow_messaging" name="allow_messaging"
+                               {% if form.instance.allow_messaging or not form.instance.pk %}checked{% endif %}
+                               class="peer sr-only">
+                        <div class="w-4 h-4 border border-ink/25 bg-surface peer-checked:bg-ink peer-checked:border-ink transition-colors"></div>
+                        <i class="fa-solid fa-check absolute inset-0 flex items-center justify-center text-[8px] text-white hidden peer-checked:flex pointer-events-none"></i>
+                    </div>
+                    <span class="text-sm text-ink-soft group-hover:text-ink transition-colors">
+                        Accepter d'être contacté via la messagerie interne du site
+                        <span class="block text-[10px] text-ink-muted mt-0.5">Les utilisateurs connectés pourront vous envoyer un message directement depuis cette annonce.</span>
                     </span>
                 </label>
 

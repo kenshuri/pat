@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block title %}{{ troupe.name }} — Troupe | Petites Annonces Théâtre{% endblock %}
+{% block title %}{{ troupe.name }} — Compagnie | Petites Annonces Théâtre{% endblock %}
 {% block meta_description %}{{ troupe.name }}{% if troupe.city %}, {{ troupe.city }}{% endif %}. {{ troupe.description|truncatechars:120 }}{% endblock %}
 
 {% block canonical_tag %}<link rel="canonical" href="{{ SITE_URL }}{% url 'profiles:troupe_detail' slug=troupe.slug %}">{% endblock %}
@@ -23,19 +23,17 @@
 {% endblock %}
 
 {% block main %}
-<div class="px-4 md:px-8 py-6 max-w-4xl">
+<div class="px-4 md:px-8 py-10 max-w-4xl">
 
-    <!-- Fil d'Ariane -->
-    <nav class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-6 flex items-center gap-2">
-        <a href="{% url 'index' %}" class="hover:text-ink transition-colors">Accueil</a>
-        <span>›</span>
-        <span class="text-ink">{{ troupe.name }}</span>
-    </nav>
+    <div class="mb-8">
+        <a href="{% url 'profiles:my_account' %}" class="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-muted hover:text-ink transition-colors mb-1 inline-block">Mon compte</a>
+        <h1 class="text-2xl font-display font-bold text-ink">Ma compagnie</h1>
+    </div>
 
     {% if own %}
     <div class="mb-6 flex items-center gap-3 p-4 bg-ink/3 border border-ink/8">
         <i class="fa-solid fa-pen text-[10px] text-ink-muted"></i>
-        <p class="text-sm text-ink-muted flex-1">C'est votre troupe.</p>
+        <p class="text-sm text-ink-muted flex-1">C'est votre compagnie.</p>
         <a href="{% url 'profiles:troupe_edit' %}"
            class="text-[11px] font-bold uppercase tracking-[0.10em] text-ink hover:opacity-60 transition-opacity">
             Modifier
@@ -83,9 +81,9 @@
 
         <!-- Description -->
         <div class="md:col-span-2">
-            <h1 class="font-display font-bold text-ink text-2xl md:text-3xl uppercase tracking-[0.06em] mb-6">
+            <h2 class="font-display font-bold text-ink text-2xl md:text-3xl tracking-[0.02em] mb-6">
                 {{ troupe.name }}
-            </h1>
+            </h2>
 
             {% if troupe.description %}
             <div class="trix-content text-sm text-ink-soft leading-relaxed">
@@ -128,6 +126,37 @@
                         {% if actor_profile.city %}<p class="text-xs text-ink-muted">{{ actor_profile.city }}</p>{% endif %}
                     </div>
                 </a>
+            </div>
+            {% endif %}
+
+            {% if troupe_plays %}
+            <div class="mt-8">
+                <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
+                    Pièces
+                </h2>
+                <ul class="space-y-2">
+                    {% for play in troupe_plays %}
+                    <li>
+                        <a href="{% url 'shows:play_detail' pk=play.pk %}"
+                           class="flex items-center gap-3 p-3 border border-ink/10 hover:border-ink/30 transition-colors">
+                            {% if play.poster %}
+                            <img src="{{ play.poster.url }}" alt="" class="w-10 h-14 object-cover flex-shrink-0">
+                            {% else %}
+                            <span class="w-10 h-14 bg-ink/5 flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-book-open text-ink/20"></i>
+                            </span>
+                            {% endif %}
+                            <span class="flex-1 min-w-0">
+                                <span class="block text-sm font-medium text-ink">{{ play.title }}</span>
+                                <span class="block text-[11px] text-ink-muted mt-0.5">
+                                    {{ play.get_genre_display }}{% if play.company %} · {{ play.company }}{% endif %}
+                                </span>
+                            </span>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-ink-muted flex-shrink-0"></i>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
             {% endif %}
 

@@ -1,0 +1,190 @@
+{% extends "core/base.html" %}
+
+{% block title %}Mon espace — Petites Annonces Théâtre{% endblock %}
+
+{% block main %}
+<div class="max-w-2xl mx-auto px-4 py-10">
+
+    <div class="mb-8">
+        <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-muted mb-1">Mon compte</p>
+        <h1 class="text-2xl font-display font-bold text-ink">Mon espace</h1>
+        <p class="text-sm text-ink-muted mt-1">{{ request.user.email }}</p>
+    </div>
+
+    <div class="space-y-8">
+
+        <!-- ── Mes profils ── -->
+        <section>
+            <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-3 border-b border-ink/8 pb-2">
+                Mes profils publics
+            </h2>
+            <div class="space-y-2">
+
+                <!-- Comédien -->
+                <div class="border border-ink/10 p-4 flex items-center gap-4">
+                    {% if actor_profile %}
+                    <div class="w-12 h-16 bg-ink/5 overflow-hidden flex-shrink-0">
+                        {% if actor_profile.photo %}
+                        <img src="{{ actor_profile.photo.url }}" alt="" class="w-full h-full object-cover">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center">
+                            <i class="fa-regular fa-user text-xl text-ink/20"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted mb-0.5">Comédien·ne</p>
+                        <p class="text-sm font-bold text-ink">{{ actor_profile.display_name }}</p>
+                        {% if actor_profile.city %}<p class="text-xs text-ink-muted">{{ actor_profile.city }}</p>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2 items-end flex-shrink-0">
+                        <a href="{% url 'profiles:actor_detail' slug=actor_profile.slug %}"
+                           class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted hover:text-ink transition-colors">
+                            Voir
+                        </a>
+                        <a href="{% url 'profiles:actor_edit' %}"
+                           class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted hover:text-ink transition-colors">
+                            Modifier
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="w-12 h-16 bg-ink/5 flex-shrink-0 flex items-center justify-center">
+                        <i class="fa-regular fa-user text-xl text-ink/20"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted mb-0.5">Comédien·ne</p>
+                        <p class="text-sm text-ink-muted">Profil non créé</p>
+                    </div>
+                    <a href="{% url 'profiles:actor_edit' %}"
+                       class="flex-shrink-0 px-4 py-2 bg-ink text-white text-[10px] font-bold uppercase tracking-[0.12em]
+                              hover:opacity-80 transition-opacity cursor-pointer">
+                        Créer
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- Compagnie -->
+                <div class="border border-ink/10 p-4 flex items-center gap-4">
+                    {% if troupe_profile %}
+                    <div class="w-12 h-12 bg-ink/5 overflow-hidden flex-shrink-0">
+                        {% if troupe_profile.photo %}
+                        <img src="{{ troupe_profile.photo.url }}" alt="" class="w-full h-full object-cover">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center">
+                            <i class="fa-solid fa-masks-theater text-xl text-ink/20"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted mb-0.5">Compagnie</p>
+                        <p class="text-sm font-bold text-ink">{{ troupe_profile.name }}</p>
+                        {% if troupe_profile.city %}<p class="text-xs text-ink-muted">{{ troupe_profile.city }}</p>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2 items-end flex-shrink-0">
+                        <a href="{% url 'profiles:troupe_detail' slug=troupe_profile.slug %}"
+                           class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted hover:text-ink transition-colors">
+                            Voir
+                        </a>
+                        <a href="{% url 'profiles:troupe_edit' %}"
+                           class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted hover:text-ink transition-colors">
+                            Modifier
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="w-12 h-12 bg-ink/5 flex-shrink-0 flex items-center justify-center">
+                        <i class="fa-solid fa-masks-theater text-xl text-ink/20"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted mb-0.5">Compagnie</p>
+                        <p class="text-sm text-ink-muted">Profil non créé</p>
+                    </div>
+                    <a href="{% url 'profiles:troupe_edit' %}"
+                       class="flex-shrink-0 px-4 py-2 bg-ink text-white text-[10px] font-bold uppercase tracking-[0.12em]
+                              hover:opacity-80 transition-opacity cursor-pointer">
+                        Créer
+                    </a>
+                    {% endif %}
+                </div>
+
+                <div class="pt-1">
+                    <a href="{% url 'profiles:user_detail' pk=request.user.pk %}"
+                       class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted hover:text-ink transition-colors inline-flex items-center gap-1.5">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                        Voir ma page publique complète
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Activité ── -->
+        <section>
+            <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-3 border-b border-ink/8 pb-2">
+                Activité
+            </h2>
+            <div class="space-y-1">
+                <a href="{% url 'offer_user' %}"
+                   class="flex items-center gap-3 px-4 py-3 border border-ink/10 hover:border-ink/30 transition-colors">
+                    <i class="fa-solid fa-envelopes-bulk text-[11px] text-ink-muted w-4 text-center"></i>
+                    <span class="flex-1 text-sm text-ink-soft">Mes annonces</span>
+                    <span class="text-[11px] text-ink-muted">
+                        {{ active_offers_count }} active{{ active_offers_count|pluralize }}
+                        {% if filled_offers_count %} · {{ filled_offers_count }} pourvue{{ filled_offers_count|pluralize }}{% endif %}
+                    </span>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-ink-muted"></i>
+                </a>
+                <a href="{% url 'messaging:inbox' %}"
+                   class="flex items-center gap-3 px-4 py-3 border border-ink/10 hover:border-ink/30 transition-colors">
+                    <i class="fa-solid fa-message text-[11px] text-ink-muted w-4 text-center"></i>
+                    <span class="flex-1 text-sm text-ink-soft">Mes messages</span>
+                    <span class="text-[11px] text-ink-muted">
+                        {{ conversations_count }} conversation{{ conversations_count|pluralize }}
+                        {% if unread_msgs_total > 0 %} · <span class="font-bold text-ink">{{ unread_msgs_total }} nouveau{{ unread_msgs_total|pluralize }}</span>{% endif %}
+                    </span>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-ink-muted"></i>
+                </a>
+                <a href="{% url 'shows:agenda-user' %}"
+                   class="flex items-center gap-3 px-4 py-3 border border-ink/10 hover:border-ink/30 transition-colors">
+                    <i class="fa-solid fa-ticket text-[11px] text-ink-muted w-4 text-center"></i>
+                    <span class="flex-1 text-sm text-ink-soft">Mes pièces</span>
+                    {% if plays_count or actor_plays_count %}
+                    <span class="text-[11px] text-ink-muted">
+                        {% if plays_count %}{{ plays_count }} créée{{ plays_count|pluralize }}{% endif %}{% if plays_count and actor_plays_count %} · {% endif %}{% if actor_plays_count %}{{ actor_plays_count }} jouée{{ actor_plays_count|pluralize }}{% endif %}
+                    </span>
+                    {% endif %}
+                    <i class="fa-solid fa-chevron-right text-[9px] text-ink-muted"></i>
+                </a>
+                <a href="{% url 'alert_user' %}"
+                   class="flex items-center gap-3 px-4 py-3 border border-ink/10 hover:border-ink/30 transition-colors">
+                    <i class="fa-solid fa-bell text-[11px] text-ink-muted w-4 text-center"></i>
+                    <span class="flex-1 text-sm text-ink-soft">Mes alertes</span>
+                    {% if alerts_count %}
+                    <span class="text-[11px] text-ink-muted">{{ alerts_count }} active{{ alerts_count|pluralize }}</span>
+                    {% endif %}
+                    <i class="fa-solid fa-chevron-right text-[9px] text-ink-muted"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- ── Compte ── -->
+        <section>
+            <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-3 border-b border-ink/8 pb-2">
+                Paramètres du compte
+            </h2>
+            <div class="space-y-1">
+                <div class="flex items-center gap-3 px-4 py-3 border border-ink/10">
+                    <i class="fa-solid fa-envelope text-[11px] text-ink-muted w-4 text-center"></i>
+                    <span class="flex-1 text-sm text-ink-soft">Adresse email</span>
+                    <span class="text-[11px] text-ink-muted">{{ request.user.email }}</span>
+                </div>
+                <a href="{% url 'password_change' %}"
+                   class="flex items-center gap-3 px-4 py-3 border border-ink/10 hover:border-ink/30 transition-colors">
+                    <i class="fa-solid fa-lock text-[11px] text-ink-muted w-4 text-center"></i>
+                    <span class="flex-1 text-sm text-ink-soft">Changer le mot de passe</span>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-ink-muted"></i>
+                </a>
+            </div>
+        </section>
+
+    </div>
+</div>
+{% endblock %}

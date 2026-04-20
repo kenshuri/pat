@@ -251,18 +251,95 @@
     {% endif %}
 
     <!-- ── Contact ── -->
-    <div class="border-t border-ink/8 pt-8 mb-8" id="contact_info">
-        <button class="w-full flex items-center justify-center gap-2
-                       py-3 px-6
-                       text-[11px] font-bold uppercase tracking-[0.14em]
-                       bg-ink text-white
-                       hover:opacity-80 transition-opacity"
-                hx-post="{% url 'offer_contact_info' offer.id %}"
-                hx-swap="outerHTML">
-            <i class="fa-solid fa-address-card text-[11px]"></i>
-            Afficher les informations de contact
-        </button>
+    {% if offer.has_contact_info or offer.allow_messaging %}
+    <div class="border-t border-ink/8 pt-8 mb-8" id="contact_info"
+         x-data="{ modal: false }">
+        <div class="space-y-3">
+            {% if offer.has_contact_info %}
+            <button class="w-full flex items-center justify-center gap-2
+                           py-3 px-6
+                           text-[11px] font-bold uppercase tracking-[0.14em]
+                           bg-ink text-white
+                           hover:opacity-80 transition-opacity cursor-pointer"
+                    hx-post="{% url 'offer_contact_info' offer.id %}"
+                    hx-swap="outerHTML">
+                <i class="fa-solid fa-address-card text-[11px]"></i>
+                Afficher les informations de contact
+            </button>
+            {% endif %}
+            {% if offer.allow_messaging and offer.author %}
+              {% if not user.is_authenticated or user != offer.author %}
+                {% if user.is_authenticated %}
+            <a href="{% url 'messaging:new_conversation' offer_id=offer.id %}"
+               class="w-full flex items-center justify-center gap-2
+                      py-3 px-6
+                      text-[11px] font-bold uppercase tracking-[0.14em]
+                      border border-ink text-ink
+                      hover:bg-ink/5 transition-colors cursor-pointer">
+                <i class="fa-solid fa-message text-[11px]"></i>
+                Envoyer un message
+            </a>
+                {% else %}
+            <button @click="modal = true"
+                    class="w-full flex items-center justify-center gap-2
+                           py-3 px-6
+                           text-[11px] font-bold uppercase tracking-[0.14em]
+                           border border-ink text-ink
+                           hover:bg-ink/5 transition-colors cursor-pointer">
+                <i class="fa-solid fa-message text-[11px]"></i>
+                Envoyer un message
+            </button>
+                {% endif %}
+              {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- Modal connexion requise -->
+        <div x-show="modal"
+             x-cloak
+             @click.self="modal = false"
+             class="fixed inset-0 bg-ink/40 z-50 flex items-center justify-center px-4">
+            <div class="bg-surface border border-ink/10 shadow-2xl max-w-sm w-full p-6 relative">
+                <button @click="modal = false"
+                        class="absolute top-4 right-4 text-ink-muted hover:text-ink transition-colors cursor-pointer">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+                <div class="mb-5">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted mb-2">
+                        Connexion requise
+                    </p>
+                    {% if offer.has_contact_info %}
+                    <p class="text-sm text-ink-soft leading-relaxed">
+                        L'annonceur a fourni ses coordonnées — vous pouvez le contacter directement
+                        en les affichant ci-dessus.<br><br>
+                        Pour utiliser la messagerie du site, connectez-vous ou créez un compte gratuit.
+                    </p>
+                    {% else %}
+                    <p class="text-sm text-ink-soft leading-relaxed">
+                        L'annonceur n'a pas souhaité partager ses coordonnées publiquement.
+                        Pour le contacter, vous devez passer par la messagerie du site —
+                        connectez-vous ou créez un compte gratuit.
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="space-y-2">
+                    <a href="{% url 'login' %}?next={% url 'messaging:new_conversation' offer_id=offer.id %}"
+                       class="w-full flex items-center justify-center gap-2 py-2.5
+                              bg-ink text-white text-[11px] font-bold uppercase tracking-[0.12em]
+                              hover:opacity-80 transition-opacity">
+                        Se connecter
+                    </a>
+                    <a href="{% url 'signup' %}?next={% url 'messaging:new_conversation' offer_id=offer.id %}"
+                       class="w-full flex items-center justify-center gap-2 py-2.5
+                              border border-ink/20 text-ink text-[11px] font-bold uppercase tracking-[0.12em]
+                              hover:bg-ink/4 transition-colors">
+                        Créer un compte gratuit
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
+    {% endif %}
 
     <!-- ── Zone propriétaire ── -->
     <!-- Liens géo SEO -->

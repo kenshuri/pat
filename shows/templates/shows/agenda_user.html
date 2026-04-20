@@ -1,44 +1,105 @@
 {% extends "core/base.html" %}
-{% load static %}
 
 {% block title %}Mes pièces — Petites Annonces Théâtre{% endblock %}
 
 {% block main %}
+<div class="max-w-2xl mx-auto px-4 py-10">
 
-<!-- Strip d'en-tête -->
-<div class="relative overflow-hidden w-full bg-ink py-10 md:py-14"
-     style="background: linear-gradient(150deg, oklch(17% .065 265) 0%, oklch(25% .085 252) 100%);">
-    <div class="absolute inset-0 pointer-events-none"
-         style="background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 12px);"></div>
-    <div class="relative max-w-screen-xl mx-auto px-4 md:px-8">
-        <span class="text-white/30 text-[10px] font-bold uppercase tracking-[0.20em] block mb-3">
-            🎭&nbsp; Mon espace
-        </span>
-        <h1 class="font-display font-bold text-white text-2xl sm:text-3xl md:text-4xl uppercase tracking-[0.04em]">
-            Mes pièces
-        </h1>
-        <p class="text-white/40 text-sm mt-2">Vos pièces, représentations et informations associées.</p>
-    </div>
-</div>
-
-<div class="max-w-screen-xl mx-auto px-4 md:px-8 py-8">
-
-    <div class="flex justify-end mb-6">
+    <div class="flex items-end justify-between mb-8">
+        <div>
+            <a href="{% url 'profiles:my_account' %}" class="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-muted hover:text-ink transition-colors mb-1 inline-block">Mon compte</a>
+            <h1 class="text-2xl font-display font-bold text-ink">Mes pièces</h1>
+        </div>
         <a href="{% url 'shows:add_play' %}"
-           class="inline-flex items-center gap-2 px-4 py-2.5
-                  bg-ink text-white text-[11px] font-bold uppercase tracking-[0.12em]
+           class="inline-flex items-center gap-2 px-4 py-2.5 bg-ink text-white text-[11px] font-bold uppercase tracking-[0.12em]
                   hover:opacity-80 transition-opacity">
             <i class="fa-solid fa-plus text-[9px]"></i>
-            Ajouter une pièce
+            Ajouter
         </a>
     </div>
 
-    <!-- Résultats -->
-    <div id="id_plays">
-        <div class="w-full" id="plays_table">
-            {% include "shows/partials/plays_table.html" %}
+    <!-- Actions en attente -->
+    {% if pending_requests or pending_invitations %}
+    <div class="mb-10">
+        <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-3 border-b border-ink/8 pb-2">
+            En attente
+        </h2>
+        <div class="space-y-2">
+            {% load messaging_tags %}
+
+            {% for m in pending_invitations %}
+            <div class="border border-ink/10 p-4 flex items-center gap-4">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-ink">
+                        <a href="{% url 'shows:play_detail' m.play.pk %}" class="hover:underline underline-offset-2">{{ m.play.title }}</a>
+                    </p>
+                    <p class="text-xs text-ink-muted mt-0.5">
+                        {% with m.play.user as owner %}
+                        <a href="{% url 'profiles:user_detail' pk=owner.pk %}" class="hover:underline underline-offset-2">{{ owner|display_name }}</a>
+                        {% endwith %}
+                        vous invite à rejoindre la distribution{% if m.role %} · <span class="text-ink">{{ m.role }}</span>{% endif %}
+                    </p>
+                </div>
+                <div class="flex gap-2 flex-shrink-0">
+                    <a href="{% url 'shows:membership_respond' m.token 'accept' %}?next={% url 'shows:agenda-user' %}"
+                       class="px-4 py-2 bg-ink text-white text-[10px] font-bold uppercase tracking-[0.10em] hover:opacity-80 transition-opacity">
+                        Accepter
+                    </a>
+                    <a href="{% url 'shows:membership_respond' m.token 'decline' %}?next={% url 'shows:agenda-user' %}"
+                       class="px-4 py-2 border border-ink/20 text-[10px] font-bold uppercase tracking-[0.10em] text-ink-soft hover:border-ink hover:text-ink transition-colors">
+                        Refuser
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% for m in pending_requests %}
+            <div class="border border-ink/10 p-4 flex items-center gap-4">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-ink">
+                        {% if m.user %}
+                        <a href="{% url 'profiles:user_detail' pk=m.user.pk %}" class="hover:underline underline-offset-2">{{ m.user|display_name }}</a>
+                        {% else %}
+                        {{ m.email }}
+                        {% endif %}
+                    </p>
+                    <p class="text-xs text-ink-muted mt-0.5">
+                        souhaite rejoindre <a href="{% url 'shows:play_detail' m.play.pk %}" class="font-medium text-ink hover:underline underline-offset-2">{{ m.play.title }}</a>
+                    </p>
+                </div>
+                <div class="flex gap-2 flex-shrink-0">
+                    <a href="{% url 'shows:membership_respond' m.token 'accept' %}?next={% url 'shows:agenda-user' %}"
+                       class="px-4 py-2 bg-ink text-white text-[10px] font-bold uppercase tracking-[0.10em] hover:opacity-80 transition-opacity">
+                        Accepter
+                    </a>
+                    <a href="{% url 'shows:membership_respond' m.token 'decline' %}?next={% url 'shows:agenda-user' %}"
+                       class="px-4 py-2 border border-ink/20 text-[10px] font-bold uppercase tracking-[0.10em] text-ink-soft hover:border-ink hover:text-ink transition-colors">
+                        Refuser
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
+    {% endif %}
+
+    <!-- Pièces créées -->
+    <div class="mb-10">
+        <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-3 border-b border-ink/8 pb-2">
+            Pièces créées
+        </h2>
+        {% include "shows/partials/plays_table.html" with plays=created_plays %}
+    </div>
+
+    <!-- Pièces à la distribution -->
+    {% if actor_plays %}
+    <div class="mb-10">
+        <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-3 border-b border-ink/8 pb-2">
+            Distribution
+        </h2>
+        {% include "shows/partials/plays_table.html" with plays=actor_plays %}
+    </div>
+    {% endif %}
 
 </div>
-{% endblock main %}
+{% endblock %}

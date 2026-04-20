@@ -54,7 +54,7 @@
             <img src="{% static 'core/mask.svg' %}"
                  alt="Masque de théâtre"
                  class="w-10 h-10 shrink-0 opacity-75">
-            <span class="font-display font-bold text-ink text-sm md:text-base leading-tight tracking-[0.06em] truncate uppercase">
+            <span class="font-display font-bold text-ink text-sm md:text-base leading-tight tracking-[0.06em] whitespace-nowrap uppercase">
                 Petites Annonces <br class="sm:hidden">Théâtre
             </span>
         </a>
@@ -80,14 +80,21 @@
             <div class="relative ml-1" x-data="{ open: false }">
                 {% with actor_photo=request.user.actor_profile.photo troupe_photo=request.user.troupe_profile.photo %}
                 <button @click="open = !open"
-                        class="w-8 h-8 rounded-full bg-ink/6 hover:bg-ink/12 flex items-center justify-center transition-colors overflow-hidden cursor-pointer"
+                        class="relative w-8 h-8 rounded-full bg-ink/6 hover:bg-ink/12 flex items-center justify-center transition-colors cursor-pointer"
                         aria-label="Mon compte">
-                    {% if actor_photo %}
-                    <img src="{{ actor_photo.url }}" alt="" class="w-full h-full object-cover transition-transform duration-300 hover:scale-110">
-                    {% elif troupe_photo %}
-                    <img src="{{ troupe_photo.url }}" alt="" class="w-full h-full object-cover transition-transform duration-300 hover:scale-110">
-                    {% else %}
-                    <i class="fa-solid fa-user text-sm text-ink-soft"></i>
+                    <div class="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+                        {% if actor_photo %}
+                        <img src="{{ actor_photo.url }}" alt="" class="w-full h-full object-cover transition-transform duration-300 hover:scale-110">
+                        {% elif troupe_photo %}
+                        <img src="{{ troupe_photo.url }}" alt="" class="w-full h-full object-cover transition-transform duration-300 hover:scale-110">
+                        {% else %}
+                        <i class="fa-solid fa-user text-sm text-ink-soft"></i>
+                        {% endif %}
+                    </div>
+                    {% if unread_messages_count > 0 or pending_plays_count > 0 %}
+                    <span class="absolute -top-1 -right-1 min-w-[14px] h-[14px] bg-ink text-white rounded-full flex items-center justify-center text-[7px] font-bold leading-none px-0.5 z-10">
+                        {{ unread_messages_count|add:pending_plays_count }}
+                    </span>
                     {% endif %}
                 </button>
                 {% endwith %}
@@ -95,7 +102,19 @@
                      x-cloak
                      @click.away="open = false"
                      class="absolute right-0 top-full mt-2 w-56 bg-surface border border-ink/10 shadow-2xl z-50 py-1">
-                    <p class="px-4 py-2.5 text-[11px] text-ink-muted border-b border-ink/6 truncate">{{ user.email }}</p>
+                    <a href="{% url 'profiles:my_account' %}"
+                       class="block px-4 py-2.5 border-b border-ink/6 hover:bg-ink/4 transition-colors">
+                        <p class="text-[11px] text-ink-muted truncate">{{ user.email }}</p>
+                        <p class="text-[10px] text-ink-muted/60 mt-0.5">Mon espace →</p>
+                    </a>
+                    <a href="{% url 'messaging:inbox' %}"
+                       class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft hover:bg-ink/4 hover:text-ink transition-colors">
+                        <i class="fa-solid fa-message text-[10px] text-ink-muted"></i>
+                        Mes messages
+                        {% if unread_messages_count > 0 %}
+                        <span class="ml-auto text-[9px] font-bold bg-ink text-white rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">{{ unread_messages_count }}</span>
+                        {% endif %}
+                    </a>
                     <a href="{% url 'offer_user' %}"
                        class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft hover:bg-ink/4 hover:text-ink transition-colors">
                         <i class="fa-solid fa-envelopes-bulk text-[10px] text-ink-muted"></i>
@@ -105,6 +124,9 @@
                        class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft hover:bg-ink/4 hover:text-ink transition-colors">
                         <i class="fa-solid fa-ticket text-[10px] text-ink-muted"></i>
                         Mes pièces
+                        {% if pending_plays_count > 0 %}
+                        <span class="ml-auto text-[9px] font-bold bg-ink text-white rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">{{ pending_plays_count }}</span>
+                        {% endif %}
                     </a>
                     <a href="{% url 'alert_user' %}"
                        class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft hover:bg-ink/4 hover:text-ink transition-colors">
@@ -122,7 +144,7 @@
                     <a href="{% if troupe_slug %}{% url 'profiles:troupe_detail' slug=troupe_slug %}{% else %}{% url 'profiles:troupe_edit' %}{% endif %}"
                        class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft hover:bg-ink/4 hover:text-ink transition-colors">
                         <i class="fa-solid fa-masks-theater text-[10px] text-ink-muted"></i>
-                        Ma troupe
+                        Ma compagnie
                     </a>
                     {% endwith %}
                     <div class="border-t border-ink/6 mt-1 pt-1">

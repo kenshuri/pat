@@ -28,6 +28,7 @@ class OfferForm(ModelForm):
                   'contact_phone',
                   'contact_website',
                   'contact_details',
+                  'allow_messaging',
                   'cover_image',
                   ]
         labels = {
@@ -46,6 +47,7 @@ class OfferForm(ModelForm):
             'contact_phone': 'Numéro de téléphone',
             'contact_website': 'Site internet',
             'contact_details': 'Infos supplémentaires',
+            'allow_messaging': 'Messagerie interne',
         }
 
 

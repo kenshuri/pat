@@ -31,6 +31,7 @@
 
     <form action="{% url 'signup' %}" method="post" class="space-y-5">
         {% csrf_token %}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
 
         <div class="space-y-1.5">
             <label for="id_email"

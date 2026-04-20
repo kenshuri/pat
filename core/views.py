@@ -124,10 +124,14 @@ def signup(request):
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(email=email, password=raw_password)
             login(request, user)
-            return redirect("index")
+            next_url = request.POST.get('next') or request.GET.get('next') or 'index'
+            return redirect(next_url)
     else:
         form = SignUpForm()
-    return render(request, 'registration/signup.html', {'form': form})
+    return render(request, 'registration/signup.html', {
+        'form': form,
+        'next': request.GET.get('next', ''),
+    })
 
 
 def _save_extra_photos(offer, files):

@@ -103,12 +103,6 @@
 <!-- ══ CONTENU ══ -->
 <div class="max-w-screen-xl mx-auto px-4 md:px-8 py-8 md:py-10">
 
-    <a href="{% url 'shows:agenda' %}"
-       class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em]
-              text-ink-muted hover:text-ink transition-colors mb-8">
-        ← Agenda
-    </a>
-
     <div class="grid lg:grid-cols-12 gap-8 lg:gap-12">
 
         <!-- Affiche (sidebar) -->
@@ -167,10 +161,30 @@
             </div>
 
             <!-- Distribution -->
-            {% if play.contributors.exists %}
+            {% if play.contributors.exists or accepted_members %}
             <div class="border-t border-ink/8 pt-6">
                 <p class="text-[10px] font-bold uppercase tracking-[0.20em] text-ink-muted mb-4">Distribution</p>
                 <ul class="space-y-2">
+                    {% load messaging_tags %}
+                    {% for m in accepted_members %}
+                    <li class="flex items-start gap-3 text-sm">
+                        <span class="text-ink-muted w-32 shrink-0">{{ m.role|default:"—" }}</span>
+                        {% if m.user %}
+                        <a href="{% url 'profiles:user_detail' pk=m.user.pk %}"
+                           class="flex items-center gap-2 text-ink font-medium hover:underline underline-offset-2">
+                            {% with m.user.actor_profile as ap %}
+                            {% if ap and ap.photo %}
+                            <img src="{{ ap.photo.url }}" alt="{{ m.user|display_name }}"
+                                 class="w-6 h-6 rounded-full object-cover flex-shrink-0">
+                            {% endif %}
+                            {% endwith %}
+                            {{ m.user|display_name }}
+                        </a>
+                        {% else %}
+                        <span class="text-ink font-medium">{{ m.email }}</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
                     {% for contributor in play.contributors.all %}
                     <li class="flex items-start gap-3 text-sm">
                         <span class="text-ink-muted w-32 shrink-0">{{ contributor.role }}</span>
@@ -238,7 +252,7 @@
                                     class="inline-flex items-center px-2.5 py-1.5
                                            text-[9px] font-bold uppercase tracking-[0.10em]
                                            border border-red-200 text-red-400 hover:bg-red-50 hover:border-red-300
-                                           transition-colors">
+                                           transition-colors cursor-pointer">
                                 <i class="fa-solid fa-trash text-[8px]"></i>
                             </button>
                             {% endif %}
@@ -258,7 +272,7 @@
                             hx-swap="innerHTML"
                             class="inline-flex items-center gap-2 px-4 py-2.5
                                    border border-ink/20 text-[11px] font-bold uppercase tracking-[0.12em]
-                                   text-ink-soft hover:border-ink hover:text-ink transition-colors">
+                                   text-ink-soft hover:border-ink hover:text-ink transition-colors cursor-pointer">
                         <i class="fa-solid fa-plus text-[9px]"></i>
                         Ajouter une représentation
                     </button>
@@ -267,8 +281,96 @@
                 {% endif %}
             </div>
 
+            <!-- Troupe -->
+            {% if troupe_profile %}
+            <div class="border-t border-ink/8 pt-6">
+                <p class="text-[10px] font-bold uppercase tracking-[0.20em] text-ink-muted mb-4">Compagnie</p>
+                <a href="{% url 'profiles:troupe_detail' slug=troupe_profile.slug %}"
+                   class="flex items-center gap-4 hover:opacity-80 transition-opacity">
+                    <div class="w-14 h-14 bg-ink/5 overflow-hidden flex-shrink-0">
+                        {% if troupe_profile.photo %}
+                        <img src="{{ troupe_profile.photo.url }}" alt="{{ troupe_profile.name }}"
+                             class="w-full h-full object-cover">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center">
+                            <i class="fa-solid fa-masks-theater text-xl text-ink/15"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-bold text-ink text-sm">{{ troupe_profile.name }}</p>
+                        <p class="text-xs text-ink-muted mt-0.5 flex flex-wrap gap-x-3">
+                            {% if troupe_profile.founded_year %}<span>Fondée en {{ troupe_profile.founded_year }}</span>{% endif %}
+                            {% if troupe_profile.city %}<span><i class="fa-solid fa-location-dot text-[9px] mr-1"></i>{{ troupe_profile.city }}</span>{% endif %}
+                        </p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-ink-muted ml-auto flex-shrink-0"></i>
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Demande de participation -->
+            {% if request.user.is_authenticated and request.user.id != play.user_id %}
+            <div class="border-t border-ink/8 pt-6">
+                {% if user_membership %}
+                    {% if user_membership.status == 'accepted' %}
+                    <p class="text-sm text-ink-muted"><i class="fa-solid fa-check text-green-500 mr-1"></i>Vous figurez dans la distribution de cette pièce.</p>
+                    {% elif user_membership.status == 'pending' and user_membership.direction == 'request' %}
+                    <p class="text-sm text-ink-muted"><i class="fa-regular fa-clock mr-1"></i>Votre demande de participation est en attente.</p>
+                    {% elif user_membership.status == 'pending' and user_membership.direction == 'invite' %}
+                    <p class="text-sm text-ink-muted mb-3">Vous avez été invité à rejoindre cette pièce.</p>
+                    <div class="flex gap-2">
+                        <a href="{% url 'shows:membership_respond' user_membership.token 'accept' %}"
+                           class="px-4 py-2 bg-ink text-white text-[11px] font-bold uppercase tracking-[0.10em] hover:opacity-80 transition-opacity">
+                           Accepter
+                        </a>
+                        <a href="{% url 'shows:membership_respond' user_membership.token 'decline' %}"
+                           class="px-4 py-2 border border-ink/20 text-[11px] font-bold uppercase tracking-[0.10em] text-ink-soft hover:border-ink hover:text-ink transition-colors">
+                           Refuser
+                        </a>
+                    </div>
+                    {% elif user_membership.status == 'declined' %}
+                    <p class="text-sm text-ink-muted/50">Demande refusée.</p>
+                    {% endif %}
+                {% else %}
+                <form method="post" action="{% url 'shows:request_join' play.pk %}" x-data="{ sent: false }" @submit="sent = true">
+                    {% csrf_token %}
+                    <button type="submit" :disabled="sent"
+                            class="inline-flex items-center gap-2 px-4 py-2 border border-ink/20
+                                   text-[11px] font-bold uppercase tracking-[0.12em]
+                                   text-ink-soft hover:border-ink hover:text-ink transition-colors
+                                   disabled:opacity-50 cursor-pointer disabled:cursor-default">
+                        <i class="fa-solid fa-user-plus text-[10px]"></i>
+                        <span x-show="!sent" x-cloak>Demander à rejoindre la distribution</span>
+                        <span x-show="sent" x-cloak>Demande envoyée…</span>
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
+
             <!-- Zone propriétaire -->
             {% if request.user.is_authenticated and play.user_id == request.user.id %}
+            {% with actor_profile=request.user.actor_profile %}
+            {% if actor_profile and not user_membership %}
+            <div class="border-t border-ink/8 pt-4">
+                <form method="post" action="{% url 'shows:add_self_to_cast' play.pk %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 px-4 py-2 border border-ink/20
+                                   text-[11px] font-bold uppercase tracking-[0.12em]
+                                   text-ink-soft hover:border-ink hover:text-ink transition-colors cursor-pointer">
+                        {% if actor_profile.photo %}<img src="{{ actor_profile.photo.url }}" alt="" class="w-5 h-5 rounded-full object-cover">{% endif %}
+                        M'ajouter à la distribution
+                    </button>
+                </form>
+            </div>
+            {% elif actor_profile and user_membership.status == 'accepted' %}
+            <div class="border-t border-ink/8 pt-4">
+                <p class="text-xs text-ink-muted"><i class="fa-solid fa-check text-green-500 mr-1"></i>Vous figurez dans la distribution en tant que comédien·ne.</p>
+            </div>
+            {% endif %}
+            {% endwith %}
             <div class="border-t border-ink/8 pt-6 flex flex-wrap gap-2">
                 <a href="{% url 'shows:edit_play' play.pk %}"
                    class="inline-flex items-center gap-2 px-4 py-2

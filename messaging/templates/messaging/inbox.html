@@ -1,0 +1,93 @@
+{% extends "core/base.html" %}
+{% load messaging_tags %}
+
+{% block title %}Mes messages | Petites Annonces Théâtre{% endblock %}
+
+{% block main %}
+<div class="max-w-2xl mx-auto px-4 py-10">
+
+    <div class="mb-8">
+        <a href="{% url 'profiles:my_account' %}" class="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-muted hover:text-ink transition-colors mb-1 inline-block">Mon compte</a>
+        <h1 class="text-2xl font-display font-bold text-ink">Mes messages</h1>
+    </div>
+
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="px-4 py-3 text-sm border
+            {% if message.tags == 'error' %}border-red-200 bg-red-50 text-red-700
+            {% elif message.tags == 'success' %}border-green-200 bg-green-50 text-green-700
+            {% else %}border-ink/10 bg-ink/3 text-ink-soft{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if conv_data %}
+    <div class="divide-y divide-ink/8 border border-ink/10">
+        {% for item in conv_data %}
+        <a href="{% url 'messaging:conversation' item.conv.pk %}"
+           class="flex items-start gap-4 px-5 py-4 hover:bg-ink/2 transition-colors
+                  {% if item.unread > 0 %}bg-ink/[0.015]{% endif %}">
+
+            <!-- Indicateur non lu -->
+            <div class="mt-1.5 shrink-0">
+                {% if item.unread > 0 %}
+                <span class="block w-2 h-2 rounded-full bg-ink"></span>
+                {% else %}
+                <span class="block w-2 h-2 rounded-full bg-transparent"></span>
+                {% endif %}
+            </div>
+
+            <!-- Contenu -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-baseline justify-between gap-2 mb-0.5">
+                    <span class="text-sm font-bold text-ink truncate">{{ item.other|display_name }}</span>
+                    {% if item.last %}
+                    <span class="text-[10px] text-ink-muted shrink-0">
+                        {{ item.last.sent_at|date:"d/m/y" }}
+                    </span>
+                    {% endif %}
+                </div>
+                {% if item.conv.offer %}
+                <p class="text-[10px] font-bold uppercase tracking-[0.10em] text-ink-muted mb-1 truncate">
+                    {{ item.conv.offer.title }}
+                </p>
+                {% elif item.conv.offer_title %}
+                <p class="text-[10px] font-bold uppercase tracking-[0.10em] text-ink-muted/50 mb-1 truncate">
+                    {{ item.conv.offer_title }} <span class="normal-case tracking-normal">(supprimée)</span>
+                </p>
+                {% endif %}
+                {% if item.last %}
+                <p class="text-sm text-ink-muted truncate">
+                    {% if item.last.is_system %}
+                        <em>— Email partagé —</em>
+                    {% else %}
+                        {{ item.last.body|truncatechars:80 }}
+                    {% endif %}
+                </p>
+                {% endif %}
+            </div>
+
+            {% if item.unread > 0 %}
+            <span class="shrink-0 mt-1 text-[9px] font-bold bg-ink text-white rounded-full w-5 h-5 flex items-center justify-center">
+                {{ item.unread }}
+            </span>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="border border-ink/10 px-6 py-12 text-center">
+        <i class="fa-regular fa-comments text-3xl text-ink-muted mb-4 block"></i>
+        <p class="text-sm text-ink-muted">Vous n'avez aucun message pour l'instant.</p>
+        <p class="text-xs text-ink-muted mt-2">
+            Parcourez les annonces et cliquez sur «&nbsp;Envoyer un message&nbsp;» pour démarrer une conversation.
+        </p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -29,14 +29,12 @@
 {% endblock %}
 
 {% block main %}
-<div class="px-4 md:px-8 py-6 max-w-4xl">
+<div class="px-4 md:px-8 py-10 max-w-4xl">
 
-    <!-- Fil d'Ariane -->
-    <nav class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-6 flex items-center gap-2">
-        <a href="{% url 'index' %}" class="hover:text-ink transition-colors">Accueil</a>
-        <span>›</span>
-        <span class="text-ink">{{ actor.display_name }}</span>
-    </nav>
+    <div class="mb-8">
+        <a href="{% url 'profiles:my_account' %}" class="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-muted hover:text-ink transition-colors mb-1 inline-block">Mon compte</a>
+        <h1 class="text-2xl font-display font-bold text-ink">Mon profil comédien·ne</h1>
+    </div>
 
     {% if own %}
     <div class="mb-6 flex items-center gap-3 p-4 bg-ink/3 border border-ink/8">
@@ -94,9 +92,9 @@
         <!-- Colonne droite : bio + expérience -->
         <div class="md:col-span-2 space-y-8">
             <div>
-                <h1 class="font-display font-bold text-ink text-2xl md:text-3xl uppercase tracking-[0.06em] mb-1">
+                <h2 class="font-display font-bold text-ink text-2xl md:text-3xl tracking-[0.02em] mb-1">
                     {{ actor.display_name }}
-                </h1>
+                </h2>
                 {% if actor.bio %}
                 <div class="trix-content text-sm text-ink-muted leading-relaxed mt-3">{{ actor.bio|safe }}</div>
                 {% endif %}
@@ -130,7 +128,7 @@
             {% if troupe_profile %}
             <div>
                 <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
-                    Troupe
+                    Compagnie
                 </h2>
                 <a href="{% url 'profiles:troupe_detail' slug=troupe_profile.slug %}"
                    class="flex items-center gap-3 p-3 border border-ink/10 hover:border-ink/30 transition-colors">
@@ -146,6 +144,37 @@
                         {% if troupe_profile.city %}<p class="text-xs text-ink-muted">{{ troupe_profile.city }}</p>{% endif %}
                     </div>
                 </a>
+            </div>
+            {% endif %}
+
+            {% if actor_plays %}
+            <div>
+                <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
+                    Distribution
+                </h2>
+                <ul class="space-y-2">
+                    {% for play in actor_plays %}
+                    <li>
+                        <a href="{% url 'shows:play_detail' pk=play.pk %}"
+                           class="flex items-center gap-3 p-3 border border-ink/10 hover:border-ink/30 transition-colors">
+                            {% if play.poster %}
+                            <img src="{{ play.poster.url }}" alt="" class="w-10 h-14 object-cover flex-shrink-0">
+                            {% else %}
+                            <span class="w-10 h-14 bg-ink/5 flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-book-open text-ink/20"></i>
+                            </span>
+                            {% endif %}
+                            <span class="flex-1 min-w-0">
+                                <span class="block text-sm font-medium text-ink">{{ play.title }}</span>
+                                <span class="block text-[11px] text-ink-muted mt-0.5">
+                                    {{ play.get_genre_display }}{% if play.company %} · {{ play.company }}{% endif %}
+                                </span>
+                            </span>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-ink-muted flex-shrink-0"></i>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
             {% endif %}
 

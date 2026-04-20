@@ -1,0 +1,47 @@
+{% extends "core/base.html" %}
+
+{% block title %}Signaler un message | Petites Annonces Théâtre{% endblock %}
+
+{% block main %}
+<div class="max-w-lg mx-auto px-4 py-10">
+
+    <a href="{% url 'messaging:conversation' msg.conversation.pk %}"
+       class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted hover:text-ink transition-colors mb-8">
+        <i class="fa-solid fa-arrow-left text-[9px]"></i>
+        Retour à la conversation
+    </a>
+
+    <div class="mb-6">
+        <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-muted mb-1">Modération</p>
+        <h1 class="text-2xl font-display font-bold text-ink">Signaler un message</h1>
+    </div>
+
+    <!-- Aperçu du message -->
+    <div class="border border-ink/10 px-4 py-3 mb-6 bg-ink/[0.015]">
+        <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted mb-2">Message concerné</p>
+        <p class="text-sm text-ink leading-relaxed">{{ msg.body|truncatechars:300 }}</p>
+    </div>
+
+    <form method="post" x-data="{ sending: false }" @submit="sending = true">
+        {% csrf_token %}
+        <div class="space-y-4">
+            <div class="space-y-1.5">
+                <label class="block text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">
+                    Raison du signalement <span class="font-normal normal-case tracking-normal text-ink/30">(optionnelle)</span>
+                </label>
+                {{ form.reason }}
+            </div>
+            <button type="submit" :disabled="sending"
+                    class="w-full py-3 bg-ink text-white text-[11px] font-bold uppercase tracking-[0.14em]
+                           hover:opacity-80 transition-opacity disabled:opacity-50 cursor-pointer disabled:cursor-default">
+                <span x-show="!sending" x-cloak>
+                    <i class="fa-solid fa-flag text-[10px] mr-2"></i>
+                    Confirmer le signalement
+                </span>
+                <span x-show="sending" x-cloak>Envoi en cours…</span>
+            </button>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

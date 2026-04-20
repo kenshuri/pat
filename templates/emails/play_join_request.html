@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f4f0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f4f0;padding:40px 16px;">
+  <tr><td align="center">
+    <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border:1px solid #e8e6e0;max-width:560px;width:100%;">
+
+      <!-- Header -->
+      <tr>
+        <td style="background:#1a1814;padding:28px 32px;">
+          <p style="margin:0 0 4px;font-family:Georgia,serif;font-size:11px;font-weight:bold;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);">
+            Petites Annonces Théâtre
+          </p>
+          <p style="margin:0;font-size:18px;font-weight:bold;color:#fff;">
+            Demande de participation
+          </p>
+        </td>
+      </tr>
+
+      <!-- Profil demandeur -->
+      <tr>
+        <td style="padding:28px 32px 0;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf9f7;border:1px solid #e8e6e0;">
+            <tr>
+              <td style="padding:16px 18px;">
+                <p style="margin:0 0 4px;font-size:11px;font-weight:bold;letter-spacing:0.10em;text-transform:uppercase;color:#8a8680;">Demandeur</p>
+                <p style="margin:0 0 4px;font-size:15px;font-weight:bold;color:#1a1814;">
+                  <a href="{{ requester_profile_url }}" style="color:#1a1814;text-decoration:none;">{{ requester_name }}</a>
+                </p>
+                {% if requester %}
+                <p style="margin:0;font-size:12px;color:#8a8680;">{{ requester.email }}</p>
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Pièce concernée -->
+      <tr>
+        <td style="padding:12px 32px 0;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf9f7;border:1px solid #e8e6e0;">
+            <tr>
+              {% if play.poster %}
+              <td style="width:72px;padding:12px 0 12px 14px;vertical-align:top;">
+                <img src="{{ play.poster.url }}" width="60" style="display:block;border:1px solid #e8e6e0;" alt="Affiche">
+              </td>
+              {% endif %}
+              <td style="padding:14px 16px;vertical-align:top;">
+                <p style="margin:0 0 4px;font-size:11px;font-weight:bold;letter-spacing:0.10em;text-transform:uppercase;color:#8a8680;">Votre pièce</p>
+                <p style="margin:0 0 4px;font-size:15px;font-weight:bold;color:#1a1814;">{{ play.title }}</p>
+                <p style="margin:0;font-size:12px;color:#8a8680;">{{ play.get_genre_display }}{% if play.company %} · {{ play.company }}{% endif %}</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Corps -->
+      <tr>
+        <td style="padding:24px 32px;">
+          <p style="margin:0 0 20px;font-size:14px;color:#4a4640;line-height:1.6;">
+            <a href="{{ requester_profile_url }}" style="color:#1a1814;font-weight:bold;text-decoration:none;">{{ requester_name }}</a>
+            souhaite figurer dans la distribution de votre pièce <strong>«&nbsp;{{ play.title }}&nbsp;»</strong>.
+            Vous pouvez accepter ou refuser cette demande.
+          </p>
+
+          <table cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="padding-right:10px;">
+                <a href="{{ accept_url }}"
+                   style="display:inline-block;padding:11px 20px;background:#1a1814;color:#fff;font-size:11px;font-weight:bold;letter-spacing:0.10em;text-transform:uppercase;text-decoration:none;">
+                  ✓ Accepter
+                </a>
+              </td>
+              <td>
+                <a href="{{ decline_url }}"
+                   style="display:inline-block;padding:11px 20px;border:1px solid #d1d5db;color:#6b7280;font-size:11px;font-weight:bold;letter-spacing:0.10em;text-transform:uppercase;text-decoration:none;">
+                  Refuser
+                </a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Footer -->
+      <tr>
+        <td style="border-top:1px solid #f0ede8;padding:20px 32px;">
+          <p style="margin:0;font-size:11px;color:#c0bdb8;line-height:1.6;">
+            Email automatique — <a href="{{ site_url }}" style="color:#8a8680;">petites-annonces-theatre.fr</a>
+          </p>
+        </td>
+      </tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

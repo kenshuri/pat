@@ -1,34 +1,30 @@
-<tr data-rep-row>
-    <td>{{ rep.datetime|date:"d/m/Y H:i" }}</td>
-    <td>
-        {% if rep.city %}
-            {{ rep.city }}
-        {% else %}
-            Ville non renseignée
+<div class="flex items-center justify-between gap-4 py-3.5 transition-opacity duration-300" data-rep-row>
+    <div class="space-y-0.5">
+        <p class="text-sm font-medium text-ink">{{ rep.datetime|date:"l d/m/Y à H:i" }}</p>
+        <p class="text-xs text-ink-muted">
+            {% if rep.city %}{{ rep.city }}{% endif %}
+            {% if rep.venue %} — {{ rep.venue }}{% endif %}
+            {% if rep.price %} · {{ rep.price }}{% endif %}
+        </p>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+        {% if rep.ticket_url %}
+        <a href="{{ rep.ticket_url }}" target="_blank" rel="noopener"
+           class="inline-flex items-center gap-1.5 px-3 py-1.5
+                  bg-ink text-white text-[9px] font-bold uppercase tracking-[0.12em]
+                  hover:opacity-80 transition-opacity">
+            <i class="fa-solid fa-ticket text-[8px]"></i>
+            Billets
+        </a>
         {% endif %}
-    </td>
-    <td>{{ rep.venue }}</td>
-    <td class="text-right">
-        <div class="flex gap-1 justify-end">
-            {% if rep.ticket_url %}
-                <a href="{{ rep.ticket_url }}" target="_blank" class="btn btn-sm btn-primary">
-                    <i class="fa-solid fa-ticket"></i>
-                </a>
-            {% else %}
-                <button class="btn btn-sm btn-primary btn-disabled">
-                    <i class="fa-solid fa-ticket"></i>
-                </button>
-            {% endif %}
-
-            {% if rep.play.user == user %}
-                <button
-                        class="btn btn-sm btn-error ml-2"
-                        onclick="fadeAndDelete(this, '{% url 'shows:delete_representation' rep.pk %}')"
-                >
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            {% endif %}
-
-        </div>
-    </td>
-</tr>
+        {% if rep.play.user == user %}
+        <button onclick="fadeAndDelete(this, '{% url 'shows:delete_representation' rep.pk %}')"
+                class="inline-flex items-center px-2.5 py-1.5
+                       text-[9px] font-bold uppercase tracking-[0.10em]
+                       border border-red-200 text-red-400 hover:bg-red-50 hover:border-red-300
+                       transition-colors">
+            <i class="fa-solid fa-trash text-[8px]"></i>
+        </button>
+        {% endif %}
+    </div>
+</div>

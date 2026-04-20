@@ -38,22 +38,14 @@
     trix-editor ol { list-style-type: decimal; padding-left: 1.4rem; }
 </style>
 
-<!-- Strip d'en-tête -->
-<div class="relative overflow-hidden w-full bg-ink py-10 md:py-14">
-    <div class="absolute inset-0 pointer-events-none"
-         style="background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 12px);"></div>
-    <div class="relative max-w-screen-xl mx-auto px-4 md:px-8">
-        <p class="text-white/30 text-[10px] font-bold uppercase tracking-[0.18em] mb-2">Profil troupe</p>
-        <h1 class="font-display font-bold text-white text-2xl sm:text-3xl uppercase tracking-[0.04em]">
-            {% if profile %}Modifier ma troupe{% else %}Créer ma troupe{% endif %}
-        </h1>
-        <p class="text-white/40 text-sm mt-2">
-            Présentez votre compagnie pour être trouvée par comédiens et partenaires.
-        </p>
-    </div>
-</div>
-
 <div class="max-w-2xl mx-auto px-4 md:px-6 py-10">
+
+    <div class="mb-8">
+        <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-muted mb-1">Profil compagnie</p>
+        <h1 class="text-2xl font-display font-bold text-ink">
+            {% if profile %}Modifier ma compagnie{% else %}Créer ma compagnie{% endif %}
+        </h1>
+    </div>
 <form method="post" enctype="multipart/form-data"
       x-data="{ submitting: false }"
       @submit="submitting = true">
@@ -63,11 +55,11 @@
 
     <!-- ── Identité ── -->
     <div class="space-y-4">
-        <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">La troupe</p>
+        <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">La compagnie</p>
 
         <div class="space-y-1.5">
             <label for="id_name" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">
-                Nom de la troupe <span class="text-red-400">*</span>
+                Nom de la compagnie <span class="text-red-400">*</span>
             </label>
             <input type="text" id="id_name" name="name"
                    value="{{ form.name.value|default:'' }}"
@@ -180,7 +172,7 @@
                 class="flex-1 py-3 bg-ink text-white text-[11px] font-display font-bold uppercase tracking-[0.14em]
                        hover:opacity-80 transition-opacity disabled:opacity-50">
             <span x-show="!submitting" x-cloak>
-                {% if profile %}Enregistrer les modifications{% else %}Créer ma troupe{% endif %}
+                {% if profile %}Enregistrer les modifications{% else %}Créer ma compagnie{% endif %}
             </span>
             <span x-show="submitting" x-cloak class="inline-flex items-center gap-2 justify-center">
                 <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -199,9 +191,47 @@
         {% endif %}
     </div>
 
+    </div>
 </div>
 </form>
+
+{% if profile %}
+<div class="max-w-2xl mx-auto px-4 pb-10" x-data="{ confirm: false }">
+    <div class="border-t border-ink/8 pt-6">
+        <button type="button" @click="confirm = true"
+                class="text-[10px] font-bold uppercase tracking-[0.12em] text-red-400 hover:text-red-600 transition-colors cursor-pointer">
+            <i class="fa-solid fa-trash text-[9px] mr-1"></i>
+            Supprimer mon profil compagnie
+        </button>
+    </div>
+
+    <!-- Modal confirmation -->
+    <div x-show="confirm" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+         @keydown.escape.window="confirm = false">
+        <div class="bg-surface border border-ink/15 max-w-sm w-full p-6 shadow-lg" @click.stop>
+            <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-red-500 mb-2">Suppression définitive</p>
+            <p class="text-sm text-ink mb-1">Voulez-vous vraiment supprimer votre profil compagnie ?</p>
+            <p class="text-xs text-ink-muted mb-6">Cette action est irréversible. Vos annonces et messages ne seront pas supprimés.</p>
+            <div class="flex gap-3">
+                <form method="post" action="{% url 'profiles:delete_troupe_profile' %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="px-5 py-2.5 bg-red-600 text-white text-[11px] font-bold uppercase tracking-[0.12em]
+                                   hover:bg-red-700 transition-colors cursor-pointer">
+                        Supprimer
+                    </button>
+                </form>
+                <button type="button" @click="confirm = false"
+                        class="px-5 py-2.5 border border-ink/20 text-[11px] font-bold uppercase tracking-[0.12em]
+                               text-ink-soft hover:border-ink hover:text-ink transition-colors cursor-pointer">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
+{% endif %}
 
 <script>
     document.getElementById('search-js').addEventListener('load', function () {

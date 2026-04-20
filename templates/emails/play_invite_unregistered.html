@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f4f0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f4f0;padding:40px 16px;">
+  <tr><td align="center">
+    <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border:1px solid #e8e6e0;max-width:560px;width:100%;">
+
+      <!-- Header -->
+      <tr>
+        <td style="background:#1a1814;padding:28px 32px;">
+          <p style="margin:0 0 4px;font-family:Georgia,serif;font-size:11px;font-weight:bold;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);">
+            Petites Annonces Théâtre
+          </p>
+          <p style="margin:0;font-size:18px;font-weight:bold;color:#fff;">
+            Invitation à rejoindre une pièce
+          </p>
+        </td>
+      </tr>
+
+      <!-- Pièce -->
+      <tr>
+        <td style="padding:28px 32px 0;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf9f7;border:1px solid #e8e6e0;">
+            <tr>
+              {% if play.poster %}
+              <td style="width:72px;padding:12px 0 12px 14px;vertical-align:top;">
+                <a href="{{ play_url }}" style="display:block;text-decoration:none;">
+                  <img src="{{ play.poster.url }}" width="60" style="display:block;border:1px solid #e8e6e0;" alt="Affiche">
+                </a>
+              </td>
+              {% endif %}
+              <td style="padding:14px 16px;vertical-align:top;">
+                <p style="margin:0 0 4px;font-size:11px;font-weight:bold;letter-spacing:0.10em;text-transform:uppercase;color:#8a8680;">{{ play.get_genre_display }}</p>
+                <p style="margin:0 0 4px;font-size:16px;font-weight:bold;">
+                  <a href="{{ play_url }}" style="color:#1a1814;text-decoration:none;">{{ play.title }}</a>
+                </p>
+                {% if play.company %}<p style="margin:0;font-size:12px;color:#8a8680;">{{ play.company }}</p>{% endif %}
+                {% if play.year_created %}<p style="margin:4px 0 0;font-size:11px;color:#c0bdb8;">{{ play.year_created }}</p>{% endif %}
+                <p style="margin:8px 0 0;">
+                  <a href="{{ play_url }}" style="font-size:12px;color:#1a1814;font-weight:bold;text-decoration:underline;">Voir la pièce →</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Corps -->
+      <tr>
+        <td style="padding:24px 32px 0;">
+          <p style="margin:0 0 16px;font-size:14px;color:#4a4640;line-height:1.6;">
+            Bonjour,<br><br>
+            <strong>{{ initiator_name }}</strong>
+            vous invite à figurer dans la distribution de la pièce <strong>«&nbsp;{{ play.title }}&nbsp;»</strong>.
+            {% if role %}<br>Rôle proposé : <strong>{{ role }}</strong>.{% endif %}
+          </p>
+
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+            <tr>
+              <td style="padding-right:10px;">
+                <a href="{{ accept_url }}"
+                   style="display:inline-block;padding:11px 20px;background:#1a1814;color:#fff;font-size:11px;font-weight:bold;letter-spacing:0.10em;text-transform:uppercase;text-decoration:none;">
+                  ✓ Accepter
+                </a>
+              </td>
+              <td>
+                <a href="{{ decline_url }}"
+                   style="display:inline-block;padding:11px 20px;border:1px solid #d1d5db;color:#6b7280;font-size:11px;font-weight:bold;letter-spacing:0.10em;text-transform:uppercase;text-decoration:none;">
+                  Refuser
+                </a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Bloc site -->
+      <tr>
+        <td style="padding:0 32px 28px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f4f0;border:1px solid #e8e6e0;">
+            <tr>
+              <td style="padding:16px 18px;">
+                <p style="margin:0 0 6px;font-size:11px;font-weight:bold;letter-spacing:0.10em;text-transform:uppercase;color:#8a8680;">
+                  Qu'est-ce que Petites Annonces Théâtre ?
+                </p>
+                <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">
+                  C'est la plateforme de référence pour le théâtre amateur en France — annonces de castings, de troupes et de cours, répertoire de pièces et mise en relation entre artistes. Gratuit et hébergé en Europe.
+                </p>
+                <p style="margin:8px 0 0;">
+                  <a href="{{ site_url }}" style="font-size:12px;color:#1a1814;font-weight:bold;">Découvrir le site →</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Footer -->
+      <tr>
+        <td style="border-top:1px solid #f0ede8;padding:20px 32px;">
+          <p style="margin:0;font-size:11px;color:#c0bdb8;line-height:1.6;">
+            Vous recevez cet email car quelqu'un vous a invité sur
+            <a href="{{ site_url }}" style="color:#8a8680;">petites-annonces-theatre.fr</a>.
+          </p>
+        </td>
+      </tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

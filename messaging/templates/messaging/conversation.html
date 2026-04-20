@@ -1,0 +1,142 @@
+{% extends "core/base.html" %}
+{% load messaging_tags %}
+
+{% block title %}Message avec {{ other|display_name }} | Petites Annonces Théâtre{% endblock %}
+
+{% block main %}
+<div class="max-w-2xl mx-auto px-4 py-10">
+
+    <!-- Retour -->
+    <a href="{% url 'messaging:inbox' %}"
+       class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted hover:text-ink transition-colors mb-8">
+        <i class="fa-solid fa-arrow-left text-[9px]"></i>
+        Mes messages
+    </a>
+
+    <!-- Contexte annonce -->
+    {% if conv.offer or conv.offer_title %}
+    <div class="border border-ink/10 px-4 py-3 mb-6 flex items-start gap-3 bg-ink/[0.015]">
+        <i class="fa-solid fa-tag text-[10px] text-ink-muted mt-0.5 shrink-0"></i>
+        <div class="min-w-0">
+            <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted mb-0.5">Annonce concernée</p>
+            {% if conv.offer %}
+            <a href="{% url 'offer' offer_id=conv.offer.pk %}"
+               class="text-sm font-bold text-ink hover:underline underline-offset-2 truncate block">
+                {{ conv.offer.title }}
+            </a>
+            {% else %}
+            <p class="text-sm font-bold text-ink truncate">
+                {{ conv.offer_title|default:"Annonce supprimée" }}
+                <span class="ml-1.5 text-[9px] font-bold uppercase tracking-[0.10em] text-ink-muted/60">(supprimée)</span>
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- En-tête conversation -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-muted mb-0.5">Conversation avec</p>
+            <a href="{{ other|profile_url }}" class="text-lg font-display font-bold text-ink hover:underline underline-offset-2">{{ other|display_name }}</a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="px-4 py-3 text-sm border
+            {% if message.tags == 'error' %}border-red-200 bg-red-50 text-red-700
+            {% elif message.tags == 'success' %}border-green-200 bg-green-50 text-green-700
+            {% else %}border-ink/10 bg-ink/3 text-ink-soft{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Fil de messages -->
+    <div class="space-y-4 mb-8">
+        {% for msg in conv.messages.all %}
+
+        {% if msg.is_system %}
+        <!-- Message système (email révélé) -->
+        <div class="text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-ink/4 border border-ink/10 text-xs text-ink-muted">
+                <i class="fa-solid fa-envelope-open text-[10px]"></i>
+                {% if msg.sender == request.user %}
+                    Vous avez partagé votre adresse email.
+                {% else %}
+                    {{ msg.sender|display_name }} a partagé son adresse email :
+                    <a href="mailto:{{ msg.body }}" class="font-bold text-ink underline underline-offset-2">{{ msg.body }}</a>
+                {% endif %}
+                <span class="text-[9px] text-ink-muted/60">{{ msg.sent_at|date:"d/m/y H:i" }}</span>
+            </div>
+        </div>
+
+        {% elif msg.sender == request.user %}
+        <!-- Message envoyé (droite) -->
+        <div class="flex justify-end">
+            <div class="max-w-[78%]">
+                <div class="bg-ink text-white px-4 py-3 text-sm leading-relaxed">
+                    {{ msg.body|linebreaksbr }}
+                </div>
+                <p class="text-[9px] text-ink-muted mt-1 text-right">{{ msg.sent_at|date:"d/m/y à H:i" }}</p>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- Message reçu (gauche) -->
+        <div class="flex justify-start">
+            <div class="max-w-[78%]">
+                <div class="border border-ink/12 bg-surface px-4 py-3 text-sm leading-relaxed text-ink">
+                    {{ msg.body|linebreaksbr }}
+                </div>
+                <div class="flex items-center justify-between mt-1 gap-4">
+                    <p class="text-[9px] text-ink-muted">{{ msg.sent_at|date:"d/m/y à H:i" }}</p>
+                    <a href="{% url 'messaging:report_message' message_id=msg.pk %}"
+                       class="text-[9px] text-ink-muted hover:text-ink transition-colors inline-flex items-center gap-1">
+                        <i class="fa-solid fa-flag text-[8px]"></i>
+                        Signaler
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% empty %}
+        <p class="text-sm text-ink-muted text-center py-6">Aucun message dans cette conversation.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Révéler email -->
+    {% if can_reveal and not already_revealed %}
+    <div class="border-t border-ink/8 pt-6 mb-6">
+        <a href="{% url 'messaging:reveal_email' conv_id=conv.pk %}"
+           class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted hover:text-ink transition-colors border border-ink/15 px-4 py-2 hover:border-ink/30">
+            <i class="fa-solid fa-envelope text-[9px]"></i>
+            Révéler mon adresse email à {{ other|display_name }}
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Formulaire de réponse -->
+    <div class="border-t border-ink/8 pt-6">
+        <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-3">Répondre</p>
+        <form method="post" x-data="{ sending: false }" @submit="sending = true">
+            {% csrf_token %}
+            {{ form.body }}
+            {% if form.body.errors %}
+            <p class="text-xs text-red-600 mt-1">{{ form.body.errors }}</p>
+            {% endif %}
+            <button type="submit" :disabled="sending"
+                    class="mt-3 px-6 py-2.5 bg-ink text-white text-[11px] font-bold uppercase tracking-[0.12em]
+                           hover:opacity-80 transition-opacity disabled:opacity-50 cursor-pointer disabled:cursor-default">
+                <span x-show="!sending" x-cloak>Envoyer</span>
+                <span x-show="sending" x-cloak>Envoi en cours…</span>
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

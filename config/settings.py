@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'core',
     'accounts',
     'moderation',
+    'messaging',
     'promote',
     'shows',
     'profiles',
@@ -66,6 +67,10 @@ if DEBUG:
 
 # Custom User model
 AUTH_USER_MODEL = 'accounts.CustomUser'
+ADMINS = [('Admin', os.environ.get('ADMIN_EMAIL', 'admin@petites-annonces-theatre.fr'))]
+SERVER_EMAIL = "Petites Annonces Théâtre <ne-pas-repondre@petites-annonces-theatre.fr>"
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 DISPOSABLE_EMAIL_DOMAINS = "accounts/blacklist/disposable_email_domains.txt"
 
@@ -100,6 +105,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'config.context_processors.site_url',
+                'messaging.context_processors.unread_messages_count',
             ],
         },
     },

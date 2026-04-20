@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from django.core.validators import FileExtensionValidator
 from django.db import models
@@ -179,6 +180,46 @@ class PublicationCredit(models.Model):
 
     def __str__(self):
         return f"{self.user.username}: {self.remaining_credits} crédits"
+
+
+class PlayMembership(models.Model):
+    DIRECTION_INVITE  = 'invite'
+    DIRECTION_REQUEST = 'request'
+    DIRECTION_CHOICES = [
+        (DIRECTION_INVITE,  'Invitation'),
+        (DIRECTION_REQUEST, 'Demande'),
+    ]
+
+    STATUS_PENDING   = 'pending'
+    STATUS_ACCEPTED  = 'accepted'
+    STATUS_DECLINED  = 'declined'
+    STATUS_CANCELLED = 'cancelled'
+    STATUS_CHOICES = [
+        (STATUS_PENDING,   'En attente'),
+        (STATUS_ACCEPTED,  'Accepté'),
+        (STATUS_DECLINED,  'Refusé'),
+        (STATUS_CANCELLED, 'Annulée'),
+    ]
+
+    play         = models.ForeignKey(Play, on_delete=models.CASCADE, related_name='memberships')
+    user         = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                     on_delete=models.SET_NULL, related_name='play_memberships')
+    email        = models.EmailField()
+    role         = models.CharField(max_length=100, blank=True)
+    direction    = models.CharField(max_length=10, choices=DIRECTION_CHOICES)
+    status       = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    token        = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    initiated_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                     on_delete=models.SET_NULL, related_name='initiated_memberships')
+    created_at   = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Participation'
+        verbose_name_plural = 'Participations'
+        unique_together = [('play', 'email')]
+
+    def __str__(self):
+        return f"{self.email} — {self.play.title} ({self.get_status_display()})"
 
 
 class Transaction(models.Model):

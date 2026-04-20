@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Play, Representation, Contributor, PublicationCredit, Transaction
+from .models import Play, PlayMembership, Representation, Contributor, PublicationCredit, Transaction
 
 
 class ContributorInline(admin.TabularInline):
@@ -40,6 +40,15 @@ class RepresentationAdmin(admin.ModelAdmin):
 class PublicationCreditAdmin(admin.ModelAdmin):
     list_display = ("user", "remaining_credits")
     search_fields = ("user__username",)
+
+
+@admin.register(PlayMembership)
+class PlayMembershipAdmin(admin.ModelAdmin):
+    list_display = ('play', 'email', 'direction', 'status', 'role', 'initiated_by', 'created_at')
+    list_filter = ('direction', 'status')
+    search_fields = ('email', 'play__title')
+    ordering = ('-created_at',)
+    readonly_fields = ('token',)
 
 
 @admin.register(Transaction)

@@ -1,14 +1,15 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.conf import settings
 from django.db.models import Count, Q
+from django.utils import timezone
 from django.utils.text import slugify
 
 
 def site_url(request):
     from core.models import Offer
 
-    six_months_ago = datetime.now() - timedelta(days=180)
+    six_months_ago = timezone.now() - timedelta(days=180)
     top_cities_qs = (
         Offer.objects
         .filter(filled=False, created_on__gte=six_months_ago)

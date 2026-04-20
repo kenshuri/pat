@@ -5,8 +5,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from accounts.models import CustomUser
 
-from core.models import Offer
-from shows.models import Play
+from core.models import Alert, Offer
+from shows.models import Play, PlayMembership
 
 from .forms import ActorProfileForm, TroupeProfileForm
 from .models import ActorPhoto, ActorProfile, TroupePhoto, TroupeProfile
@@ -53,11 +53,15 @@ def actor_detail(request, slug):
     troupe_profile = getattr(actor.user, 'troupe_profile', None)
     active_offers = Offer.objects.filter(author=actor.user, filled=False).order_by('-created_on')
     filled_offers = Offer.objects.filter(author=actor.user, filled=True).order_by('-created_on')
+    actor_plays = Play.objects.filter(
+        memberships__user=actor.user, memberships__status=PlayMembership.STATUS_ACCEPTED
+    ).order_by('-created_at')
     return render(request, 'profiles/actor_detail.html', {
         'actor': actor, 'own': own,
         'troupe_profile': troupe_profile,
         'active_offers': active_offers,
         'filled_offers': filled_offers,
+        'actor_plays': actor_plays,
     })
 
 
@@ -90,11 +94,13 @@ def troupe_detail(request, slug):
     actor_profile = getattr(troupe.user, 'actor_profile', None)
     active_offers = Offer.objects.filter(author=troupe.user, filled=False).order_by('-created_on')
     filled_offers = Offer.objects.filter(author=troupe.user, filled=True).order_by('-created_on')
+    troupe_plays = Play.objects.filter(user=troupe.user).order_by('-created_at')
     return render(request, 'profiles/troupe_detail.html', {
         'troupe': troupe, 'own': own,
         'actor_profile': actor_profile,
         'active_offers': active_offers,
         'filled_offers': filled_offers,
+        'troupe_plays': troupe_plays,
     })
 
 
@@ -119,6 +125,60 @@ def troupe_edit(request):
     })
 
 
+@login_required
+def delete_actor_profile(request):
+    profile = getattr(request.user, 'actor_profile', None)
+    if request.method == 'POST' and profile:
+        profile.delete()
+    return redirect('profiles:user_detail', pk=request.user.pk)
+
+
+@login_required
+def delete_troupe_profile(request):
+    profile = getattr(request.user, 'troupe_profile', None)
+    if request.method == 'POST' and profile:
+        profile.delete()
+    return redirect('profiles:my_account')
+
+
+# ── Mon espace ────────────────────────────────────────────────────────────────
+
+@login_required
+def my_account(request):
+    from messaging.models import Conversation
+    actor_profile = getattr(request.user, 'actor_profile', None)
+    troupe_profile = getattr(request.user, 'troupe_profile', None)
+    active_offers_count = Offer.objects.filter(author=request.user, filled=False).count()
+    filled_offers_count = Offer.objects.filter(author=request.user, filled=True).count()
+    plays_count = Play.objects.filter(user=request.user).count()
+    actor_plays_count = PlayMembership.objects.filter(
+        user=request.user, status=PlayMembership.STATUS_ACCEPTED
+    ).exclude(play__user=request.user).count()
+    conversations = Conversation.objects.filter(participants=request.user)
+    conversations_count = conversations.count()
+    unread_convs_count = sum(
+        1 for c in conversations.prefetch_related('messages')
+        if c.unread_count_for(request.user) > 0
+    )
+    unread_msgs_total = sum(
+        c.unread_count_for(request.user)
+        for c in conversations.prefetch_related('messages')
+    )
+    alerts_count = Alert.objects.filter(email=request.user.email, active=True).count()
+    return render(request, 'profiles/my_account.html', {
+        'actor_profile': actor_profile,
+        'troupe_profile': troupe_profile,
+        'active_offers_count': active_offers_count,
+        'filled_offers_count': filled_offers_count,
+        'plays_count': plays_count,
+        'actor_plays_count': actor_plays_count,
+        'conversations_count': conversations_count,
+        'unread_convs_count': unread_convs_count,
+        'unread_msgs_total': unread_msgs_total,
+        'alerts_count': alerts_count,
+    })
+
+
 # ── Profil utilisateur global ──────────────────────────────────────────────────
 
 def user_detail(request, pk):
@@ -127,7 +187,10 @@ def user_detail(request, pk):
     troupe_profile = getattr(user, 'troupe_profile', None)
     active_offers = Offer.objects.filter(author=user, filled=False).order_by('-created_on')
     filled_offers = Offer.objects.filter(author=user, filled=True).order_by('-created_on')
-    plays = Play.objects.filter(user=user).order_by('-created_at')
+    created_plays = Play.objects.filter(user=user).order_by('-created_at')
+    actor_plays = Play.objects.filter(
+        memberships__user=user, memberships__status=PlayMembership.STATUS_ACCEPTED
+    ).order_by('-created_at')
     own = request.user.is_authenticated and request.user == user
     return render(request, 'profiles/user_detail.html', {
         'profile_user': user,
@@ -135,6 +198,7 @@ def user_detail(request, pk):
         'troupe_profile': troupe_profile,
         'active_offers': active_offers,
         'filled_offers': filled_offers,
-        'plays': plays,
+        'created_plays': created_plays,
+        'actor_plays': actor_plays,
         'own': own,
     })

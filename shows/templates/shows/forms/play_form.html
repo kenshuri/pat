@@ -181,28 +181,160 @@
             Distribution
             <i class="fa-solid fa-chevron-down text-[9px] ml-auto transition-transform" :class="open ? 'rotate-180' : ''"></i>
         </button>
-        <div x-show="open" x-collapse class="pt-4">
-            {{ formset.management_form }}
-            {% if formset.non_form_errors %}
-            <div class="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 mb-3">
-                {% for e in formset.non_form_errors %}<p>{{ e }}</p>{% endfor %}
+        <div x-show="open" x-collapse class="pt-4 space-y-6">
+
+            <!-- Membres confirmés (PlayMembership accepted) -->
+            {% if accepted_members or user_actor_profile and not user_in_cast %}
+            <div>
+                <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted mb-2">Membres confirmés</p>
+                <div class="space-y-2">
+                    {% for m in accepted_members %}
+                    <div class="flex items-center gap-3 px-3 py-2 border border-ink/10 bg-ink/[0.012]">
+                        {% if m.user %}{% with ap=m.user.actor_profile %}
+                        {% if ap and ap.photo %}
+                        <img src="{{ ap.photo.url }}" alt="" class="w-7 h-7 rounded-full object-cover flex-shrink-0">
+                        {% else %}
+                        <span class="w-7 h-7 rounded-full bg-ink/8 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-regular fa-user text-[10px] text-ink/30"></i>
+                        </span>
+                        {% endif %}
+                        <span class="flex-1 min-w-0 text-sm text-ink truncate">
+                            {% if ap %}{{ ap.display_name }}{% else %}{{ m.email }}{% endif %}
+                        </span>
+                        {% endwith %}{% else %}
+                        <span class="w-7 h-7 rounded-full bg-ink/8 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-regular fa-user text-[10px] text-ink/30"></i>
+                        </span>
+                        <span class="flex-1 min-w-0 text-sm text-ink truncate">{{ m.email }}</span>
+                        {% endif %}
+                        <input type="text" name="member_role_{{ m.token }}" value="{{ m.role }}"
+                               placeholder="Rôle"
+                               class="w-32 flex-shrink-0 border border-ink/15 px-2 py-1 text-xs text-ink bg-surface focus:outline-none focus:border-ink transition-colors">
+                        <button type="button"
+                                hx-post="{% url 'shows:delete_membership' m.token %}"
+                                hx-confirm="Retirer ce membre de la distribution ?"
+                                class="ml-2 text-[10px] text-ink-muted/50 hover:text-red-500 transition-colors cursor-pointer flex-shrink-0"
+                                title="Retirer">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+
+                    <!-- M'ajouter à la distribution -->
+                    {% if user_actor_profile and not user_in_cast %}
+                    <button type="button"
+                            hx-post="{% url 'shows:add_self_to_cast' play.pk %}"
+                            class="flex items-center gap-2 w-full px-3 py-2 border border-dashed border-ink/20 hover:border-ink/40 text-ink-muted hover:text-ink transition-colors cursor-pointer">
+                        {% if user_actor_profile.photo %}
+                        <img src="{{ user_actor_profile.photo.url }}" alt="" class="w-7 h-7 rounded-full object-cover flex-shrink-0">
+                        {% else %}
+                        <span class="w-7 h-7 rounded-full bg-ink/8 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-regular fa-user text-[10px] text-ink/30"></i>
+                        </span>
+                        {% endif %}
+                        <span class="text-[11px] font-medium">M'ajouter à la distribution</span>
+                        <i class="fa-solid fa-plus text-[9px] ml-auto"></i>
+                    </button>
+                    {% endif %}
+                </div>
             </div>
             {% endif %}
 
-            <div id="contributors-forms" class="space-y-3">
-                {% for cform in formset.forms %}
-                    {% include "shows/partials/contributor_row.html" with form=cform %}
-                {% endfor %}
+            <!-- Invitations en attente -->
+            {% if pending_invitations %}
+            <div>
+                <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted mb-2">Invitations en attente</p>
+                <div class="space-y-2">
+                    {% for inv in pending_invitations %}
+                    <div class="flex items-center gap-3 px-3 py-2 border border-ink/10 border-dashed bg-ink/[0.008]">
+                        <span class="w-7 h-7 rounded-full bg-ink/8 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-regular fa-envelope text-[10px] text-ink/30"></i>
+                        </span>
+                        <span class="flex-1 min-w-0 text-sm text-ink truncate">{{ inv.email }}</span>
+                        {% if inv.role %}<span class="text-xs text-ink-muted flex-shrink-0">{{ inv.role }}</span>{% endif %}
+                        <span class="text-[9px] text-ink-muted/60 flex-shrink-0 italic">En attente</span>
+                        <button type="button"
+                                hx-post="{% url 'shows:cancel_invitation' inv.token %}"
+                                hx-confirm="Annuler cette invitation ?"
+                                class="ml-1 text-[10px] text-ink-muted/50 hover:text-red-500 transition-colors cursor-pointer flex-shrink-0"
+                                title="Annuler l'invitation">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Membres texte (sans compte) -->
+            <div>
+                <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted mb-2">Membres sans compte</p>
+                {{ formset.management_form }}
+                {% if formset.non_form_errors %}
+                <div class="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 mb-3">
+                    {% for e in formset.non_form_errors %}<p>{{ e }}</p>{% endfor %}
+                </div>
+                {% endif %}
+
+                <div id="contributors-forms" class="space-y-3">
+                    {% for cform in formset.forms %}
+                        {% include "shows/partials/contributor_row.html" with form=cform %}
+                    {% endfor %}
+                </div>
+
+                <template id="contributor-prototype">
+                    {% include "shows/partials/contributor_row.html" with form=formset.empty_form %}
+                </template>
+
+                <button type="button" onclick="addContributor()"
+                        class="mt-3 inline-flex items-center gap-2 px-4 py-2 border border-ink/20 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted hover:border-ink hover:text-ink transition-colors">
+                    <i class="fa-solid fa-plus text-[9px]"></i> Ajouter
+                </button>
             </div>
 
-            <template id="contributor-prototype">
-                {% include "shows/partials/contributor_row.html" with form=formset.empty_form %}
-            </template>
+            <!-- Inviter par email -->
+            <div x-data="{
+                invites: [],
+                newEmail: '',
+                newRole: '',
+                addInvite() {
+                    const e = this.newEmail.trim().toLowerCase();
+                    if (!e || !e.includes('@')) return;
+                    if (this.invites.find(i => i.email === e)) return;
+                    this.invites.push({ email: e, role: this.newRole.trim() });
+                    this.newEmail = ''; this.newRole = '';
+                },
+                removeInvite(idx) { this.invites.splice(idx, 1); }
+            }">
+                <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted mb-2">Inviter par email</p>
+                <p class="text-xs text-ink-muted/70 mb-3">La personne reçoit un email pour accepter ou refuser. Si elle n'a pas de compte, elle peut quand même accepter.</p>
 
-            <button type="button" onclick="addContributor()"
-                    class="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-ink/20 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted hover:border-ink hover:text-ink transition-colors">
-                <i class="fa-solid fa-plus text-[9px]"></i> Ajouter un membre
-            </button>
+                <div class="flex gap-2 flex-wrap">
+                    <input type="email" x-model="newEmail" placeholder="Email *"
+                           class="border border-ink/20 px-3 py-2 text-sm text-ink bg-surface focus:outline-none focus:border-ink transition-colors flex-1 min-w-[180px]">
+                    <input type="text" x-model="newRole" placeholder="Rôle (optionnel)"
+                           class="border border-ink/20 px-3 py-2 text-sm text-ink bg-surface focus:outline-none focus:border-ink transition-colors w-40">
+                    <button type="button" @click="addInvite()"
+                            class="px-4 py-2 bg-ink text-white text-[11px] font-bold uppercase tracking-[0.12em] hover:opacity-80 transition-opacity cursor-pointer">
+                        Inviter
+                    </button>
+                </div>
+
+                <template x-for="(inv, idx) in invites" :key="idx">
+                    <div class="flex items-center gap-3 px-3 py-2 border border-ink/10 bg-ink/[0.015] mt-2">
+                        <input type="hidden" :name="'invite_email_' + idx" :value="inv.email">
+                        <input type="hidden" :name="'invite_role_' + idx" :value="inv.role">
+                        <i class="fa-regular fa-envelope text-[10px] text-ink-muted/50"></i>
+                        <span class="flex-1 text-sm text-ink" x-text="inv.email"></span>
+                        <span class="text-xs text-ink-muted" x-text="inv.role || '—'"></span>
+                        <button type="button" @click="removeInvite(idx)"
+                                class="text-[9px] text-ink-muted/60 hover:text-red-500 transition-colors cursor-pointer">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </template>
+            </div>
+
         </div>
     </div>
 
@@ -302,7 +434,7 @@
     <div class="border-t border-ink/8 pt-6">
         <button type="submit" :disabled="submitting"
                 class="w-full py-3 bg-ink text-white text-[11px] font-display font-bold uppercase tracking-[0.14em]
-                       hover:opacity-80 transition-opacity disabled:opacity-50">
+                       hover:opacity-80 transition-opacity disabled:opacity-50 cursor-pointer disabled:cursor-default">
             <span x-show="!submitting" x-cloak>
                 {% if play_id == -1 %}Créer la pièce{% else %}Enregistrer les modifications{% endif %}
             </span>

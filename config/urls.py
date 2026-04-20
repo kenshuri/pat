@@ -63,6 +63,7 @@ urlpatterns = [
     path('alertes/desactiver/<uuid:token>', core.views.alert_unsubscribe, name='alert_unsubscribe'),
     path('alertes/gerer/<uuid:token>', core.views.alert_manage, name='alert_manage'),
     path('alert', core.views.alert, name='alert_legacy'),
+    path("", include("messaging.urls", namespace="messaging")),
     path("", include("promote.urls", namespace="promote")),
     path("__reload__/", include("django_browser_reload.urls")),
 ]

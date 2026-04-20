@@ -16,5 +16,9 @@ urlpatterns = [
     path("plays/<int:pk>/edit/", views.edit_play, name="edit_play"),
     path("plays/<int:pk>/delete/", views.delete_play, name="delete_play"),
     path("repertoire/", views.repertoire, name="repertoire"),
-
+    path("play/<int:pk>/rejoindre/", views.request_join, name="request_join"),
+    path("play/<int:pk>/m-ajouter/", views.add_self_to_cast, name="add_self_to_cast"),
+    path("membership/<uuid:token>/delete/", views.delete_membership, name="delete_membership"),
+    path("membership/<uuid:token>/cancel/", views.cancel_invitation, name="cancel_invitation"),
+    path("membership/<uuid:token>/<str:action>/", views.membership_respond, name="membership_respond"),
 ]
