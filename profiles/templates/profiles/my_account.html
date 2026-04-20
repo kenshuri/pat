@@ -148,7 +148,7 @@
                     <span class="flex-1 text-sm text-ink-soft">Mes pièces</span>
                     {% if plays_count or actor_plays_count %}
                     <span class="text-[11px] text-ink-muted">
-                        {% if plays_count %}{{ plays_count }} créée{{ plays_count|pluralize }}{% endif %}{% if plays_count and actor_plays_count %} · {% endif %}{% if actor_plays_count %}{{ actor_plays_count }} jouée{{ actor_plays_count|pluralize }}{% endif %}
+                        {% if plays_count %}{{ plays_count }} créée{{ plays_count|pluralize }}{% endif %}{% if plays_count and actor_plays_count %} · {% endif %}{% if actor_plays_count %}{{ actor_plays_count }} participation{{ actor_plays_count|pluralize }}{% endif %}
                     </span>
                     {% endif %}
                     <i class="fa-solid fa-chevron-right text-[9px] text-ink-muted"></i>
