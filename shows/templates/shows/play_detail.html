@@ -70,7 +70,11 @@
                     tracking-[0.04em] leading-tight max-w-3xl">
             {{ play.title }}
         </h1>
-        {% if play.company %}
+        {% if troupe_profile %}
+        <p class="text-white/40 text-xs uppercase tracking-[0.18em] mt-3">
+            <a href="{% url 'profiles:troupe_detail' slug=troupe_profile.slug %}" class="hover:text-white/70 transition-colors">{{ troupe_profile.name }}</a>
+        </p>
+        {% elif play.company %}
         <p class="text-white/40 text-xs uppercase tracking-[0.18em] mt-3">{{ play.company }}</p>
         {% endif %}
     </div>
@@ -92,7 +96,11 @@
                         tracking-[0.04em] leading-tight max-w-3xl">
                 {{ play.title }}
             </h1>
-            {% if play.company %}
+            {% if troupe_profile %}
+            <p class="text-white/35 text-xs uppercase tracking-[0.18em] mt-3">
+                <a href="{% url 'profiles:troupe_detail' slug=troupe_profile.slug %}" class="hover:text-white/60 transition-colors">{{ troupe_profile.name }}</a>
+            </p>
+            {% elif play.company %}
             <p class="text-white/35 text-xs uppercase tracking-[0.18em] mt-3">{{ play.company }}</p>
             {% endif %}
         </div>
