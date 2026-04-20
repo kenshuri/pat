@@ -119,6 +119,22 @@
             </label>
             {% endfor %}
         </div>
+
+        <!-- Description dynamique de la rubrique -->
+        <p class="text-xs text-ink-muted leading-relaxed mt-3 min-h-[2.5rem]">
+            <template x-if="section === 'artists_groups'">
+                <span>Recrutez ou proposez votre candidature pour des rôles artistiques : comédien·ne, metteur·se en scène, chorégraphe, dramaturge…</span>
+            </template>
+            <template x-if="section === 'courses_training'">
+                <span>Proposez ou recherchez des cours de théâtre, stages de formation, ateliers d'improvisation, coaching artistique…</span>
+            </template>
+            <template x-if="section === 'calls_events'">
+                <span>Lancez ou répondez à des appels à projets, résidences, festivals, lectures publiques, créations collectives…</span>
+            </template>
+            <template x-if="section === 'services_equipment'">
+                <span>Proposez ou recherchez des services techniques et logistiques (régie, son, lumière, costumes, décors, administration…) ou du matériel à louer ou céder.</span>
+            </template>
+        </p>
     </div>
 
     <!-- ── Type + Rémunération ── -->
@@ -253,87 +269,53 @@
             <i class="fa-solid fa-chevron-down text-[9px] ml-auto transition-transform" :class="open ? 'rotate-180' : ''"></i>
         </button>
         <div x-show="open" x-collapse>
-            <div class="space-y-4">
+            <div class="space-y-3">
 
-                <p class="text-xs text-ink-muted leading-relaxed px-3 py-2.5 border border-ink/10 bg-ink/[0.015]">
-                    Vous n'êtes pas obligé de renseigner vos coordonnées. Si vous préférez être contacté
-                    uniquement via la messagerie du site, laissez ces champs vides — les personnes intéressées
-                    devront créer un compte pour vous écrire.
-                </p>
-
-                <div class="space-y-1.5">
-                    <label for="id_contact_name" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Nom / Compagnie</label>
-                    <input type="text" id="id_contact_name" name="contact_name"
-                           maxlength="30" minlength="3"
-                           placeholder="La Compagnie de la Gazette"
-                           value="{% if form.instance.contact_name %}{{ form.instance.contact_name }}{% endif %}"
-                           class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
-                                  focus:outline-none focus:border-ink transition-colors bg-surface">
+                <!-- Option A : messagerie interne -->
+                <div class="border border-ink/10 p-4">
+                    <label class="flex items-start gap-3 cursor-pointer group">
+                        <div class="relative mt-0.5 shrink-0">
+                            <input type="checkbox" id="id_allow_messaging" name="allow_messaging"
+                                   {% if form.instance.allow_messaging or not form.instance.pk %}checked{% endif %}
+                                   class="peer sr-only">
+                            <div class="w-4 h-4 border border-ink/25 bg-surface peer-checked:bg-ink peer-checked:border-ink transition-colors"></div>
+                            <i class="fa-solid fa-check absolute inset-0 text-[15px] leading-4 text-center text-white hidden peer-checked:block pointer-events-none"></i>
+                        </div>
+                        <span class="text-sm font-medium text-ink group-hover:text-ink transition-colors">
+                            Autoriser la messagerie interne
+                            <span class="block text-[11px] text-ink-muted font-normal mt-0.5 leading-relaxed">
+                                Recommandé — les personnes intéressées pourront vous écrire directement depuis l'annonce. Un compte est requis pour utiliser cette fonctionnalité, ce qui protège vos coordonnées personnelles.
+                            </span>
+                        </span>
+                    </label>
                 </div>
 
-                <div class="grid sm:grid-cols-2 gap-4">
-                    <div class="space-y-1.5">
-                        <label for="id_contact_email" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Email de contact</label>
-                        <input type="email" id="id_contact_email" name="contact_email"
-                               placeholder="compagnie@gazette.fr"
-                               value="{% if form.instance.contact_email %}{{ form.instance.contact_email }}{% endif %}"
-                               class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
-                                      focus:outline-none focus:border-ink transition-colors bg-surface">
-                        <p class="text-error text-xs">{{ form.contact_email.errors }}</p>
+                <!-- Option B : coordonnées publiques -->
+                <div class="border border-ink/10 p-4 space-y-3">
+                    <div>
+                        <p class="text-sm font-medium text-ink mb-0.5">Coordonnées publiques <span class="text-[10px] font-normal text-ink-muted">(optionnel)</span></p>
+                        <p class="text-[11px] text-ink-muted leading-relaxed">Ces informations seront visibles par tous sans nécessiter de compte. Les deux options peuvent être activées simultanément.</p>
                     </div>
-                    <div class="space-y-1.5">
-                        <label for="id_contact_phone" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Téléphone</label>
-                        <input type="tel" id="id_contact_phone" name="contact_phone"
-                               placeholder="0612345678" pattern="[0-9]*" minlength="10" maxlength="10"
-                               value="{% if form.instance.contact_phone %}{{ form.instance.contact_phone }}{% endif %}"
-                               class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
-                                      focus:outline-none focus:border-ink transition-colors bg-surface">
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label for="id_contact_email" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Email de contact</label>
+                            <input type="email" id="id_contact_email" name="contact_email"
+                                   placeholder="compagnie@gazette.fr"
+                                   value="{% if form.instance.contact_email %}{{ form.instance.contact_email }}{% endif %}"
+                                   class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
+                                          focus:outline-none focus:border-ink transition-colors bg-surface">
+                            <p class="text-error text-xs">{{ form.contact_email.errors }}</p>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label for="id_contact_phone" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Téléphone</label>
+                            <input type="tel" id="id_contact_phone" name="contact_phone"
+                                   placeholder="0612345678" pattern="[0-9]*" minlength="10" maxlength="10"
+                                   value="{% if form.instance.contact_phone %}{{ form.instance.contact_phone }}{% endif %}"
+                                   class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
+                                          focus:outline-none focus:border-ink transition-colors bg-surface">
+                        </div>
                     </div>
                 </div>
-
-                <div class="space-y-1.5">
-                    <label for="id_contact_website" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Site web</label>
-                    <input type="url" id="id_contact_website" name="contact_website"
-                           placeholder="https://lacompagniedelagazette.fr"
-                           value="{% if form.instance.contact_website %}{{ form.instance.contact_website }}{% endif %}"
-                           class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
-                                  focus:outline-none focus:border-ink transition-colors bg-surface">
-                </div>
-
-                <div class="space-y-1.5">
-                    <label for="id_contact_details" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted">Informations complémentaires</label>
-                    <textarea id="id_contact_details" name="contact_details" rows="3" maxlength="5000"
-                              class="w-full border border-ink/20 px-3 py-2.5 text-sm text-ink
-                                     focus:outline-none focus:border-ink transition-colors bg-surface resize-y">{% if form.instance.contact_details %}{{ form.instance.contact_details }}{% endif %}</textarea>
-                </div>
-
-                <label class="flex items-start gap-3 cursor-pointer group">
-                    <div class="relative mt-0.5 shrink-0">
-                        <input type="checkbox" id="id_show_author_mail" name="show_author_mail"
-                               {% if form.instance.show_author_mail %}checked{% endif %}
-                               class="peer sr-only">
-                        <div class="w-4 h-4 border border-ink/25 bg-surface peer-checked:bg-ink peer-checked:border-ink transition-colors"></div>
-                        <i class="fa-solid fa-check absolute inset-0 flex items-center justify-center text-[8px] text-white hidden peer-checked:flex pointer-events-none"></i>
-                    </div>
-                    <span class="text-sm text-ink-soft group-hover:text-ink transition-colors">
-                        Afficher mon email de compte dans l'annonce
-                        <span class="block text-[10px] text-ink-muted mt-0.5">Ne pas activer si vous souhaitez garder votre email personnel caché.</span>
-                    </span>
-                </label>
-
-                <label class="flex items-start gap-3 cursor-pointer group">
-                    <div class="relative mt-0.5 shrink-0">
-                        <input type="checkbox" id="id_allow_messaging" name="allow_messaging"
-                               {% if form.instance.allow_messaging or not form.instance.pk %}checked{% endif %}
-                               class="peer sr-only">
-                        <div class="w-4 h-4 border border-ink/25 bg-surface peer-checked:bg-ink peer-checked:border-ink transition-colors"></div>
-                        <i class="fa-solid fa-check absolute inset-0 flex items-center justify-center text-[8px] text-white hidden peer-checked:flex pointer-events-none"></i>
-                    </div>
-                    <span class="text-sm text-ink-soft group-hover:text-ink transition-colors">
-                        Accepter d'être contacté via la messagerie interne du site
-                        <span class="block text-[10px] text-ink-muted mt-0.5">Les utilisateurs connectés pourront vous envoyer un message directement depuis cette annonce.</span>
-                    </span>
-                </label>
 
             </div>
         </div>
@@ -399,7 +381,7 @@
             <div class="relative mt-0.5 shrink-0">
                 <input type="checkbox" required class="peer sr-only">
                 <div class="w-4 h-4 border border-ink/25 bg-surface peer-checked:bg-ink peer-checked:border-ink transition-colors"></div>
-                <i class="fa-solid fa-check absolute inset-0 flex items-center justify-center text-[8px] text-white hidden peer-checked:flex pointer-events-none"></i>
+                <i class="fa-solid fa-check absolute inset-0 flex items-center justify-center text-[15px] leading-4 text-center text-white hidden peer-checked:block pointer-events-none"></i>
             </div>
             <span class="text-sm text-ink-soft group-hover:text-ink transition-colors">
                 J'ai lu et j'accepte les
@@ -410,7 +392,7 @@
 
         <button type="submit" :disabled="submitting"
                 class="w-full py-3 bg-ink text-white text-[11px] font-display font-bold uppercase tracking-[0.14em]
-                       hover:opacity-80 transition-opacity disabled:opacity-50">
+                       hover:opacity-80 transition-opacity disabled:opacity-50 cursor-pointer disabled:cursor-default">
             <span x-show="!submitting" x-cloak>
                 {% if offer_id == -1 %}Déposer l'annonce{% else %}Enregistrer les modifications{% endif %}
             </span>

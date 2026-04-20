@@ -39,7 +39,7 @@
     {% if own %}
     <div class="mb-6 flex items-center gap-3 p-4 bg-ink/3 border border-ink/8">
         <i class="fa-solid fa-pen text-[10px] text-ink-muted"></i>
-        <p class="text-sm text-ink-muted flex-1">C'est votre profil.</p>
+        <p class="text-sm text-ink-muted flex-1">C'est votre profil comédien·ne.</p>
         <a href="{% url 'profiles:actor_edit' %}"
            class="text-[11px] font-bold uppercase tracking-[0.10em] text-ink hover:opacity-60 transition-opacity">
             Modifier
@@ -125,32 +125,10 @@
             </div>
             {% endif %}
 
-            {% if troupe_profile %}
-            <div>
-                <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
-                    Compagnie
-                </h2>
-                <a href="{% url 'profiles:troupe_detail' slug=troupe_profile.slug %}"
-                   class="flex items-center gap-3 p-3 border border-ink/10 hover:border-ink/30 transition-colors">
-                    {% if troupe_profile.photo %}
-                    <img src="{{ troupe_profile.photo.url }}" alt="" class="w-10 h-10 object-cover flex-shrink-0">
-                    {% else %}
-                    <span class="w-10 h-10 bg-ink/5 flex items-center justify-center flex-shrink-0">
-                        <i class="fa-solid fa-masks-theater text-ink/20"></i>
-                    </span>
-                    {% endif %}
-                    <div>
-                        <p class="text-sm font-semibold text-ink">{{ troupe_profile.name }}</p>
-                        {% if troupe_profile.city %}<p class="text-xs text-ink-muted">{{ troupe_profile.city }}</p>{% endif %}
-                    </div>
-                </a>
-            </div>
-            {% endif %}
-
             {% if actor_plays %}
             <div>
                 <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
-                    Distribution
+                    Participation{% if actor_plays|length > 1 %}s{% endif %}
                 </h2>
                 <ul class="space-y-2">
                     {% for play in actor_plays %}
@@ -175,6 +153,28 @@
                     </li>
                     {% endfor %}
                 </ul>
+            </div>
+            {% endif %}
+
+            {% if troupe_profile %}
+            <div>
+                <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
+                    Compagnie
+                </h2>
+                <a href="{% url 'profiles:troupe_detail' slug=troupe_profile.slug %}"
+                   class="flex items-center gap-3 p-3 border border-ink/10 hover:border-ink/30 transition-colors">
+                    {% if troupe_profile.photo %}
+                    <img src="{{ troupe_profile.photo.url }}" alt="" class="w-10 h-10 object-cover flex-shrink-0">
+                    {% else %}
+                    <span class="w-10 h-10 bg-ink/5 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-masks-theater text-ink/20"></i>
+                    </span>
+                    {% endif %}
+                    <div>
+                        <p class="text-sm font-semibold text-ink">{{ troupe_profile.name }}</p>
+                        {% if troupe_profile.city %}<p class="text-xs text-ink-muted">{{ troupe_profile.city }}</p>{% endif %}
+                    </div>
+                </a>
             </div>
             {% endif %}
 

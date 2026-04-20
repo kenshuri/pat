@@ -147,7 +147,7 @@
         {% if created_plays %}
         <section>
             <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
-                Pièces créées
+                Pièce{% if created_plays|length > 1 %}s créées{% else %} créée{% endif %}
             </h2>
             <ul class="space-y-2">
                 {% for play in created_plays %}
@@ -179,7 +179,7 @@
         {% if actor_plays %}
         <section>
             <h2 class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted mb-4 border-b border-ink/8 pb-2">
-                Distribution
+                Participation{% if actor_plays|length > 1 %}s{% endif %}
             </h2>
             <ul class="space-y-2">
                 {% for play in actor_plays %}
