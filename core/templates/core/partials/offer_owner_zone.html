@@ -1,0 +1,111 @@
+<div id="owner-zone"
+     class="border-t border-ink/8 pt-8 space-y-4"
+     {% if offer.moderation_status == 'pending' %}
+     hx-get="{% url 'offer_owner_zone' offer.id %}"
+     hx-trigger="every 3s"
+     hx-swap="outerHTML"
+     {% endif %}>
+
+    {% if offer.moderation_status == 'pending' %}
+    <div class="border-l-4 border-amber-400 bg-ink/3 px-4 py-3">
+        <p class="text-sm text-ink-soft">
+            <i class="fa-solid fa-circle-notch fa-spin text-amber-500 mr-1.5"></i>
+            Votre annonce est en cours de vérification automatique — elle sera en ligne dans quelques instants. Elle ne peut pas être modifiée pendant cette période.
+        </p>
+    </div>
+    {% elif offer.moderation_status == 'under_review' %}
+    <div class="border-l-4 border-amber-400 bg-ink/3 px-4 py-3">
+        <p class="text-sm text-ink-soft">
+            <i class="fa-solid fa-circle-exclamation text-amber-500 mr-1.5"></i>
+            Votre annonce est examinée par notre équipe. Elle n'est pas visible publiquement et ne peut pas être modifiée — vous serez notifié par email dès qu'elle sera traitée.
+        </p>
+    </div>
+    {% elif not offer.filled %}
+        {% if offer.moderation and not offer.moderation.passed %}
+        <div class="border-l-4 border-red-400 bg-red-50 px-4 py-3">
+            <p class="text-sm font-bold text-red-700 mb-2">Annonce non publiée — modération</p>
+            <p class="text-sm text-red-600 mb-2">Notre système a détecté un contenu potentiellement problématique :</p>
+            <ul class="text-sm text-red-600 space-y-0.5 mb-2">
+                {% for reason in offer.moderation.get_localized_reasons %}
+                <li class="flex items-start gap-1.5"><span class="mt-0.5 shrink-0">–</span> {{ reason }}</li>
+                {% endfor %}
+            </ul>
+            <p class="text-sm text-red-500">Modifiez votre annonce pour respecter les règles, puis soumettez-la à nouveau.</p>
+        </div>
+        {% else %}
+        <div class="border-l-4 border-ink/15 bg-ink/3 px-4 py-3">
+            <p class="text-sm text-ink-soft">
+                <i class="fa-solid fa-circle-check text-green-500 mr-1.5"></i>
+                Votre annonce est en ligne.
+            </p>
+        </div>
+        {% endif %}
+    {% else %}
+    <div class="border-l-4 border-ink/15 bg-ink/3 px-4 py-3">
+        <p class="text-sm text-ink-muted">
+            <i class="fa-solid fa-handshake-simple mr-1.5"></i>
+            Cette annonce a été marquée comme pourvue — elle n'est plus visible en ligne.
+        </p>
+    </div>
+    {% endif %}
+
+    {% if offer.moderation_status == 'pending' or offer.moderation_status == 'under_review' %}
+    <div class="flex flex-wrap gap-2">
+        <span class="flex items-center gap-2 px-4 py-2
+                     text-[11px] font-bold uppercase tracking-[0.12em]
+                     border border-ink/10 bg-ink/3 text-ink/25 cursor-not-allowed select-none">
+            <i class="fa-solid fa-lock text-[9px]"></i>Modifier
+        </span>
+        {% if not offer.filled %}
+        <span class="flex items-center gap-2 px-4 py-2
+                     text-[11px] font-bold uppercase tracking-[0.12em]
+                     border border-ink/10 bg-ink/3 text-ink/25 cursor-not-allowed select-none">
+            <i class="fa-solid fa-lock text-[9px]"></i>Marquer pourvue
+        </span>
+        {% else %}
+        <span class="flex items-center gap-2 px-4 py-2
+                     text-[11px] font-bold uppercase tracking-[0.12em]
+                     border border-ink/10 bg-ink/3 text-ink/25 cursor-not-allowed select-none">
+            <i class="fa-solid fa-lock text-[9px]"></i>Marquer non pourvue
+        </span>
+        {% endif %}
+        <span class="flex items-center gap-2 px-4 py-2
+                     text-[11px] font-bold uppercase tracking-[0.12em]
+                     border border-ink/10 bg-ink/3 text-ink/25 cursor-not-allowed select-none ml-auto">
+            <i class="fa-solid fa-lock text-[9px]"></i>Supprimer
+        </span>
+    </div>
+    {% else %}
+    <div class="flex flex-wrap gap-2">
+        <a href="{% url 'update_offer' offer.id %}"
+           class="flex items-center gap-2 px-4 py-2
+                  text-[11px] font-bold uppercase tracking-[0.12em]
+                  border border-ink/20 text-ink-soft hover:border-ink hover:text-ink transition-colors">
+            <i class="fa-solid fa-pen text-[10px]"></i>Modifier
+        </a>
+        {% if not offer.filled %}
+        <a href="{% url 'fill_offer' offer.id %}"
+           class="flex items-center gap-2 px-4 py-2
+                  text-[11px] font-bold uppercase tracking-[0.12em]
+                  bg-green-600 text-white hover:bg-green-700 transition-colors">
+            <i class="fa-solid fa-handshake-simple text-[10px]"></i>Marquer pourvue
+        </a>
+        {% else %}
+        <a href="{% url 'unfill_offer' offer.id %}"
+           class="flex items-center gap-2 px-4 py-2
+                  text-[11px] font-bold uppercase tracking-[0.12em]
+                  border border-amber-400/60 text-amber-600 hover:bg-amber-50 transition-colors">
+            <i class="fa-solid fa-handshake-slash text-[10px]"></i>Marquer non pourvue
+        </a>
+        {% endif %}
+        <a href="{% url 'delete_offer' offer.id %}"
+           class="flex items-center gap-2 px-4 py-2
+                  text-[11px] font-bold uppercase tracking-[0.12em]
+                  text-red-400 hover:text-red-600 hover:bg-red-50
+                  border border-transparent hover:border-red-200 transition-colors ml-auto">
+            <i class="fa-solid fa-trash text-[10px]"></i>Supprimer
+        </a>
+    </div>
+    {% endif %}
+
+</div>

@@ -252,6 +252,14 @@ def offer(request, offer_id: int):
     return render(request, 'core/offer.html', {'offer': offer})
 
 
+@login_required
+def offer_owner_zone(request, offer_id: int):
+    offer = get_object_or_404(Offer, pk=offer_id)
+    if request.user != offer.author:
+        raise Http404
+    return render(request, 'core/partials/offer_owner_zone.html', {'offer': offer})
+
+
 def offer_search(request):
     search_data = request.POST
 

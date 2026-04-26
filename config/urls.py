@@ -71,6 +71,7 @@ urlpatterns = [
 htmx_urlpatterns = [
     path('offer_search/', core.views.offer_search, name='offer_search'),
     path('offer/<int:offer_id>/contact_info', core.views.offer_contact_info, name='offer_contact_info'),
+    path('offer/<int:offer_id>/owner_zone', core.views.offer_owner_zone, name='offer_owner_zone'),
     path('offers/<int:page>', core.views.offers, name='offers'),
 ]
 
