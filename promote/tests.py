@@ -220,6 +220,14 @@ class WebhookViewTests(TestCase):
             stripe_session_id='cs_test_webhook',
         )
 
+    def _make_event(self, event_type, promote_id=None, amount_total=1000):
+        event = MagicMock()
+        event.type = event_type
+        if promote_id is not None:
+            event.data.object.metadata.promote_id = str(promote_id)
+            event.data.object.amount_total = amount_total
+        return event
+
     def _post_webhook(self, event):
         with patch('promote.views.stripe') as mock_stripe:
             mock_stripe.Webhook.construct_event.return_value = event
@@ -232,13 +240,7 @@ class WebhookViewTests(TestCase):
         return response
 
     def test_webhook_confirms_promote_on_completed(self):
-        event = {
-            'type': 'checkout.session.completed',
-            'data': {'object': {
-                'metadata': {'promote_id': str(self.promote.pk)},
-                'amount_total': 1000,
-            }},
-        }
+        event = self._make_event('checkout.session.completed', self.promote.pk, 1000)
         response = self._post_webhook(event)
         self.assertEqual(response.status_code, 200)
         self.promote.refresh_from_db()
@@ -246,8 +248,9 @@ class WebhookViewTests(TestCase):
         self.assertEqual(float(self.promote.price_paid), 10.0)
 
     def test_webhook_returns_200_on_invalid_signature(self):
-        with patch('promote.views.stripe.Webhook.construct_event') as mock_construct:
-            mock_construct.side_effect = stripe.error.SignatureVerificationError("invalid sig", "sig_header")
+        with patch('promote.views.stripe') as mock_stripe:
+            mock_stripe.error.SignatureVerificationError = stripe.error.SignatureVerificationError
+            mock_stripe.Webhook.construct_event.side_effect = stripe.error.SignatureVerificationError("invalid sig", "sig_header")
             response = self.client.post(
                 reverse('promote:stripe_webhook'),
                 data=b'bad',
@@ -257,10 +260,7 @@ class WebhookViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_webhook_ignores_other_events(self):
-        event = {
-            'type': 'payment_intent.created',
-            'data': {'object': {}},
-        }
+        event = self._make_event('payment_intent.created')
         response = self._post_webhook(event)
         self.assertEqual(response.status_code, 200)
         self.promote.refresh_from_db()
@@ -276,13 +276,7 @@ class WebhookViewTests(TestCase):
             start_date=date(2026, 9, 3), end_date=date(2026, 9, 5),
             formula='day', status='confirmed',
         )
-        event = {
-            'type': 'checkout.session.completed',
-            'data': {'object': {
-                'metadata': {'promote_id': str(self.promote.pk)},
-                'amount_total': 1000,
-            }},
-        }
+        event = self._make_event('checkout.session.completed', self.promote.pk, 1000)
         response = self._post_webhook(event)
         self.assertEqual(response.status_code, 200)
         self.promote.refresh_from_db()

@@ -200,9 +200,10 @@ def sponsor_checkout(request, play_id):
             }],
             mode='payment',
             success_url=(
-                f"{settings.SITE_URL}/promote/sponsor/confirmation/{{CHECKOUT_SESSION_ID}}/"
+                request.build_absolute_uri('/').rstrip('/')
+                + '/promote/sponsor/confirmation/{CHECKOUT_SESSION_ID}/'
             ),
-            cancel_url=f"{settings.SITE_URL}/promote/sponsor/cancel/",
+            cancel_url=request.build_absolute_uri(reverse('promote:sponsor_cancel')),
             metadata={'promote_id': str(promote.pk)},
             customer_email=request.user.email,
         )
@@ -230,9 +231,10 @@ def stripe_webhook(request):
         logger.error("Stripe webhook signature error: %s", e)
         return HttpResponse(status=200)
 
-    if event.get('type') == 'checkout.session.completed':
-        session = event['data']['object']
-        promote_id = session.get('metadata', {}).get('promote_id')
+    if event.type == 'checkout.session.completed':
+        session = event.data.object
+        metadata = getattr(session, 'metadata', None)
+        promote_id = getattr(metadata, 'promote_id', None) if metadata else None
 
         if promote_id:
             try:
@@ -250,7 +252,7 @@ def stripe_webhook(request):
                     )
                 else:
                     promote.status = 'confirmed'
-                    promote.price_paid = session.get('amount_total', 0) / 100
+                    promote.price_paid = (getattr(session, 'amount_total', 0) or 0) / 100
                     promote.save(update_fields=['status', 'price_paid'])
 
             except Promote.DoesNotExist:
