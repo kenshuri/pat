@@ -381,59 +381,7 @@
             {% endwith %}
 
             {% if request.user == play.user %}
-            <div class="border-t border-ink/8 pt-8 space-y-4">
-
-                {% if play.moderation_status == 'pending' %}
-                <div class="border-l-4 border-amber-400 bg-ink/3 px-4 py-3">
-                    <p class="text-sm text-ink-soft">
-                        <i class="fa-solid fa-circle-notch fa-spin text-amber-500 mr-1.5"></i>
-                        Votre pièce est en cours de vérification automatique — elle sera visible dans quelques instants.
-                    </p>
-                </div>
-                {% elif play.moderation_status == 'under_review' %}
-                <div class="border-l-4 border-amber-400 bg-ink/3 px-4 py-3">
-                    <p class="text-sm text-ink-soft">
-                        <i class="fa-solid fa-circle-exclamation text-amber-500 mr-1.5"></i>
-                        Votre pièce est examinée par notre équipe — elle n'est pas visible publiquement. Vous serez notifié par email dès qu'elle sera traitée.
-                    </p>
-                </div>
-                {% elif play.moderation_status == 'rejected' %}
-                <div class="border-l-4 border-red-400 bg-red-50 px-4 py-3">
-                    <p class="text-sm font-bold text-red-700 mb-1">Pièce non publiée</p>
-                    {% if play.moderation and play.moderation.get_localized_reasons %}
-                    <ul class="text-sm text-red-600 space-y-0.5">
-                        {% for reason in play.moderation.get_localized_reasons %}
-                        <li class="flex items-start gap-1.5"><span class="mt-0.5 shrink-0">–</span> {{ reason }}</li>
-                        {% endfor %}
-                    </ul>
-                    {% endif %}
-                </div>
-                {% else %}
-                <div class="border-l-4 border-ink/15 bg-ink/3 px-4 py-3">
-                    <p class="text-sm text-ink-soft">
-                        <i class="fa-solid fa-circle-check text-green-500 mr-1.5"></i>
-                        Votre pièce est en ligne.
-                    </p>
-                </div>
-                {% endif %}
-
-                <div class="flex flex-wrap gap-2">
-                    <a href="{% url 'shows:edit_play' pk=play.pk %}"
-                       class="flex items-center gap-2 px-4 py-2
-                              text-[11px] font-bold uppercase tracking-[0.12em]
-                              border border-ink/20 text-ink-soft hover:border-ink hover:text-ink transition-colors">
-                        <i class="fa-solid fa-pen text-[10px]"></i>Modifier
-                    </a>
-                    <a href="{% url 'shows:delete_play' pk=play.pk %}"
-                       class="flex items-center gap-2 px-4 py-2
-                              text-[11px] font-bold uppercase tracking-[0.12em]
-                              text-red-400 hover:text-red-600 hover:bg-red-50
-                              border border-transparent hover:border-red-200 transition-colors ml-auto">
-                        <i class="fa-solid fa-trash text-[10px]"></i>Supprimer
-                    </a>
-                </div>
-
-            </div>
+            {% include "shows/partials/play_owner_zone.html" %}
             {% endif %}
             {% endif %}
 

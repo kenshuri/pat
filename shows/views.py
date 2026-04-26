@@ -217,6 +217,11 @@ def play_detail(request, pk):
     })
 
 
+@login_required
+def play_owner_zone(request, pk):
+    play = get_object_or_404(Play, pk=pk, user=request.user)
+    return render(request, "shows/partials/play_owner_zone.html", {"play": play})
+
 
 @login_required
 def add_representation(request, pk):

@@ -8,6 +8,7 @@ urlpatterns = [
     path("agenda/user/", views.agenda_user, name="agenda-user"),
     path("agenda/filter/", views.agenda_filter, name="agenda-filter"),
     path("play/<int:pk>/", views.play_detail, name="play_detail"),
+    path("play/<int:pk>/owner-zone/", views.play_owner_zone, name="play_owner_zone"),
     path('<int:pk>/add-representation/', views.add_representation, name='add_representation'),
     path("representation/partial/credit", views.get_representation_form_partial_credit, name="get_representation_credit"),
     path("representation/<int:pk>/delete/", views.delete_representation, name="delete_representation"),
