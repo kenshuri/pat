@@ -40,6 +40,7 @@ class PlayModerationStatusTests(TestCase):
 
 
 from unittest.mock import patch, MagicMock
+from moderation.models import ModerationResult
 
 
 class ModeratePlayImagesTests(TestCase):
@@ -91,3 +92,64 @@ class ModeratePlayImagesTests(TestCase):
         passed, reasons = moderate_play_images(play)
         self.assertFalse(passed)
         self.assertIn('poster', reasons)
+
+
+class ModeratePlayTaskTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            email='task_tester@example.com',
+            password='password123',
+        )
+
+    def _make_play(self):
+        return Play.objects.create(
+            user=self.user,
+            title='Test Play',
+            description='Une description de test',
+            genre='theatre',
+        )
+
+    @patch('core.services.image_moderation.moderate_play_images')
+    @patch('moderation.services.moderate_text')
+    def test_published_when_text_and_images_pass(self, mock_text, mock_images):
+        from core.tasks import moderate_play
+        mock_text.return_value = ModerationResult.objects.create(reasons=None)
+        mock_images.return_value = (True, '')
+
+        play = self._make_play()
+        moderate_play(play.pk)
+
+        play.refresh_from_db()
+        self.assertEqual(play.moderation_status, 'published')
+        self.assertIsNotNone(play.moderation)
+
+    @patch('core.services.image_moderation.moderate_play_images')
+    @patch('moderation.services.moderate_text')
+    def test_under_review_when_text_fails(self, mock_text, mock_images):
+        from core.tasks import moderate_play
+        mock_text.return_value = ModerationResult.objects.create(reasons='violence')
+        mock_images.return_value = (True, '')
+
+        play = self._make_play()
+        moderate_play(play.pk)
+
+        play.refresh_from_db()
+        self.assertEqual(play.moderation_status, 'under_review')
+
+    @patch('core.services.image_moderation.moderate_play_images')
+    @patch('moderation.services.moderate_text')
+    def test_under_review_when_images_fail(self, mock_text, mock_images):
+        from core.tasks import moderate_play
+        mock_text.return_value = ModerationResult.objects.create(reasons=None)
+        mock_images.return_value = (False, 'poster')
+
+        play = self._make_play()
+        moderate_play(play.pk)
+
+        play.refresh_from_db()
+        self.assertEqual(play.moderation_status, 'under_review')
+
+    def test_does_not_raise_on_missing_play(self):
+        from core.tasks import moderate_play
+        # Should log warning and return, not raise
+        moderate_play(99999)

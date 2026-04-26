@@ -66,6 +66,52 @@ def moderate_offer(offer_id: int):
         raise  # laisse autoretry_for gérer le retry
 
 
+@shared_task(
+    autoretry_for=(Exception,),
+    max_retries=3,
+    retry_backoff=60,
+    retry_jitter=True,
+)
+def moderate_play(play_id: int):
+    from shows.models import Play
+    from core.services.image_moderation import moderate_play_images
+    from moderation.services import moderate_text
+
+    try:
+        play = Play.objects.select_related('moderation').get(pk=play_id)
+    except Play.DoesNotExist:
+        logger.warning("moderate_play: Play %s not found", play_id)
+        return
+
+    try:
+        text_result = moderate_text(f"{play.title}\n{play.description or ''}")
+
+        images_ok, image_reasons = moderate_play_images(play)
+
+        text_result.images_passed = images_ok
+        text_result.image_reasons = image_reasons
+        text_result.save()
+
+        play.moderation = text_result
+
+        if not text_result.reasons and images_ok:
+            play.moderation_status = Play.PUBLISHED
+        else:
+            play.moderation_status = Play.UNDER_REVIEW
+
+        play.save(update_fields=['moderation', 'moderation_status'])
+
+    except Exception as e:
+        logger.error("moderate_play failed for play %s: %s", play_id, e)
+        if moderate_play.request.retries >= moderate_play.max_retries:
+            try:
+                play.moderation_status = Play.UNDER_REVIEW
+                play.save(update_fields=['moderation_status'])
+            except Exception:
+                pass
+        raise
+
+
 def _notify_admin_flagged(offer, moderation_result):
     reasons = []
     if moderation_result.reasons:
