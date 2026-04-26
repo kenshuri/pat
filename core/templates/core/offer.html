@@ -56,6 +56,19 @@
 {% endblock jsonld %}
 
 {% block main %}
+{% if offer.moderation_status == 'under_review' and request.user == offer.author %}
+<div class="max-w-screen-xl mx-auto px-4 md:px-8 pt-6">
+  <div class="rounded-xl border border-amber-300 bg-amber-50 px-6 py-4 text-amber-900">
+    <p class="font-semibold text-sm mb-1">Annonce en cours de vérification</p>
+    <p class="text-sm leading-relaxed">
+      Votre annonce est examinée par notre équipe suite à une détection automatique.
+      Elle n'est pas visible publiquement pour le moment.
+      Vous serez notifié par email dès qu'elle sera traitée.
+      Vous ne pouvez pas la modifier pendant cet examen.
+    </p>
+  </div>
+</div>
+{% endif %}
 
 <!-- ══════════════════════════════════════
      COUVERTURE : image réelle ou strip coloré
