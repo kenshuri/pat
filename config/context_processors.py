@@ -14,7 +14,7 @@ def site_url(request):
         Offer.objects
         .filter(filled=False, created_on__gte=six_months_ago)
         .exclude(city='')
-        .filter(Q(moderation__isnull=True) | Q(moderation__passed=True))
+        .filter(moderation_status='published')
         .values('city')
         .annotate(count=Count('id'))
         .filter(count__gte=3)
@@ -26,7 +26,7 @@ def site_url(request):
         Offer.objects
         .filter(filled=False, created_on__gte=six_months_ago)
         .exclude(city='')
-        .filter(Q(moderation__isnull=True) | Q(moderation__passed=True))
+        .filter(moderation_status='published')
         .values_list('city', flat=True)
     )
     dept_counts = {}

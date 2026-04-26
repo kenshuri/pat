@@ -5,7 +5,7 @@ from django.contrib import admin, messages
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from .models import Alert, Offer
+from .models import Alert, Offer, OfferPhoto
 
 
 # ---- Filtre "Récent" (< 7 j, < 30 j) ----
@@ -45,12 +45,32 @@ class AlertAdmin(admin.ModelAdmin):
         queryset.update(active=False)
 
 
+class OfferPhotoInline(admin.TabularInline):
+    model = OfferPhoto
+    extra = 0
+    readonly_fields = ("photo_preview", "order", "image")
+    fields = ("photo_preview", "order", "image")
+    can_delete = True
+
+    @admin.display(description="Aperçu")
+    def photo_preview(self, obj):
+        if obj.image:
+            return format_html(
+                '<a href="{0}" target="_blank" rel="noopener">'
+                '<img src="{0}" style="max-height:120px;max-width:200px;object-fit:contain;border-radius:2px;">'
+                '</a>',
+                obj.image.url,
+            )
+        return "—"
+
+
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):
     save_on_top = True
     date_hierarchy = "created_on"
     ordering = ("-created_on",)
     list_select_related = ("author", "moderation")
+    inlines = [OfferPhotoInline]
 
     # Colonnes de la liste
     list_display = (
@@ -58,10 +78,10 @@ class OfferAdmin(admin.ModelAdmin):
         "city", "gender", "age_range", "filled",
         "is_recent", "displayed_email", "contact_phone",
         "created_on", "author_display",
-        "moderation_status", "moderation_manual_status", "moderation_passed",
+        "moderation_status",
     )
     list_display_links = ("title",)
-    list_editable = ("filled",)
+    list_editable = ("filled", "moderation_status")
 
     # Recherche & filtres
     search_fields = (
@@ -71,10 +91,9 @@ class OfferAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "section", "type", "category", "gender",
-        "filled", "show_author_mail",
+        "filled", "show_author_mail", "moderation_status",
         RecentFilter,
         ("created_on", admin.DateFieldListFilter),
-        "moderation__manual_status", "moderation__passed",
     )
 
     # Optimisation FK
@@ -83,12 +102,12 @@ class OfferAdmin(admin.ModelAdmin):
     # autocomplete_fields = ("author", "moderation")
 
     # Champs en lecture seule (affichages calculés)
-    readonly_fields = ("created_on", "moderation_preview", "displayed_email_link", "contact_website_link")
+    readonly_fields = ("created_on", "moderation_preview", "displayed_email_link", "contact_website_link", "cover_image_preview")
 
     # Groupes de champs
     fieldsets = (
         (_("Contenu"), {
-            "fields": ("type", "section", "category", "title", "summary", "description")
+            "fields": ("type", "section", "category", "title", "summary", "description", "cover_image_preview", "cover_image")
         }),
         (_("Informations pratiques"), {
             "fields": ("city", "min_age", "max_age", "gender", "filled")
@@ -101,7 +120,7 @@ class OfferAdmin(admin.ModelAdmin):
             )
         }),
         (_("Modération"), {
-            "fields": ("moderation", "moderation_preview")
+            "fields": ("moderation_status", "moderation", "moderation_preview")
         }),
         (_("Métadonnées"), {
             "fields": ("created_on",)
@@ -138,16 +157,6 @@ class OfferAdmin(admin.ModelAdmin):
             return full_name or getattr(obj.author, "username", None) or getattr(obj.author, "email", None) or obj.author_id
         return "—"
 
-    @admin.display(description=_("Statut manuel"))
-    def moderation_manual_status(self, obj):
-        if obj.moderation_id and hasattr(obj.moderation, "get_manual_status_display"):
-            return obj.moderation.get_manual_status_display()
-        return "—"
-
-    @admin.display(boolean=True, description=_("Modération OK"))
-    def moderation_passed(self, obj):
-        return getattr(obj.moderation, "passed", False) if obj.moderation_id else False
-
     @admin.display(description=_("Résumé modération"))
     def moderation_preview(self, obj):
         if hasattr(obj, "get_moderation_text"):
@@ -170,6 +179,17 @@ class OfferAdmin(admin.ModelAdmin):
         email = self.displayed_email(obj)
         if email and email != "—":
             return format_html('<a href="mailto:{0}">{0}</a>', email)
+        return "—"
+
+    @admin.display(description=_("Vignette de couverture"))
+    def cover_image_preview(self, obj):
+        if obj.cover_image:
+            return format_html(
+                '<a href="{0}" target="_blank" rel="noopener">'
+                '<img src="{0}" style="max-height:160px;max-width:320px;object-fit:cover;border-radius:2px;">'
+                '</a>',
+                obj.cover_image.url,
+            )
         return "—"
 
     @admin.display(description=_("Site de contact (lien)"))

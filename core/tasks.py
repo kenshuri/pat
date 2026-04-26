@@ -46,7 +46,7 @@ def moderate_offer(offer_id: int):
         offer.moderation = text_result
 
         # 4. Décision finale
-        if text_result.passed and images_ok:
+        if not text_result.reasons and images_ok:
             offer.moderation_status = Offer.PUBLISHED
         else:
             offer.moderation_status = Offer.UNDER_REVIEW
@@ -68,7 +68,7 @@ def moderate_offer(offer_id: int):
 
 def _notify_admin_flagged(offer, moderation_result):
     reasons = []
-    if not moderation_result.passed and moderation_result.reasons:
+    if moderation_result.reasons:
         reasons.append(f"Texte : {moderation_result.reasons}")
     if not moderation_result.images_passed and moderation_result.image_reasons:
         reasons.append(f"Images : {moderation_result.image_reasons}")

@@ -62,7 +62,7 @@
         <p class="text-sm font-bold text-red-700 mb-2">
             <i class="fa-solid fa-circle-xmark mr-1.5"></i>Annonce non publiée
         </p>
-        {% if offer.moderation and not offer.moderation.passed and offer.moderation.get_localized_reasons %}
+        {% if offer.moderation and offer.moderation.get_localized_reasons %}
         <p class="text-sm text-red-600 mb-3">
             Notre système de modération automatique a détecté un contenu potentiellement problématique :
         </p>

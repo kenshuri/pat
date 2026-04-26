@@ -1,15 +1,14 @@
 # moderation/admin.py
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.db.models import Count, Q
 from django.utils.html import format_html, format_html_join
 from django.utils.translation import gettext_lazy as _
 
-from .models import ModerationResult, ModerationStatus
+from .models import ModerationResult
 from moderation.utils import CATEGORY_TRANSLATIONS
 from core.models import Offer
 
 
-# ------------ Filtres personnalisés ------------
 class HasReasonsFilter(admin.SimpleListFilter):
     title = _("Raisons présentes")
     parameter_name = "has_reasons"
@@ -33,7 +32,6 @@ class HasOffersFilter(admin.SimpleListFilter):
         return (("yes", _("Oui")), ("no", _("Non")))
 
     def queryset(self, request, queryset):
-        # dépend de l'annotation _offers_count faite dans get_queryset
         if self.value() == "yes":
             return queryset.filter(_offers_count__gt=0)
         if self.value() == "no":
@@ -56,11 +54,10 @@ class ReasonCodeFilter(admin.SimpleListFilter):
         return queryset
 
 
-# ------------ Inline des offres liées ------------
 class OfferInline(admin.TabularInline):
     model = Offer
     fk_name = "moderation"
-    fields = ("title", "type", "section", "category", "city", "filled", "created_on")
+    fields = ("title", "type", "section", "city", "moderation_status", "filled", "created_on")
     readonly_fields = fields
     extra = 0
     can_delete = False
@@ -69,7 +66,6 @@ class OfferInline(admin.TabularInline):
     verbose_name_plural = _("Annonces liées")
 
 
-# ------------ Admin principal ------------
 @admin.register(ModerationResult)
 class ModerationResultAdmin(admin.ModelAdmin):
     inlines = [OfferInline]
@@ -78,44 +74,41 @@ class ModerationResultAdmin(admin.ModelAdmin):
     ordering = ("-created_at",)
     actions_on_top = actions_on_bottom = True
 
-    # Colonnes liste
     list_display = (
         "id",
-        "passed",
-        "manual_status",
+        "text_passed",
+        "images_passed",
         "created_at",
         "reasons_badges",
         "offers_count",
     )
     list_display_links = ("id",)
-    list_editable = ("passed", "manual_status")
 
-    # Recherche & filtres
     search_fields = (
         "reasons",
-        "offers__title", "offers__summary", "offers__description",
+        "offers__title", "offers__summary",
         "offers__author__username", "offers__author__email",
     )
     list_filter = (
-        "passed",
-        "manual_status",
         ("created_at", admin.DateFieldListFilter),
         HasReasonsFilter,
         HasOffersFilter,
         ReasonCodeFilter,
     )
 
-    readonly_fields = ("created_at", "reasons_localized_display")
+    readonly_fields = ("created_at", "text_passed", "reasons_localized_display")
     fieldsets = (
-        (_("Statut"), {
-            "fields": ("passed", "manual_status", "created_at"),
+        (_("Résultat texte"), {
+            "fields": ("text_passed", "reasons", "reasons_localized_display"),
         }),
-        (_("Raisons"), {
-            "fields": ("reasons", "reasons_localized_display"),
+        (_("Résultat images"), {
+            "fields": ("images_passed", "image_reasons"),
+        }),
+        (_("Métadonnées"), {
+            "fields": ("created_at",),
         }),
     )
 
-    # ---------- Queryset & annotations ----------
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.annotate(_offers_count=Count("offers"))
@@ -124,7 +117,10 @@ class ModerationResultAdmin(admin.ModelAdmin):
     def offers_count(self, obj):
         return getattr(obj, "_offers_count", 0) or 0
 
-    # ---------- Affichages custom ----------
+    @admin.display(boolean=True, description=_("Texte OK"))
+    def text_passed(self, obj):
+        return not obj.reasons
+
     @admin.display(description=_("Raisons (localisées)"))
     def reasons_localized_display(self, obj):
         items = obj.get_localized_reasons()
@@ -146,50 +142,3 @@ class ModerationResultAdmin(admin.ModelAdmin):
             ((it,) for it in items[:6])
         )
         return html + (format_html(" …") if len(items) > 6 else html.__class__(""))
-
-    # ---------- Actions ----------
-    @admin.action(description=_("Marquer comme ACCEPTÉ (passed=True, statut = Révisé et accepté)"))
-    def action_mark_passed(self, request, queryset):
-        updated = queryset.update(passed=True, manual_status=ModerationStatus.REVIEW_PASSED)
-        self.message_user(request, _("%d élément(s) marqué(s) ACCEPTÉ.") % updated, level=messages.SUCCESS)
-
-    @admin.action(description=_("Marquer comme REJETÉ (passed=False, statut = Révisé et rejeté)"))
-    def action_mark_failed(self, request, queryset):
-        updated = queryset.update(passed=False, manual_status=ModerationStatus.REVIEW_FAILED)
-        self.message_user(request, _("%d élément(s) marqué(s) REJETÉ.") % updated, level=messages.SUCCESS)
-
-    @admin.action(description=_("Marquer comme Non révisé"))
-    def action_mark_not_reviewed(self, request, queryset):
-        updated = queryset.update(manual_status=ModerationStatus.NOT_REVIEWED)
-        self.message_user(request, _("%d élément(s) marqué(s) Non révisé.") % updated, level=messages.SUCCESS)
-
-    @admin.action(description=_("Marquer comme Révision demandée par l’auteur"))
-    def action_mark_review_requested(self, request, queryset):
-        updated = queryset.update(manual_status=ModerationStatus.REVIEW_REQUESTED)
-        self.message_user(request, _("%d élément(s) marqué(s) Révision demandée.") % updated, level=messages.SUCCESS)
-
-    @admin.action(description=_("Synchroniser 'passed' à partir du 'manual_status'"))
-    def action_sync_passed_from_status(self, request, queryset):
-        updated_passed = updated_failed = 0
-        for obj in queryset.only("id", "passed", "manual_status"):
-            if obj.manual_status == ModerationStatus.REVIEW_PASSED and not obj.passed:
-                obj.passed = True
-                obj.save(update_fields=["passed"])
-                updated_passed += 1
-            elif obj.manual_status == ModerationStatus.REVIEW_FAILED and obj.passed:
-                obj.passed = False
-                obj.save(update_fields=["passed"])
-                updated_failed += 1
-        self.message_user(
-            request,
-            _("Synchronisation effectuée. Passé→True: %(a)d, Passé→False: %(b)d") % {"a": updated_passed, "b": updated_failed},
-            level=messages.INFO,
-        )
-
-    actions = (
-        "action_mark_passed",
-        "action_mark_failed",
-        "action_mark_not_reviewed",
-        "action_mark_review_requested",
-        "action_sync_passed_from_status",
-    )

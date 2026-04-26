@@ -17,12 +17,9 @@ def moderate_text(text: str) -> ModerationResult:
                 category for category, flagged in result.categories.items() if flagged
             ]
         return ModerationResult.objects.create(
-            passed=len(failed_categories) == 0,
-            reasons=", ".join(failed_categories)
+            reasons=", ".join(failed_categories) if failed_categories else None
         )
     except Exception as e:
         return ModerationResult.objects.create(
-            passed=False,
             reasons="api_error"
         )
-
