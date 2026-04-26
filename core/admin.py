@@ -58,7 +58,7 @@ class OfferAdmin(admin.ModelAdmin):
         "city", "gender", "age_range", "filled",
         "is_recent", "displayed_email", "contact_phone",
         "created_on", "author_display",
-        "moderation_status", "moderation_passed",
+        "moderation_status", "moderation_manual_status", "moderation_passed",
     )
     list_display_links = ("title",)
     list_editable = ("filled",)
@@ -109,7 +109,7 @@ class OfferAdmin(admin.ModelAdmin):
     )
 
     # Actions rapides
-    actions = ("marquer_comme_pourvue", "marquer_comme_ouverte")
+    actions = ("marquer_comme_pourvue", "marquer_comme_ouverte", "valider_annonces", "rejeter_annonces")
 
     # --------- Helpers d’affichage ---------
     def get_queryset(self, request):
@@ -138,8 +138,8 @@ class OfferAdmin(admin.ModelAdmin):
             return full_name or getattr(obj.author, "username", None) or getattr(obj.author, "email", None) or obj.author_id
         return "—"
 
-    @admin.display(description=_("Statut modération"))
-    def moderation_status(self, obj):
+    @admin.display(description=_("Statut manuel"))
+    def moderation_manual_status(self, obj):
         if obj.moderation_id and hasattr(obj.moderation, "get_manual_status_display"):
             return obj.moderation.get_manual_status_display()
         return "—"
@@ -195,4 +195,22 @@ class OfferAdmin(admin.ModelAdmin):
             request,
             _("%d offre(s) marquée(s) comme ouverte(s).") % updated,
             level=messages.SUCCESS,
+        )
+
+    @admin.action(description=_("Valider les annonces sélectionnées"))
+    def valider_annonces(self, request, queryset):
+        updated = queryset.update(moderation_status='published')
+        self.message_user(
+            request,
+            _("%d annonce(s) validée(s) et publiée(s).") % updated,
+            level=messages.SUCCESS,
+        )
+
+    @admin.action(description=_("Rejeter les annonces sélectionnées"))
+    def rejeter_annonces(self, request, queryset):
+        updated = queryset.update(moderation_status='rejected')
+        self.message_user(
+            request,
+            _("%d annonce(s) rejetée(s).") % updated,
+            level=messages.WARNING,
         )
