@@ -1,0 +1,156 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Réserver un bandeau — Petites Annonces Théâtre{% endblock %}
+
+{% block main %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<div class="max-w-2xl mx-auto px-4 py-10">
+    <h1 class="font-display font-bold text-ink text-xl uppercase tracking-[0.06em] mb-2">
+        Réserver un bandeau
+    </h1>
+    <p class="text-ink-soft text-sm mb-8">
+        Choisissez votre pièce, une formule et une date de début. Un seul bandeau à la fois — les dates déjà réservées sont grisées.
+    </p>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="border-l-4 border-red-400 bg-red-50 px-4 py-3 mb-6">
+        <p class="text-sm text-red-700">{{ message }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if not selected_play and not plays %}
+    <div class="border-l-4 border-amber-400 bg-ink/3 px-4 py-3">
+        <p class="text-sm text-ink-soft">
+            Vous n'avez aucune pièce validée.
+            <a href="{% url 'shows:add_play' %}" class="underline">Ajouter une pièce</a>
+        </p>
+    </div>
+    {% else %}
+
+    {% if not selected_play %}
+    <div class="mb-6">
+        <label class="block text-xs font-bold uppercase tracking-wider text-ink-soft mb-2">Pièce</label>
+        <select id="play-select" class="w-full border border-ink/20 px-3 py-2 text-sm bg-white">
+            <option value="">— Choisir une pièce —</option>
+            {% for play in plays %}
+            <option value="{{ play.pk }}">{{ play.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% else %}
+
+    <form method="post" action="{% url 'promote:sponsor_checkout' selected_play.pk %}" id="checkout-form">
+        {% csrf_token %}
+
+        <div class="mb-6 p-4 border border-ink/10 flex items-center gap-3">
+            {% if selected_play.poster %}
+            <img src="{{ selected_play.poster.url }}" alt="{{ selected_play.title }}"
+                 class="w-10 h-14 object-cover shrink-0">
+            {% endif %}
+            <div>
+                <p class="font-display font-bold text-sm uppercase">{{ selected_play.title }}</p>
+                {% if selected_play.company %}
+                <p class="text-xs text-ink-soft">{{ selected_play.company }}</p>
+                {% endif %}
+            </div>
+            <a href="{% url 'promote:sponsor_list' %}"
+               class="ml-auto text-xs text-ink-soft underline">Changer</a>
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-xs font-bold uppercase tracking-wider text-ink-soft mb-3">Formule</label>
+            <div class="grid grid-cols-3 gap-3">
+                {% for value, label, price in formula_options %}
+                <label class="cursor-pointer">
+                    <input type="radio" name="formula" value="{{ value }}"
+                           class="sr-only peer" {% if forloop.first %}checked{% endif %}>
+                    <div class="border border-ink/15 peer-checked:border-primary peer-checked:bg-primary/5
+                                px-4 py-3 text-center transition-colors">
+                        <p class="font-bold text-sm">{{ label }}</p>
+                        <p class="text-xs text-ink-soft mt-0.5">{{ price }} €</p>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <label for="id_start_date"
+                   class="block text-xs font-bold uppercase tracking-wider text-ink-soft mb-2">
+                Date de début
+            </label>
+            <input type="text" id="id_start_date" name="start_date"
+                   placeholder="Choisir une date…"
+                   class="w-full border border-ink/20 px-3 py-2 text-sm bg-white cursor-pointer"
+                   readonly>
+            <p class="text-xs text-ink-soft mt-1" id="end-date-label"></p>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-primary text-white font-bold uppercase tracking-wider text-sm py-3
+                       hover:opacity-90 transition-opacity disabled:opacity-40"
+                id="submit-btn" disabled>
+            Payer par carte →
+        </button>
+    </form>
+    {% endif %}
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+<script>
+const FORMULA_DAYS = {day: 0, week: 6, month: 29};
+
+{% if not selected_play %}
+document.getElementById('play-select').addEventListener('change', function() {
+    if (this.value) {
+        window.location = '{% url "promote:sponsor_calendar" %}?play=' + this.value;
+    }
+});
+{% else %}
+let fp;
+
+function getFormula() {
+    const checked = document.querySelector('input[name="formula"]:checked');
+    return checked ? checked.value : 'week';
+}
+
+function updateEndDate(dateStr) {
+    const formula = getFormula();
+    if (!dateStr) return;
+    const days = FORMULA_DAYS[formula] || 0;
+    const start = new Date(dateStr);
+    const end = new Date(start);
+    end.setDate(end.getDate() + days);
+    const opts = {day: 'numeric', month: 'long', year: 'numeric'};
+    const endStr = end.toLocaleDateString('fr-FR', opts);
+    document.getElementById('end-date-label').textContent = 'Fin : ' + endStr;
+    document.getElementById('submit-btn').disabled = false;
+}
+
+fetch('{% url "promote:sponsor_availability" %}')
+    .then(r => r.json())
+    .then(data => {
+        const disabled = data.booked.map(b => ({from: b.start, to: b.end}));
+        fp = flatpickr('#id_start_date', {
+            locale: 'fr',
+            minDate: 'today',
+            disable: disabled,
+            onChange: function(_, dateStr) { updateEndDate(dateStr); },
+        });
+    });
+
+document.querySelectorAll('input[name="formula"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const dateStr = document.getElementById('id_start_date').value;
+        if (dateStr) updateEndDate(dateStr);
+    });
+});
+{% endif %}
+</script>
+{% endblock main %}

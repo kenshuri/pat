@@ -1,0 +1,49 @@
+{% extends "core/base.html" %}
+
+{% block title %}Promouvoir ma pièce — Petites Annonces Théâtre{% endblock %}
+
+{% block main %}
+<div class="max-w-2xl mx-auto px-4 py-10">
+    <h1 class="font-display font-bold text-ink text-xl uppercase tracking-[0.06em] mb-2">
+        Promouvoir une pièce
+    </h1>
+    <p class="text-ink-soft text-sm mb-8">
+        Choisissez la pièce que vous souhaitez mettre en avant dans le bandeau de la page d'accueil.
+    </p>
+
+    {% if plays %}
+    <div class="space-y-3">
+        {% for play in plays %}
+        <a href="{% url 'promote:sponsor_calendar' %}?play={{ play.pk }}"
+           class="flex items-center gap-4 p-4 border border-ink/10 hover:border-ink/30 transition-colors group">
+            {% if play.poster %}
+            <img src="{{ play.poster.url }}" alt="{{ play.title }}"
+                 class="w-12 h-16 object-cover shrink-0">
+            {% else %}
+            <div class="w-12 h-16 bg-ink/5 shrink-0 flex items-center justify-center">
+                <i class="fa-solid fa-masks-theater text-ink/20"></i>
+            </div>
+            {% endif %}
+            <div class="min-w-0">
+                <p class="font-display font-bold text-ink text-sm uppercase tracking-wide truncate
+                          group-hover:text-primary transition-colors">
+                    {{ play.title }}
+                </p>
+                {% if play.company %}
+                <p class="text-ink-soft text-xs mt-0.5">{{ play.company }}</p>
+                {% endif %}
+            </div>
+            <i class="fa-solid fa-chevron-right text-ink/20 group-hover:text-ink/50 transition-colors ml-auto shrink-0"></i>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="border-l-4 border-amber-400 bg-ink/3 px-4 py-3">
+        <p class="text-sm text-ink-soft">
+            <i class="fa-solid fa-circle-exclamation text-amber-500 mr-1.5"></i>
+            Vous n'avez aucune pièce validée. Une pièce doit être publiée avant de pouvoir être promue.
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock main %}
