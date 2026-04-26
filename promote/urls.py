@@ -1,7 +1,6 @@
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 
-import promote.views
 from . import views
 
 app_name = "promote"
@@ -20,5 +19,5 @@ urlpatterns = [
     path("promote/<slug:slug>/", views.PromoteDetailView.as_view(), name="detail"),
     path("promote/<slug:slug>/click/", views.banner_click, name="banner_click"),
     path("promote/<slug:slug>/book/", views.booking_redirect, name="booking_redirect"),
-    path("promote/", promote.views.default, name="default"),
+    path("promote/", views.default, name="default"),
 ]
