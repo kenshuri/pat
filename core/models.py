@@ -67,6 +67,16 @@ class Offer(models.Model):
         (MALE, 'Homme'),
     ]
 
+    PUBLISHED = 'published'
+    UNDER_REVIEW = 'under_review'
+    REJECTED = 'rejected'
+
+    MODERATION_STATUS_CHOICES = [
+        (PUBLISHED, 'Publiée'),
+        (UNDER_REVIEW, 'Sous examen'),
+        (REJECTED, 'Rejetée'),
+    ]
+
     type = models.CharField(
         max_length=255,
         choices=TYPE_CHOICES,
@@ -93,6 +103,11 @@ class Offer(models.Model):
     gender = models.CharField(max_length=255, choices=GENDER_CHOICES, default=None, null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     filled = models.BooleanField(default=False)
+    moderation_status = models.CharField(
+        max_length=20,
+        choices=MODERATION_STATUS_CHOICES,
+        default=UNDER_REVIEW,
+    )
     author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
     show_author_mail = models.BooleanField(default=False)
     contact_name = models.CharField(max_length=255, null=True, blank=True)
