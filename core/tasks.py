@@ -51,7 +51,12 @@ def moderate_offer(offer_id: int):
 
     except Exception as e:
         logger.error("moderate_offer failed for offer %s: %s", offer_id, e)
-        # fail closed: moderation_status stays under_review
+        # fail closed: set under_review so admin can investigate
+        try:
+            offer.moderation_status = Offer.UNDER_REVIEW
+            offer.save(update_fields=['moderation_status'])
+        except Exception:
+            pass
 
 
 def _notify_admin_flagged(offer, moderation_result):

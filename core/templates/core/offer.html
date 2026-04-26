@@ -56,20 +56,6 @@
 {% endblock jsonld %}
 
 {% block main %}
-{% if offer.moderation_status == 'under_review' and request.user == offer.author %}
-<div class="max-w-screen-xl mx-auto px-4 md:px-8 pt-6">
-  <div class="rounded-xl border border-amber-300 bg-amber-50 px-6 py-4 text-amber-900">
-    <p class="font-semibold text-sm mb-1">Annonce en cours de vérification</p>
-    <p class="text-sm leading-relaxed">
-      Votre annonce est examinée par notre équipe suite à une détection automatique.
-      Elle n'est pas visible publiquement pour le moment.
-      Vous serez notifié par email dès qu'elle sera traitée.
-      Vous ne pouvez pas la modifier pendant cet examen.
-    </p>
-  </div>
-</div>
-{% endif %}
-
 <!-- ══════════════════════════════════════
      COUVERTURE : image réelle ou strip coloré
 ══════════════════════════════════════ -->
@@ -386,7 +372,21 @@
     {% if offer.author == request.user %}
     <div class="border-t border-ink/8 pt-8 space-y-4">
 
-        {% if not offer.filled %}
+        {% if offer.moderation_status == 'pending' %}
+        <div class="border-l-4 border-amber-400 bg-ink/3 px-4 py-3">
+            <p class="text-sm text-ink-soft">
+                <i class="fa-solid fa-circle-notch fa-spin text-amber-500 mr-1.5"></i>
+                Votre annonce est en cours de vérification automatique — elle sera en ligne dans quelques instants.
+            </p>
+        </div>
+        {% elif offer.moderation_status == 'under_review' %}
+        <div class="border-l-4 border-amber-400 bg-ink/3 px-4 py-3">
+            <p class="text-sm text-ink-soft">
+                <i class="fa-solid fa-circle-exclamation text-amber-500 mr-1.5"></i>
+                Votre annonce est examinée par notre équipe. Elle n'est pas visible publiquement — vous serez notifié par email dès qu'elle sera traitée.
+            </p>
+        </div>
+        {% elif not offer.filled %}
             {% if offer.moderation and not offer.moderation.passed %}
             <div class="border-l-4 border-red-400 bg-red-50 px-4 py-3">
                 <p class="text-sm font-bold text-red-700 mb-2">Annonce non publiée — modération</p>

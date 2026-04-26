@@ -68,11 +68,13 @@ class Offer(models.Model):
     ]
 
     PUBLISHED = 'published'
+    PENDING = 'pending'
     UNDER_REVIEW = 'under_review'
     REJECTED = 'rejected'
 
     MODERATION_STATUS_CHOICES = [
         (PUBLISHED, 'Publiée'),
+        (PENDING, 'Vérification en cours'),
         (UNDER_REVIEW, 'Sous examen'),
         (REJECTED, 'Rejetée'),
     ]
@@ -106,7 +108,7 @@ class Offer(models.Model):
     moderation_status = models.CharField(
         max_length=20,
         choices=MODERATION_STATUS_CHOICES,
-        default=UNDER_REVIEW,
+        default=PENDING,
     )
     author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
     show_author_mail = models.BooleanField(default=False)
