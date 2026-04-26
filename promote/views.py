@@ -219,7 +219,44 @@ def sponsor_checkout(request, play_id):
 
 
 def stripe_webhook(request):
-    return HttpResponse("Not implemented", status=501)
+    payload = request.body
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE', '')
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+    except Exception as e:
+        logger.error("Stripe webhook signature error: %s", e)
+        return HttpResponse(status=200)
+
+    if event.get('type') == 'checkout.session.completed':
+        session = event['data']['object']
+        promote_id = session.get('metadata', {}).get('promote_id')
+
+        if promote_id:
+            try:
+                promote = Promote.objects.get(pk=promote_id)
+
+                overlap = Promote.objects.filter(
+                    status='confirmed',
+                    start_date__lte=promote.end_date,
+                    end_date__gte=promote.start_date,
+                ).exclude(pk=promote.pk).exists()
+
+                if overlap:
+                    logger.warning(
+                        "Promote %s: overlapping confirmed slot, skipping confirm", promote_id
+                    )
+                else:
+                    promote.status = 'confirmed'
+                    promote.price_paid = session.get('amount_total', 0) / 100
+                    promote.save(update_fields=['status', 'price_paid'])
+
+            except Promote.DoesNotExist:
+                logger.error("Webhook: Promote %s not found", promote_id)
+
+    return HttpResponse(status=200)
 
 
 def sponsor_confirmation(request, session_id):

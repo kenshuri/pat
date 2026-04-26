@@ -200,3 +200,89 @@ class CheckoutViewTests(TestCase):
             {'formula': 'week', 'start_date': '2026-09-01'},
         )
         self.assertEqual(response.status_code, 404)
+
+
+class WebhookViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = CustomUser.objects.create_user(
+            email='webhook@example.com', password='password123'
+        )
+        self.play = Play.objects.create(
+            user=self.user, title='Webhook Play',
+            genre='theatre', moderation_status='published',
+        )
+        self.promote = Promote.objects.create(
+            user=self.user, play=self.play, title=self.play.title,
+            start_date=date(2026, 9, 1), end_date=date(2026, 9, 7),
+            formula='week', status='pending_payment',
+            stripe_session_id='cs_test_webhook',
+        )
+
+    def _post_webhook(self, event):
+        with patch('promote.views.stripe') as mock_stripe:
+            mock_stripe.Webhook.construct_event.return_value = event
+            response = self.client.post(
+                reverse('promote:stripe_webhook'),
+                data=b'{}',
+                content_type='application/json',
+                HTTP_STRIPE_SIGNATURE='t=1,v1=abc',
+            )
+        return response
+
+    def test_webhook_confirms_promote_on_completed(self):
+        event = {
+            'type': 'checkout.session.completed',
+            'data': {'object': {
+                'metadata': {'promote_id': str(self.promote.pk)},
+                'amount_total': 1000,
+            }},
+        }
+        response = self._post_webhook(event)
+        self.assertEqual(response.status_code, 200)
+        self.promote.refresh_from_db()
+        self.assertEqual(self.promote.status, 'confirmed')
+        self.assertEqual(float(self.promote.price_paid), 10.0)
+
+    def test_webhook_returns_200_on_invalid_signature(self):
+        with patch('promote.views.stripe') as mock_stripe:
+            mock_stripe.Webhook.construct_event.side_effect = Exception("invalid sig")
+            response = self.client.post(
+                reverse('promote:stripe_webhook'),
+                data=b'bad',
+                content_type='application/json',
+                HTTP_STRIPE_SIGNATURE='bad',
+            )
+        self.assertEqual(response.status_code, 200)
+
+    def test_webhook_ignores_other_events(self):
+        event = {
+            'type': 'payment_intent.created',
+            'data': {'object': {}},
+        }
+        response = self._post_webhook(event)
+        self.assertEqual(response.status_code, 200)
+        self.promote.refresh_from_db()
+        self.assertEqual(self.promote.status, 'pending_payment')
+
+    def test_webhook_skips_confirm_on_overlap(self):
+        other_play = Play.objects.create(
+            user=self.user, title='Other Play',
+            genre='theatre', moderation_status='published',
+        )
+        Promote.objects.create(
+            user=self.user, play=other_play, title='Other',
+            start_date=date(2026, 9, 3), end_date=date(2026, 9, 5),
+            formula='day', status='confirmed',
+        )
+        event = {
+            'type': 'checkout.session.completed',
+            'data': {'object': {
+                'metadata': {'promote_id': str(self.promote.pk)},
+                'amount_total': 1000,
+            }},
+        }
+        response = self._post_webhook(event)
+        self.assertEqual(response.status_code, 200)
+        self.promote.refresh_from_db()
+        self.assertEqual(self.promote.status, 'pending_payment')
