@@ -134,6 +134,10 @@ class Offer(models.Model):
         )
 
     @property
+    def valid_through(self):
+        return (self.created_on + datetime.timedelta(days=90)).strftime('%Y-%m-%d')
+
+    @property
     def recent(self):
         offer_date = self.created_on
         threshold = timezone.now() - datetime.timedelta(weeks=1)

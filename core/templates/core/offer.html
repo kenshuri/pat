@@ -43,6 +43,12 @@
     }
   },
   "employmentType": "{% if offer.category == 'paid' %}CONTRACTOR{% else %}VOLUNTEER{% endif %}",
+  "validThrough": "{{ offer.valid_through }}",
+  {% if offer.category != 'paid' %}"baseSalary": {
+    "@type": "MonetaryAmount",
+    "currency": "EUR",
+    "value": { "@type": "QuantitativeValue", "value": 0 }
+  },{% endif %}
   "url": "{{ SITE_URL }}{% url 'offer' offer_id=offer.pk %}"
 }
 </script>
