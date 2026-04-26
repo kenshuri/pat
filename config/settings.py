@@ -38,6 +38,9 @@ ALLOWED_HOSTS = ['pat-production-b5b4.up.railway.app',
 
 SITE_URL = 'https://petites-annonces-theatre.fr'
 
+STRIPE_SECRET_KEY      = os.environ.get('STRIPE_SECRET_KEY', '')
+STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
+STRIPE_WEBHOOK_SECRET  = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
 
 # Application definition
 
