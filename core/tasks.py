@@ -14,7 +14,12 @@ def ping():
     return "pong"
 
 
-@shared_task
+@shared_task(
+    autoretry_for=(Exception,),
+    max_retries=3,
+    retry_backoff=60,   # 60s → 120s → 240s
+    retry_jitter=True,
+)
 def moderate_offer(offer_id: int):
     from core.models import Offer
     from core.services.image_moderation import moderate_images
@@ -51,12 +56,14 @@ def moderate_offer(offer_id: int):
 
     except Exception as e:
         logger.error("moderate_offer failed for offer %s: %s", offer_id, e)
-        # fail closed: set under_review so admin can investigate
-        try:
-            offer.moderation_status = Offer.UNDER_REVIEW
-            offer.save(update_fields=['moderation_status'])
-        except Exception:
-            pass
+        if moderate_offer.request.retries >= moderate_offer.max_retries:
+            # Tous les retries épuisés : passe en under_review pour examen admin
+            try:
+                offer.moderation_status = Offer.UNDER_REVIEW
+                offer.save(update_fields=['moderation_status'])
+            except Exception:
+                pass
+        raise  # laisse autoretry_for gérer le retry
 
 
 def _notify_admin_flagged(offer, moderation_result):
