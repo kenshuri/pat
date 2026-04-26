@@ -109,6 +109,8 @@ def moderate_play_images(play) -> tuple[bool, str]:
         images_to_check.append(("poster", play.poster))
     if play.cover_image:
         images_to_check.append(("cover_image", play.cover_image))
+    for photo in play.photos.all():
+        images_to_check.append((f"photo_{photo.pk}", photo.image))
 
     if not images_to_check:
         return True, ""

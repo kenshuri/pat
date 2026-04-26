@@ -1,6 +1,6 @@
 from django.test import TestCase
 from accounts.models import CustomUser
-from shows.models import Play
+from shows.models import Play, PlayPhoto
 
 
 class PlayModerationStatusTests(TestCase):
@@ -92,6 +92,30 @@ class ModeratePlayImagesTests(TestCase):
         passed, reasons = moderate_play_images(play)
         self.assertFalse(passed)
         self.assertIn('poster', reasons)
+
+    @patch('core.services.image_moderation._download_to_temp')
+    @patch('core.services.image_moderation._analyze_image_file')
+    def test_unsafe_extra_photo_returns_failed(self, mock_analyze, mock_download):
+        from core.services.image_moderation import moderate_play_images
+        mock_download.return_value = '/tmp/fake.webp'
+        mock_analyze.return_value = False  # unsafe
+
+        play = Play.objects.create(
+            user=self.user, title='Extra Photo Play', genre='theatre'
+        )
+        photo = PlayPhoto(play=play, order=0)
+        photo.image = MagicMock()
+        photo.image.name = 'extra.webp'
+        photo.pk = 1
+
+        play_mock = MagicMock(wraps=play)
+        play_mock.poster = None
+        play_mock.cover_image = None
+        play_mock.photos.all.return_value = [photo]
+
+        passed, reasons = moderate_play_images(play_mock)
+        self.assertFalse(passed)
+        self.assertIn('photo_1', reasons)
 
 
 class ModeratePlayTaskTests(TestCase):
