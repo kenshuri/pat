@@ -55,17 +55,23 @@ class Promote(models.Model):
 
 ## URLs
 
+Préfixe `promote/` (cohérent avec les URLs existantes de l'app `promote`).
+
 ```
-GET  /promouvoir/                          → liste des pièces publiées de l'utilisateur
-GET  /promouvoir/calendrier/              → page avec calendrier + formulaire de réservation
-GET  /promouvoir/disponibilites/          → JSON des périodes confirmées (pour le calendrier)
-GET  /promouvoir/checkout/<play_id>/      → création session Stripe + redirect
-GET  /promouvoir/confirmation/<session_id>/ → page de confirmation post-paiement
-GET  /promouvoir/annulation/              → page d'annulation (abandon Stripe)
-POST /promouvoir/stripe/webhook/          → endpoint webhook Stripe
+GET  /promote/sponsor/                          → liste des pièces publiées de l'utilisateur
+GET  /promote/sponsor/calendar/                → page avec calendrier + formulaire de réservation
+GET  /promote/sponsor/availability/            → JSON des périodes confirmées (pour le calendrier)
+GET  /promote/sponsor/checkout/<play_id>/      → création session Stripe + redirect
+GET  /promote/sponsor/confirmation/<session_id>/ → page de confirmation post-paiement
+GET  /promote/sponsor/cancel/                  → page d'annulation (abandon Stripe)
+POST /promote/sponsor/webhook/                 → endpoint webhook Stripe
 ```
 
 Toutes les vues sauf le webhook requièrent `@login_required`. Le webhook est exempt de CSRF.
+
+## Point d'entrée depuis la page pièce
+
+Sur `shows/templates/shows/play_detail.html`, dans la zone propriétaire (visible uniquement si `request.user == play.user`) : bouton **"Promouvoir cette pièce"** liant vers `/promote/sponsor/?play=<pk>`. Si la pièce n'est pas `published`, le bouton est désactivé avec un tooltip "Votre pièce doit être validée avant de pouvoir être promue."
 
 ## Flux utilisateur
 
