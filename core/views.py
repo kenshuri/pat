@@ -17,7 +17,7 @@ from django.utils.text import slugify
 
 from core.forms import AlertForm, MAX_ALERTS_PER_EMAIL, OfferForm, SignUpForm
 from core.models import Alert, Offer, OfferPhoto
-from moderation.services import moderate_text
+from core.tasks import moderate_offer
 from promote.models import Promote
 
 
@@ -32,8 +32,8 @@ def _build_offer_queryset(get_params):
     age_max       = get_params.get('age_max', '')
     freshness     = get_params.get('freshness', '')
 
-    qs = Offer.objects.select_related('moderation').filter(filled=False).filter(
-        Q(moderation__isnull=True) | Q(moderation__passed=True)
+    qs = Offer.objects.filter(filled=False).filter(
+        moderation_status=Offer.PUBLISHED
     )
     if search_query:
         qs = qs.filter(
@@ -159,10 +159,10 @@ def add_offer(request):
         if form.is_valid():
             offer = form.save(commit=False)
             offer.author = request.user
-            moderation_result = moderate_text(offer.get_moderation_text())
-            offer.moderation = moderation_result
+            offer.moderation_status = Offer.UNDER_REVIEW
             offer.save()
             _save_extra_photos(offer, request.FILES.getlist('extra_photos'))
+            moderate_offer.delay(offer.id)
             offer_id = offer.id
             return redirect('offer', offer_id=offer_id)
     else:
@@ -179,18 +179,26 @@ def update_offer(request, offer_id: int):
         offer = get_object_or_404(Offer, id=offer_id)
         if offer.author != request.user:
             return redirect('offer', offer_id=offer_id)
+        if offer.moderation_status == Offer.UNDER_REVIEW:
+            from django.contrib import messages as django_messages
+            django_messages.error(request, "Votre annonce est en cours d'examen et ne peut pas être modifiée pour le moment.")
+            return redirect('offer', offer_id=offer_id)
         form = OfferForm(request.POST, request.FILES, instance=offer)
         if form.is_valid():
             offer = form.save(commit=False)
-            moderation_result = moderate_text(offer.get_moderation_text())
-            offer.moderation = moderation_result
+            offer.moderation_status = Offer.UNDER_REVIEW
             offer.save()
             _delete_extra_photos(offer, request.POST)
             _save_extra_photos(offer, request.FILES.getlist('extra_photos'))
+            moderate_offer.delay(offer.id)
             return redirect('offer', offer_id=offer_id)
     else:
         offer = get_object_or_404(Offer, id=offer_id)
         if offer.author != request.user:
+            return redirect('offer', offer_id=offer_id)
+        if offer.moderation_status == Offer.UNDER_REVIEW:
+            from django.contrib import messages as django_messages
+            django_messages.error(request, "Votre annonce est en cours d'examen et ne peut pas être modifiée pour le moment.")
             return redirect('offer', offer_id=offer_id)
         form = OfferForm(instance=offer)
     return render(request,
