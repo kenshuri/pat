@@ -61,6 +61,24 @@
                   border border-ink/20 text-ink-soft hover:border-ink hover:text-ink transition-colors">
             <i class="fa-solid fa-pen text-[10px]"></i>Modifier
         </a>
+
+        {% if play.moderation_status == 'published' %}
+        <a href="{% url 'promote:sponsor_list' %}?play={{ play.pk }}"
+           class="flex items-center gap-2 px-4 py-2
+                  text-[11px] font-bold uppercase tracking-[0.12em]
+                  border border-primary/40 text-primary hover:border-primary hover:bg-primary/5
+                  transition-colors">
+            <i class="fa-solid fa-star text-[10px]"></i>Promouvoir
+        </a>
+        {% else %}
+        <span title="Votre pièce doit être validée avant de pouvoir être promue."
+              class="flex items-center gap-2 px-4 py-2
+                     text-[11px] font-bold uppercase tracking-[0.12em]
+                     border border-ink/10 bg-ink/3 text-ink/25 cursor-not-allowed select-none">
+            <i class="fa-solid fa-star text-[10px]"></i>Promouvoir
+        </span>
+        {% endif %}
+
         <a href="{% url 'shows:delete_play' pk=play.pk %}"
            class="flex items-center gap-2 px-4 py-2
                   text-[11px] font-bold uppercase tracking-[0.12em]
