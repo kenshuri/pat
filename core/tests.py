@@ -44,7 +44,7 @@ class OfferModelTests(TestCase):
         self.assertFalse(offer.recent)
 
     def test_get_moderation_text_omits_empty_fields(self):
-        moderation = ModerationResult.objects.create(passed=True, reasons='')  # type: ignore[attr-defined]
+        moderation = ModerationResult.objects.create(reasons='')  # type: ignore[attr-defined]
         offer = Offer.objects.create(  # type: ignore[attr-defined]
             title='Annonce',
             summary='Resume',

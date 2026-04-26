@@ -11,6 +11,7 @@ from PIL import Image, ImageOps
 from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
+from moderation.models import ModerationResult
 
 
 def _play_poster_path(instance, filename):
@@ -85,6 +86,31 @@ class Play(models.Model):
 
     created_at = models.DateTimeField(_("Date de création"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Date de modification"), auto_now=True)
+
+    # --- Modération ---
+    PENDING      = 'pending'
+    PUBLISHED    = 'published'
+    UNDER_REVIEW = 'under_review'
+    REJECTED     = 'rejected'
+    MODERATION_STATUS_CHOICES = [
+        (PENDING,      'En vérification'),
+        (PUBLISHED,    'Publiée'),
+        (UNDER_REVIEW, 'Sous examen'),
+        (REJECTED,     'Rejetée'),
+    ]
+
+    moderation_status = models.CharField(
+        max_length=20,
+        choices=MODERATION_STATUS_CHOICES,
+        default=PENDING,
+    )
+    moderation = models.ForeignKey(
+        ModerationResult,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='plays',
+    )
 
     class Meta:
         verbose_name = _("Pièce")
