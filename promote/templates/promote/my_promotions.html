@@ -1,0 +1,66 @@
+{% extends "core/base.html" %}
+
+{% block title %}Mes promotions — Petites Annonces Théâtre{% endblock %}
+
+{% block main %}
+<div class="max-w-2xl mx-auto px-4 py-10">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="font-display font-bold text-ink text-xl uppercase tracking-[0.06em]">
+            Mes promotions
+        </h1>
+        <a href="{% url 'promote:sponsor_list' %}"
+           class="text-xs font-bold uppercase tracking-wider bg-primary text-white px-4 py-2
+                  hover:opacity-90 transition-opacity">
+            + Nouvelle
+        </a>
+    </div>
+
+    {% if not promotions %}
+    <div class="border-l-4 border-ink/15 bg-ink/3 px-4 py-3">
+        <p class="text-sm text-ink-soft">
+            Vous n'avez pas encore de promotion.
+            <a href="{% url 'promote:sponsor_list' %}" class="underline">Promouvoir une pièce</a>
+        </p>
+    </div>
+    {% else %}
+    <div class="space-y-3">
+        {% for promo in promotions %}
+        {% with today=promo.start_date %}
+        <div class="border border-ink/10 p-4 flex gap-4 items-start">
+            {% if promo.play and promo.play.poster %}
+            <div class="shrink-0 w-10" style="aspect-ratio: 2/3;">
+                <img src="{{ promo.play.poster.url }}"
+                     alt="{{ promo.play.title }}"
+                     class="w-full h-full object-cover">
+            </div>
+            {% endif %}
+            <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2">
+                    <p class="font-display font-bold text-sm uppercase tracking-wide text-ink truncate">
+                        {% if promo.play %}{{ promo.play.title }}{% else %}{{ promo.title }}{% endif %}
+                    </p>
+                    <span class="shrink-0 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5
+                        {% if promo.display_status == 'active' %}bg-green-50 text-green-700 border border-green-200
+                        {% elif promo.display_status == 'upcoming' %}bg-blue-50 text-blue-700 border border-blue-200
+                        {% elif promo.display_status == 'pending_payment' %}bg-amber-50 text-amber-700 border border-amber-200
+                        {% else %}bg-ink/5 text-ink-muted border border-ink/10{% endif %}">
+                        {% if promo.display_status == 'active' %}En cours
+                        {% elif promo.display_status == 'upcoming' %}À venir
+                        {% elif promo.display_status == 'pending_payment' %}En attente de paiement
+                        {% else %}Terminé{% endif %}
+                    </span>
+                </div>
+                <p class="text-xs text-ink-soft mt-1">
+                    {{ promo.get_formula_display }} · {{ promo.start_date|date:"j F Y" }} – {{ promo.end_date|date:"j F Y" }}
+                </p>
+                {% if promo.price_paid %}
+                <p class="text-xs text-ink-muted mt-0.5">{{ promo.price_paid }} €</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock main %}

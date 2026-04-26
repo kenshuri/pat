@@ -65,11 +65,11 @@
             <label class="block text-xs font-bold uppercase tracking-wider text-ink-soft mb-3">Formule</label>
             <div class="grid grid-cols-3 gap-3">
                 {% for value, label, price in formula_options %}
-                <label class="cursor-pointer">
+                <label class="cursor-pointer formula-label">
                     <input type="radio" name="formula" value="{{ value }}"
-                           class="sr-only peer" {% if forloop.first %}checked{% endif %}>
-                    <div class="border border-ink/15 peer-checked:border-primary peer-checked:bg-primary/5
-                                px-4 py-3 text-center transition-colors">
+                           class="sr-only" {% if forloop.first %}checked{% endif %}>
+                    <div class="formula-card border px-4 py-3 text-center transition-colors
+                                {% if forloop.first %}border-ink bg-ink/5{% else %}border-ink/15{% endif %}">
                         <p class="font-bold text-sm">{{ label }}</p>
                         <p class="text-xs text-ink-soft mt-0.5">{{ price }} €</p>
                     </div>
@@ -92,9 +92,12 @@
 
         <button type="submit"
                 class="w-full bg-primary text-white font-bold uppercase tracking-wider text-sm py-3
-                       hover:opacity-90 transition-opacity disabled:opacity-40"
+                       transition-opacity disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 id="submit-btn" disabled>
-            Payer par carte →
+            <span id="btn-label">Payer par carte →</span>
+            <span id="btn-loading" class="hidden">
+                <i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Redirection…
+            </span>
         </button>
     </form>
     {% endif %}
@@ -113,8 +116,32 @@ document.getElementById('play-select').addEventListener('change', function() {
     }
 });
 {% else %}
-let fp;
 
+// --- Formula card visual selection ---
+function updateFormulaCards() {
+    document.querySelectorAll('.formula-label').forEach(label => {
+        const input = label.querySelector('input[type="radio"]');
+        const card = label.querySelector('.formula-card');
+        if (input.checked) {
+            card.classList.remove('border-ink/15');
+            card.classList.add('border-ink', 'bg-ink/5');
+        } else {
+            card.classList.remove('border-ink', 'bg-ink/5');
+            card.classList.add('border-ink/15');
+        }
+    });
+}
+
+document.querySelectorAll('input[name="formula"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        updateFormulaCards();
+        const dateStr = document.getElementById('id_start_date').value;
+        if (dateStr) updateEndDate(dateStr);
+    });
+});
+updateFormulaCards();
+
+// --- Date picker ---
 function getFormula() {
     const checked = document.querySelector('input[name="formula"]:checked');
     return checked ? checked.value : 'week';
@@ -137,7 +164,7 @@ fetch('{% url "promote:sponsor_availability" %}')
     .then(r => r.json())
     .then(data => {
         const disabled = data.booked.map(b => ({from: b.start, to: b.end}));
-        fp = flatpickr('#id_start_date', {
+        flatpickr('#id_start_date', {
             locale: 'fr',
             minDate: 'today',
             disable: disabled,
@@ -145,11 +172,12 @@ fetch('{% url "promote:sponsor_availability" %}')
         });
     });
 
-document.querySelectorAll('input[name="formula"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        const dateStr = document.getElementById('id_start_date').value;
-        if (dateStr) updateEndDate(dateStr);
-    });
+// --- Loading state on submit ---
+document.getElementById('checkout-form').addEventListener('submit', function() {
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    document.getElementById('btn-label').classList.add('hidden');
+    document.getElementById('btn-loading').classList.remove('hidden');
 });
 {% endif %}
 </script>

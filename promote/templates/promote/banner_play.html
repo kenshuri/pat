@@ -3,12 +3,12 @@
    class="group flex items-stretch mb-6 bg-primary hover:opacity-90 transition-opacity">
 
     {% if promo.play.poster %}
-    <div class="w-16 sm:w-20 shrink-0">
-        <img src="{{ promo.play.poster.url }}"
-             alt="Affiche {{ promo.play.title }}"
-             width="80" height="112"
-             class="w-full h-full object-cover"
-             style="min-height: 88px; display: block;">
+    <div class="shrink-0 p-2">
+        <div class="w-12 sm:w-14" style="aspect-ratio: 2/3;">
+            <img src="{{ promo.play.poster.url }}"
+                 alt="Affiche {{ promo.play.title }}"
+                 class="w-full h-full object-cover block shadow-md">
+        </div>
     </div>
     {% endif %}
 

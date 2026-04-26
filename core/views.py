@@ -348,7 +348,7 @@ def tou(request):
     return render(request, 'core/tou.html')
 
 def announcement(request):
-    return render(request, 'core/announcement.html')
+    return redirect('promote:sponsor_landing')
 
 
 def alert(request):

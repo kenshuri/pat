@@ -162,6 +162,18 @@
                     {% endif %}
                     <i class="fa-solid fa-chevron-right text-[9px] text-ink-muted"></i>
                 </a>
+                <a href="{% url 'promote:my_promotions' %}"
+                   class="flex items-center gap-3 px-4 py-3 border border-ink/10 hover:border-ink/30 transition-colors">
+                    <i class="fa-solid fa-star text-[11px] text-ink-muted w-4 text-center"></i>
+                    <span class="flex-1 text-sm text-ink-soft">Mes promotions</span>
+                    {% if promotions_count %}
+                    <span class="text-[11px] text-ink-muted">
+                        {{ promotions_count }} au total
+                        {% if active_promotions_count %} · <span class="font-bold text-ink">{{ active_promotions_count }} en cours</span>{% endif %}
+                    </span>
+                    {% endif %}
+                    <i class="fa-solid fa-chevron-right text-[9px] text-ink-muted"></i>
+                </a>
             </div>
         </section>
 

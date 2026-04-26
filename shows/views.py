@@ -209,19 +209,49 @@ def play_detail(request, pk):
     user_membership = None
     if request.user.is_authenticated:
         user_membership = PlayMembership.objects.filter(play=play, email=request.user.email).first()
+    play_promotions = []
+    if request.user.is_authenticated and request.user == play.user:
+        from promote.models import Promote
+        from datetime import date as _date
+        _today = _date.today()
+        _promos = list(Promote.objects.filter(play=play).order_by('-start_date'))
+        for p in _promos:
+            if p.status == 'pending_payment':
+                p.display_status = 'pending_payment'
+            elif p.end_date < _today:
+                p.display_status = 'expired'
+            elif p.start_date > _today:
+                p.display_status = 'upcoming'
+            else:
+                p.display_status = 'active'
+        play_promotions = _promos
     return render(request, "shows/play_detail.html", {
         "play": play,
         "representations": representations,
         "troupe_profile": troupe_profile,
         "accepted_members": accepted_members,
         "user_membership": user_membership,
+        "play_promotions": play_promotions,
     })
 
 
 @login_required
 def play_owner_zone(request, pk):
+    from promote.models import Promote
+    from datetime import date as _date
     play = get_object_or_404(Play, pk=pk, user=request.user)
-    return render(request, "shows/partials/play_owner_zone.html", {"play": play})
+    _today = _date.today()
+    _promos = list(Promote.objects.filter(play=play).order_by('-start_date'))
+    for p in _promos:
+        if p.status == 'pending_payment':
+            p.display_status = 'pending_payment'
+        elif p.end_date < _today:
+            p.display_status = 'expired'
+        elif p.start_date > _today:
+            p.display_status = 'upcoming'
+        else:
+            p.display_status = 'active'
+    return render(request, "shows/partials/play_owner_zone.html", {"play": play, "play_promotions": _promos})
 
 
 @login_required

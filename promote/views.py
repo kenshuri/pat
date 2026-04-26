@@ -194,6 +194,10 @@ def sponsor_checkout(request, play_id):
                     'unit_amount': FORMULA_PRICES[formula],
                     'product_data': {
                         'name': f"Bandeau — {play.title} ({FORMULA_LABELS[formula]})",
+                        'description': (
+                            f"{start_date.strftime('%d/%m/%Y')} – {end_date.strftime('%d/%m/%Y')}"
+                            f" · {request.user.email}"
+                        ),
                     },
                 },
                 'quantity': 1,
@@ -266,6 +270,26 @@ def sponsor_confirmation(request, session_id):
     promote = get_object_or_404(
         Promote, stripe_session_id=session_id, user=request.user
     )
+
+    # If webhook hasn't fired yet, confirm directly via Stripe API
+    if promote.status == 'pending_payment':
+        try:
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+            session = stripe.checkout.Session.retrieve(session_id)
+            if getattr(session, 'payment_status', None) == 'paid':
+                overlap = Promote.objects.filter(
+                    status='confirmed',
+                    start_date__lte=promote.end_date,
+                    end_date__gte=promote.start_date,
+                ).exclude(pk=promote.pk).exists()
+                if not overlap:
+                    amount = getattr(session, 'amount_total', 0) or 0
+                    promote.status = 'confirmed'
+                    promote.price_paid = amount / 100
+                    promote.save(update_fields=['status', 'price_paid'])
+        except Exception as e:
+            logger.warning("Could not verify Stripe session %s: %s", session_id, e)
+
     today = date.today()
     is_active = promote.start_date <= today <= promote.end_date
     return render(request, 'promote/sponsor_confirmation.html', {
@@ -277,3 +301,25 @@ def sponsor_confirmation(request, session_id):
 @login_required
 def sponsor_cancel(request):
     return render(request, 'promote/sponsor_cancel.html')
+
+
+def sponsor_landing(request):
+    return render(request, 'promote/sponsor_landing.html')
+
+
+@login_required
+def my_promotions(request):
+    today = date.today()
+    promotions = Promote.objects.filter(
+        user=request.user
+    ).order_by('-start_date')
+    for p in promotions:
+        if p.status == 'pending_payment':
+            p.display_status = 'pending_payment'
+        elif p.end_date < today:
+            p.display_status = 'expired'
+        elif p.start_date > today:
+            p.display_status = 'upcoming'
+        else:
+            p.display_status = 'active'
+    return render(request, 'promote/my_promotions.html', {'promotions': promotions})

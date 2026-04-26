@@ -165,6 +165,14 @@ def my_account(request):
         for c in conversations.prefetch_related('messages')
     )
     alerts_count = Alert.objects.filter(email=request.user.email, active=True).count()
+    from promote.models import Promote
+    from datetime import date as _date
+    _today = _date.today()
+    promotions_count = Promote.objects.filter(user=request.user, status='confirmed').count()
+    active_promotions_count = Promote.objects.filter(
+        user=request.user, status='confirmed',
+        start_date__lte=_today, end_date__gte=_today,
+    ).count()
     return render(request, 'profiles/my_account.html', {
         'actor_profile': actor_profile,
         'troupe_profile': troupe_profile,
@@ -176,6 +184,8 @@ def my_account(request):
         'unread_convs_count': unread_convs_count,
         'unread_msgs_total': unread_msgs_total,
         'alerts_count': alerts_count,
+        'promotions_count': promotions_count,
+        'active_promotions_count': active_promotions_count,
     })
 
 

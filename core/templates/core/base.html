@@ -128,6 +128,11 @@
                         <span class="ml-auto text-[9px] font-bold bg-ink text-white rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">{{ pending_plays_count }}</span>
                         {% endif %}
                     </a>
+                    <a href="{% url 'promote:my_promotions' %}"
+                       class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft hover:bg-ink/4 hover:text-ink transition-colors">
+                        <i class="fa-solid fa-star text-[10px] text-ink-muted"></i>
+                        Mes promotions
+                    </a>
                     <a href="{% url 'alert_user' %}"
                        class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft hover:bg-ink/4 hover:text-ink transition-colors">
                         <i class="fa-solid fa-bell text-[10px] text-ink-muted"></i>
@@ -209,7 +214,7 @@
             <nav>
                 <p class="font-display text-surface/20 text-[10px] uppercase tracking-[0.15em] font-bold mb-4">Légal</p>
                 <ul class="space-y-2.5">
-                    <li><a class="text-sm text-surface/45 hover:text-surface transition-colors" href="{% url 'announcement' %}">Faire sa promo</a></li>
+                    <li><a class="text-sm text-surface/45 hover:text-surface transition-colors" href="{% url 'promote:sponsor_landing' %}">Faire sa promo</a></li>
                     <li><a class="text-sm text-surface/45 hover:text-surface transition-colors" href="{% url 'tou' %}">Conditions d'utilisation</a></li>
                 </ul>
             </nav>

@@ -30,10 +30,28 @@
                        class="font-bold text-sm text-ink hover:text-ink-soft transition-colors leading-snug block">
                         {{ play.title }}
                     </a>
-                    <span class="inline-flex items-center mt-1 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]
-                                 border border-ink/20 text-ink-muted">
-                        {{ play.get_genre_display }}
-                    </span>
+                    <div class="flex items-center gap-1.5 mt-1 flex-wrap">
+                        <span class="inline-flex items-center px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]
+                                     border border-ink/20 text-ink-muted">
+                            {{ play.get_genre_display }}
+                        </span>
+                        {% if play.moderation_status == 'pending' %}
+                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]
+                                     border border-amber-400/40 text-amber-600 bg-amber-50">
+                            <i class="fa-solid fa-circle-notch fa-spin text-[8px]"></i>En vérification
+                        </span>
+                        {% elif play.moderation_status == 'under_review' %}
+                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]
+                                     border border-amber-400/40 text-amber-600 bg-amber-50">
+                            <i class="fa-solid fa-circle-exclamation text-[8px]"></i>Sous examen
+                        </span>
+                        {% elif play.moderation_status == 'rejected' %}
+                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]
+                                     border border-red-300/50 text-red-600 bg-red-50">
+                            <i class="fa-solid fa-circle-xmark text-[8px]"></i>Non publiée
+                        </span>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <!-- Actions -->
