@@ -9,6 +9,7 @@ services:
     command: uv run celery -A config worker --loglevel=info
     volumes:
       - .:/app
+      - worker_venv:/app/.venv
     env_file: .env
     environment:
       - REDIS_URL=redis://redis:6379/0
@@ -20,8 +21,13 @@ services:
     command: uv run celery -A config beat --loglevel=info
     volumes:
       - .:/app
+      - beat_venv:/app/.venv
     env_file: .env
     environment:
       - REDIS_URL=redis://redis:6379/0
     depends_on:
       - redis
+
+volumes:
+  worker_venv:
+  beat_venv:
