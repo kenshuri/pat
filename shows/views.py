@@ -15,7 +15,7 @@ from django.utils.timezone import now
 from datetime import datetime, time
 
 from accounts.models import CustomUser
-from .models import Play, PlayMembership, PlayPhoto, Representation, PublicationCredit
+from .models import Play, PlayMembership, PlayPhoto, Representation, PublicationCredit, _process_image
 from .forms import RepresentationForm, PlayForm, ContributorFormSet, ContributorForm
 from core.tasks import moderate_play
 
@@ -28,6 +28,7 @@ def _save_play_extra_photos(play, files):
         photo = PlayPhoto(play=play, order=existing_count + i)
         photo.save()
         photo.image = file
+        _process_image(photo.image, "photo.webp")
         photo.save(update_fields=['image'])
 
 
