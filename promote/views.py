@@ -259,9 +259,19 @@ def stripe_webhook(request):
     return HttpResponse(status=200)
 
 
+@login_required
 def sponsor_confirmation(request, session_id):
-    return HttpResponse("Not implemented", status=501)
+    promote = get_object_or_404(
+        Promote, stripe_session_id=session_id, user=request.user
+    )
+    today = date.today()
+    is_active = promote.start_date <= today <= promote.end_date
+    return render(request, 'promote/sponsor_confirmation.html', {
+        'promote': promote,
+        'is_active': is_active,
+    })
 
 
+@login_required
 def sponsor_cancel(request):
-    return HttpResponse("Not implemented", status=501)
+    return render(request, 'promote/sponsor_cancel.html')

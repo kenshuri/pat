@@ -1,0 +1,19 @@
+{% extends "core/base.html" %}
+
+{% block title %}Paiement annulé — Petites Annonces Théâtre{% endblock %}
+
+{% block main %}
+<div class="max-w-2xl mx-auto px-4 py-10">
+    <div class="border-l-4 border-ink/15 bg-ink/3 px-4 py-3 mb-8">
+        <p class="text-sm text-ink-soft">
+            <i class="fa-solid fa-circle-xmark text-ink/40 mr-1.5"></i>
+            Paiement annulé — aucun montant n'a été débité.
+        </p>
+    </div>
+    <a href="{% url 'promote:sponsor_list' %}"
+       class="px-4 py-2 border border-ink/20 text-ink-soft text-sm font-bold uppercase
+              tracking-wider hover:border-ink hover:text-ink transition-colors">
+        ← Retour
+    </a>
+</div>
+{% endblock main %}

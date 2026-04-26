@@ -287,3 +287,46 @@ class WebhookViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.promote.refresh_from_db()
         self.assertEqual(self.promote.status, 'pending_payment')
+
+
+@override_settings(STORAGES=_SIMPLE_STORAGE)
+class ConfirmationViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = CustomUser.objects.create_user(
+            email='conf@example.com', password='password123'
+        )
+        self.play = Play.objects.create(
+            user=self.user, title='Conf Play',
+            genre='theatre', moderation_status='published',
+        )
+        self.promote = Promote.objects.create(
+            user=self.user, play=self.play, title=self.play.title,
+            start_date=date(2026, 10, 1), end_date=date(2026, 10, 7),
+            formula='week', status='confirmed',
+            stripe_session_id='cs_test_confirm123',
+            price_paid='10.00',
+        )
+
+    def test_confirmation_shows_promote_details(self):
+        self.client.login(email='conf@example.com', password='password123')
+        response = self.client.get(
+            reverse('promote:sponsor_confirmation', args=['cs_test_confirm123'])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Conf Play')
+
+    def test_confirmation_requires_ownership(self):
+        other = CustomUser.objects.create_user(
+            email='other2@example.com', password='password123'
+        )
+        self.client.login(email='other2@example.com', password='password123')
+        response = self.client.get(
+            reverse('promote:sponsor_confirmation', args=['cs_test_confirm123'])
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_cancel_page_renders(self):
+        self.client.login(email='conf@example.com', password='password123')
+        response = self.client.get(reverse('promote:sponsor_cancel'))
+        self.assertEqual(response.status_code, 200)
