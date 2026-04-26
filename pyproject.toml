@@ -17,6 +17,7 @@ dependencies = [
     "mistralai>=1.5.1",
     "pillow>=12.0.0",
     "celery[redis]>=5.4",
+    "nudenet>=3.4",
     "psycopg[binary,pool]>=3.2.5",
     "python-dotenv>=1.0.1",
     "pytz>=2025.1",
