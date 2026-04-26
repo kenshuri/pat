@@ -15,8 +15,9 @@
     </div>
 
     <div class="border border-ink/10 p-6 space-y-3">
+        {% if promote.play %}
         <div class="flex gap-4 items-start">
-            {% if promote.play and promote.play.poster %}
+            {% if promote.play.poster %}
             <img src="{{ promote.play.poster.url }}"
                  alt="{{ promote.play.title }}"
                  class="w-14 h-20 object-cover shrink-0">
@@ -30,6 +31,7 @@
                 {% endif %}
             </div>
         </div>
+        {% endif %}
         <div class="text-sm text-ink-soft space-y-1 pt-2 border-t border-ink/8">
             <p><span class="font-medium text-ink">Formule :</span> {{ promote.get_formula_display }}</p>
             <p>
@@ -50,11 +52,13 @@
             Voir le bandeau →
         </a>
         {% endif %}
+        {% if promote.play %}
         <a href="{% url 'shows:play_detail' promote.play.pk %}"
            class="px-4 py-2 border border-ink/20 text-ink-soft text-sm font-bold uppercase
                   tracking-wider hover:border-ink hover:text-ink transition-colors">
             Voir la pièce
         </a>
+        {% endif %}
     </div>
 </div>
 {% endblock main %}
