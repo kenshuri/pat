@@ -402,7 +402,8 @@ def _send_alert_confirmation(alert_obj, request):
 # ── Helpers villes ────────────────────────────────────────────────────────────
 
 def _moderation_filter():
-    return Q(moderation__isnull=True) | Q(moderation__passed=True)
+    from core.models import Offer as _Offer
+    return Q(moderation_status=_Offer.PUBLISHED)
 
 
 def _find_city_by_slug(city_slug):
@@ -449,7 +450,6 @@ def city_offers(request, city_slug):
 
     qs = (
         Offer.objects
-        .select_related('moderation')
         .filter(city__iexact=city, filled=False)
         .filter(_moderation_filter())
         .order_by('-created_on')
@@ -560,7 +560,6 @@ def department_offers(request, dept_slug):
 
     qs = (
         Offer.objects
-        .select_related('moderation')
         .filter(city__icontains=', ' + department, filled=False)
         .filter(_moderation_filter())
         .order_by('-created_on')
