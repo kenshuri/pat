@@ -51,8 +51,8 @@ def actor_detail(request, slug):
     actor = get_object_or_404(ActorProfile, slug=slug)
     own = request.user.is_authenticated and actor.user == request.user
     troupe_profile = getattr(actor.user, 'troupe_profile', None)
-    active_offers = Offer.objects.filter(author=actor.user, filled=False).order_by('-created_on')
-    filled_offers = Offer.objects.filter(author=actor.user, filled=True).order_by('-created_on')
+    active_offers = Offer.objects.filter(author=actor.user, filled=False, moderation_status=Offer.PUBLISHED).order_by('-created_on')
+    filled_offers = Offer.objects.filter(author=actor.user, filled=True, moderation_status=Offer.PUBLISHED).order_by('-created_on')
     actor_plays = Play.objects.filter(
         memberships__user=actor.user, memberships__status=PlayMembership.STATUS_ACCEPTED
     ).order_by('-created_at')
@@ -92,8 +92,8 @@ def troupe_detail(request, slug):
     troupe = get_object_or_404(TroupeProfile, slug=slug)
     own = request.user.is_authenticated and troupe.user == request.user
     actor_profile = getattr(troupe.user, 'actor_profile', None)
-    active_offers = Offer.objects.filter(author=troupe.user, filled=False).order_by('-created_on')
-    filled_offers = Offer.objects.filter(author=troupe.user, filled=True).order_by('-created_on')
+    active_offers = Offer.objects.filter(author=troupe.user, filled=False, moderation_status=Offer.PUBLISHED).order_by('-created_on')
+    filled_offers = Offer.objects.filter(author=troupe.user, filled=True, moderation_status=Offer.PUBLISHED).order_by('-created_on')
     troupe_plays = Play.objects.filter(user=troupe.user).order_by('-created_at')
     return render(request, 'profiles/troupe_detail.html', {
         'troupe': troupe, 'own': own,
@@ -185,8 +185,8 @@ def user_detail(request, pk):
     user = get_object_or_404(CustomUser, pk=pk)
     actor_profile = getattr(user, 'actor_profile', None)
     troupe_profile = getattr(user, 'troupe_profile', None)
-    active_offers = Offer.objects.filter(author=user, filled=False).order_by('-created_on')
-    filled_offers = Offer.objects.filter(author=user, filled=True).order_by('-created_on')
+    active_offers = Offer.objects.filter(author=user, filled=False, moderation_status=Offer.PUBLISHED).order_by('-created_on')
+    filled_offers = Offer.objects.filter(author=user, filled=True, moderation_status=Offer.PUBLISHED).order_by('-created_on')
     created_plays = Play.objects.filter(user=user).order_by('-created_at')
     actor_plays = Play.objects.filter(
         memberships__user=user, memberships__status=PlayMembership.STATUS_ACCEPTED
