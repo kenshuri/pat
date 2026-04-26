@@ -107,8 +107,8 @@ def index(request):
 
 
 def offers(request, page: int):
-    all_offers = Offer.objects.select_related('moderation').filter(filled=False).filter(
-        Q(moderation__isnull=True) | Q(moderation__passed=True)).order_by('-created_on')
+    all_offers = Offer.objects.filter(filled=False).filter(
+        moderation_status=Offer.PUBLISHED).order_by('-created_on')
     return render(request, 'core/partials/offers_partials.html', {
         'all_offers': all_offers[(page-1)*20:(page)*20],
         'page': page,
@@ -255,8 +255,8 @@ def offer_search(request):
     category = search_data.get('category')
 
     # Base queryset
-    results = Offer.objects.select_related('moderation').filter(filled=False).filter(
-        Q(moderation__isnull=True) | Q(moderation__passed=True)
+    results = Offer.objects.filter(filled=False).filter(
+        moderation_status=Offer.PUBLISHED
     )
 
     # Filtres dynamiques
