@@ -185,26 +185,32 @@ def sponsor_checkout(request, play_id):
     )
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
-    session = stripe.checkout.Session.create(
-        payment_method_types=['card'],
-        line_items=[{
-            'price_data': {
-                'currency': 'eur',
-                'unit_amount': FORMULA_PRICES[formula],
-                'product_data': {
-                    'name': f"Bandeau — {play.title} ({FORMULA_LABELS[formula]})",
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'eur',
+                    'unit_amount': FORMULA_PRICES[formula],
+                    'product_data': {
+                        'name': f"Bandeau — {play.title} ({FORMULA_LABELS[formula]})",
+                    },
                 },
-            },
-            'quantity': 1,
-        }],
-        mode='payment',
-        success_url=(
-            f"{settings.SITE_URL}/promote/sponsor/confirmation/{{CHECKOUT_SESSION_ID}}/"
-        ),
-        cancel_url=f"{settings.SITE_URL}/promote/sponsor/cancel/",
-        metadata={'promote_id': str(promote.pk)},
-        customer_email=request.user.email,
-    )
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=(
+                f"{settings.SITE_URL}/promote/sponsor/confirmation/{{CHECKOUT_SESSION_ID}}/"
+            ),
+            cancel_url=f"{settings.SITE_URL}/promote/sponsor/cancel/",
+            metadata={'promote_id': str(promote.pk)},
+            customer_email=request.user.email,
+        )
+    except Exception as e:
+        logger.error("Stripe session creation failed for promote %s: %s", promote.pk, e)
+        promote.delete()
+        messages.error(request, "Une erreur est survenue lors du paiement. Veuillez réessayer.")
+        return redirect(f"{reverse('promote:sponsor_calendar')}?play={play_id}")
 
     promote.stripe_session_id = session.id
     promote.save(update_fields=['stripe_session_id'])
