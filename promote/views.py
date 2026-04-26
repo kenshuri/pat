@@ -226,7 +226,7 @@ def stripe_webhook(request):
         event = stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
-    except Exception as e:
+    except stripe.error.SignatureVerificationError as e:
         logger.error("Stripe webhook signature error: %s", e)
         return HttpResponse(status=200)
 

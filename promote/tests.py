@@ -6,6 +6,7 @@ from django.urls import reverse
 from accounts.models import CustomUser
 from shows.models import Play
 from promote.models import Promote
+import stripe
 
 _SIMPLE_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -245,8 +246,8 @@ class WebhookViewTests(TestCase):
         self.assertEqual(float(self.promote.price_paid), 10.0)
 
     def test_webhook_returns_200_on_invalid_signature(self):
-        with patch('promote.views.stripe') as mock_stripe:
-            mock_stripe.Webhook.construct_event.side_effect = Exception("invalid sig")
+        with patch('promote.views.stripe.Webhook.construct_event') as mock_construct:
+            mock_construct.side_effect = stripe.error.SignatureVerificationError("invalid sig", "sig_header")
             response = self.client.post(
                 reverse('promote:stripe_webhook'),
                 data=b'bad',
