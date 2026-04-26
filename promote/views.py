@@ -137,8 +137,79 @@ def sponsor_availability(request):
     })
 
 
+@login_required
 def sponsor_checkout(request, play_id):
-    return HttpResponse("Not implemented", status=501)
+    from shows.models import Play
+    from datetime import date as date_type
+
+    play = get_object_or_404(
+        Play, pk=play_id, user=request.user, moderation_status='published'
+    )
+
+    if request.method != 'POST':
+        return redirect(f"{reverse('promote:sponsor_calendar')}?play={play_id}")
+
+    formula = request.POST.get('formula', '')
+    start_date_str = request.POST.get('start_date', '')
+
+    if formula not in FORMULA_DAYS:
+        messages.error(request, "Formule invalide.")
+        return redirect(f"{reverse('promote:sponsor_calendar')}?play={play_id}")
+
+    try:
+        start_date = date_type.fromisoformat(start_date_str)
+    except (ValueError, TypeError):
+        messages.error(request, "Date de début invalide.")
+        return redirect(f"{reverse('promote:sponsor_calendar')}?play={play_id}")
+
+    end_date = start_date + timedelta(days=FORMULA_DAYS[formula])
+
+    overlap = Promote.objects.filter(
+        status='confirmed',
+        start_date__lte=end_date,
+        end_date__gte=start_date,
+    ).exists()
+
+    if overlap:
+        messages.error(request, "Cette période est déjà réservée. Choisissez une autre date.")
+        return redirect(f"{reverse('promote:sponsor_calendar')}?play={play_id}")
+
+    promote = Promote.objects.create(
+        user=request.user,
+        play=play,
+        title=play.title,
+        start_date=start_date,
+        end_date=end_date,
+        formula=formula,
+        status='pending_payment',
+    )
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price_data': {
+                'currency': 'eur',
+                'unit_amount': FORMULA_PRICES[formula],
+                'product_data': {
+                    'name': f"Bandeau — {play.title} ({FORMULA_LABELS[formula]})",
+                },
+            },
+            'quantity': 1,
+        }],
+        mode='payment',
+        success_url=(
+            f"{settings.SITE_URL}/promote/sponsor/confirmation/{{CHECKOUT_SESSION_ID}}/"
+        ),
+        cancel_url=f"{settings.SITE_URL}/promote/sponsor/cancel/",
+        metadata={'promote_id': str(promote.pk)},
+        customer_email=request.user.email,
+    )
+
+    promote.stripe_session_id = session.id
+    promote.save(update_fields=['stripe_session_id'])
+
+    return redirect(session.url)
 
 
 def stripe_webhook(request):

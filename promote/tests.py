@@ -1,5 +1,6 @@
 import json
 from datetime import date, timedelta
+from unittest.mock import patch, MagicMock
 from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from accounts.models import CustomUser
@@ -129,3 +130,73 @@ class AvailabilityViewTests(TestCase):
         data = json.loads(response.content)
         slugs = [(b['start'], b['end']) for b in data['booked']]
         self.assertIn(('2026-07-01', '2026-07-07'), slugs)
+
+
+@override_settings(STORAGES=_SIMPLE_STORAGE)
+class CheckoutViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = CustomUser.objects.create_user(
+            email='checkout@example.com', password='password123'
+        )
+        self.play = Play.objects.create(
+            user=self.user, title='Test Play',
+            genre='theatre', moderation_status='published',
+        )
+
+    def _mock_session(self):
+        session = MagicMock()
+        session.id = 'cs_test_abc123'
+        session.url = 'https://checkout.stripe.com/pay/cs_test_abc123'
+        return session
+
+    @patch('promote.views.stripe')
+    def test_checkout_creates_promote_and_redirects(self, mock_stripe):
+        mock_stripe.checkout.Session.create.return_value = self._mock_session()
+        self.client.login(email='checkout@example.com', password='password123')
+        response = self.client.post(
+            reverse('promote:sponsor_checkout', args=[self.play.pk]),
+            {'formula': 'week', 'start_date': '2026-08-01'},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['Location'], 'https://checkout.stripe.com/pay/cs_test_abc123')
+        promote = Promote.objects.get(stripe_session_id='cs_test_abc123')
+        self.assertEqual(promote.status, 'pending_payment')
+        self.assertEqual(promote.formula, 'week')
+
+    @patch('promote.views.stripe')
+    def test_checkout_rejects_overlapping_slot(self, mock_stripe):
+        Promote.objects.create(
+            user=self.user, play=self.play, title=self.play.title,
+            start_date=date(2026, 8, 1), end_date=date(2026, 8, 7),
+            formula='week', status='confirmed',
+        )
+        self.client.login(email='checkout@example.com', password='password123')
+        response = self.client.post(
+            reverse('promote:sponsor_checkout', args=[self.play.pk]),
+            {'formula': 'week', 'start_date': '2026-08-03'},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('calendar', response['Location'])
+        self.assertFalse(mock_stripe.checkout.Session.create.called)
+
+    def test_checkout_rejects_non_owner(self):
+        other = CustomUser.objects.create_user(
+            email='other@example.com', password='password123'
+        )
+        self.client.login(email='other@example.com', password='password123')
+        response = self.client.post(
+            reverse('promote:sponsor_checkout', args=[self.play.pk]),
+            {'formula': 'week', 'start_date': '2026-09-01'},
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_checkout_rejects_unpublished_play(self):
+        self.play.moderation_status = 'pending'
+        self.play.save()
+        self.client.login(email='checkout@example.com', password='password123')
+        response = self.client.post(
+            reverse('promote:sponsor_checkout', args=[self.play.pk]),
+            {'formula': 'week', 'start_date': '2026-09-01'},
+        )
+        self.assertEqual(response.status_code, 404)
