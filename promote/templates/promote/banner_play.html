@@ -1,0 +1,44 @@
+{% load static %}
+<a href="{% url 'shows:play_detail' promo.play.pk %}"
+   class="group flex items-stretch mb-6 bg-primary hover:opacity-90 transition-opacity">
+
+    {% if promo.play.poster %}
+    <div class="w-16 sm:w-20 shrink-0">
+        <img src="{{ promo.play.poster.url }}"
+             alt="Affiche {{ promo.play.title }}"
+             width="80" height="112"
+             class="w-full h-full object-cover"
+             style="min-height: 88px; display: block;">
+    </div>
+    {% endif %}
+
+    <div class="flex flex-1 items-center justify-between px-4 py-3 gap-3 min-w-0">
+        <div class="min-w-0">
+            <span class="font-display text-[9px] font-bold uppercase tracking-[0.20em] text-white/25 block mb-1.5">
+                Publicité
+            </span>
+            <p class="font-display font-bold text-white text-sm sm:text-base leading-tight uppercase tracking-wide truncate">
+                {{ promo.play.title }}
+            </p>
+            {% if promo.play.company %}
+            <p class="text-white/50 text-xs mt-1 hidden sm:block italic">
+                {{ promo.play.company }}
+            </p>
+            {% endif %}
+            {% if promo_next_rep %}
+            <p class="text-white/35 text-[11px] mt-1">
+                {% if promo_next_rep.venue %}{{ promo_next_rep.venue }}{% endif %}
+                {% if promo_next_rep.city %} — {{ promo_next_rep.city }}{% endif %}
+                · <time datetime="{{ promo_next_rep.datetime|date:'Y-m-d' }}">
+                    {{ promo_next_rep.datetime|date:"j M." }}
+                </time>
+            </p>
+            {% endif %}
+        </div>
+        <span class="shrink-0 font-display text-[10px] font-bold uppercase tracking-[0.12em]
+                     border border-white/20 text-white/40 group-hover:border-white/50
+                     group-hover:text-white px-3 py-1.5 transition-colors whitespace-nowrap">
+            En savoir plus →
+        </span>
+    </div>
+</a>

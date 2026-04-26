@@ -330,3 +330,43 @@ class ConfirmationViewTests(TestCase):
         self.client.login(email='conf@example.com', password='password123')
         response = self.client.get(reverse('promote:sponsor_cancel'))
         self.assertEqual(response.status_code, 200)
+
+
+from django.utils import timezone as tz
+
+
+@override_settings(STORAGES=_SIMPLE_STORAGE)
+class IndexBannerTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = CustomUser.objects.create_user(
+            email='banner@example.com', password='password123'
+        )
+        self.play = Play.objects.create(
+            user=self.user, title='Banner Play',
+            genre='theatre', moderation_status='published',
+        )
+
+    def test_index_uses_confirmed_play_promo(self):
+        today = date.today()
+        Promote.objects.create(
+            user=self.user, play=self.play, title=self.play.title,
+            start_date=today, end_date=today + timedelta(days=6),
+            formula='week', status='confirmed',
+        )
+        response = self.client.get(reverse('index'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.context.get('promo'))
+        self.assertEqual(response.context['promo'].play, self.play)
+
+    def test_index_ignores_pending_payment_promo(self):
+        today = date.today()
+        Promote.objects.create(
+            user=self.user, play=self.play, title=self.play.title,
+            start_date=today, end_date=today + timedelta(days=6),
+            formula='week', status='pending_payment',
+        )
+        response = self.client.get(reverse('index'))
+        promo = response.context.get('promo')
+        if promo:
+            self.assertNotEqual(promo.status, 'pending_payment')

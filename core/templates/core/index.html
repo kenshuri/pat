@@ -55,9 +55,15 @@
 <div class="px-4 md:px-8 py-6">
 
     <!-- Bannière promo -->
-    {% with "promote/banner_"|add:promo.slug|add:".html" as template_name %}
-        {% include template_name %}
-    {% endwith %}
+    {% if promo %}
+    {% if promo.play %}
+        {% include "promote/banner_play.html" %}
+    {% else %}
+        {% with "promote/banner_"|add:promo.slug|add:".html" as template_name %}
+            {% include template_name %}
+        {% endwith %}
+    {% endif %}
+    {% endif %}
 
     <!-- En-tête + recherche -->
     <div class="mb-1">

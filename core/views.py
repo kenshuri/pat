@@ -95,14 +95,41 @@ def index(request):
     if is_htmx:
         return render(request, 'core/partials/offers_partials.html', ctx)
 
+    from django.utils import timezone as _tz
     today = date.today()
-    promo = Promote.objects.filter(start_date__lte=today, end_date__gte=today).order_by('?').first()
-    if promo:
-        Promote.objects.filter(pk=promo.pk).update(impression_count=F("impression_count") + 1)
-    else:
+
+    active_confirmed = Promote.objects.filter(
+        status='confirmed',
+        start_date__lte=today,
+        end_date__gte=today,
+    )
+    # Play-based promos (self-service) take priority
+    promo = (
+        active_confirmed
+        .filter(play__isnull=False)
+        .order_by('start_date')
+        .select_related('play')
+        .first()
+    )
+    if not promo:
+        promo = active_confirmed.filter(play__isnull=True).order_by('?').first()
+    if not promo:
         promo = Promote.objects.filter(slug__exact='your-ad').first()
 
+    if promo:
+        Promote.objects.filter(pk=promo.pk).update(impression_count=F("impression_count") + 1)
+
+    promo_next_rep = None
+    if promo and promo.play_id:
+        promo_next_rep = (
+            promo.play.representations
+            .filter(datetime__gte=_tz.now())
+            .order_by('datetime')
+            .first()
+        )
+
     ctx['promo'] = promo
+    ctx['promo_next_rep'] = promo_next_rep
     return render(request, 'core/index.html', ctx)
 
 
