@@ -240,8 +240,11 @@ def unfill_offer(request, offer_id: int):
 
 def offer(request, offer_id: int):
     offer = get_object_or_404(Offer, pk=offer_id)
-    if offer.moderation and not offer.moderation.passed:
-        return render(request, 'core/offer_moderation_failed.html', {'offer': offer})
+    if offer.moderation_status != Offer.PUBLISHED:
+        if request.user != offer.author:
+            raise Http404
+        if offer.moderation_status == Offer.REJECTED:
+            return render(request, 'core/offer_moderation_failed.html', {'offer': offer})
     return render(request, 'core/offer.html', {'offer': offer})
 
 

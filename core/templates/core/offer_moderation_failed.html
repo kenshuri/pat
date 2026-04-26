@@ -1,60 +1,119 @@
 {% extends "core/base.html" %}
 
-{% block title %}
-    Annonce refusee
-{% endblock title %}
+{% block title %}Annonce non publiée — {{ offer.title|capfirst }} | Petites Annonces Théâtre{% endblock title %}
 
 {% block main %}
-    <div class="bg-base-100 rounded p-4 mt-2 flex flex-col gap-3">
-        <h1 class="font-bold text-xl">Annonce non visible</h1>
-        {% if offer.author == request.user %}
-            <div class="mt-4">
-                <div role="alert" class="alert alert-error">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div class="flex flex-col gap-1">
-                        <h4 class="font-bold">
-                            Votre annonce n’a pas été acceptée.
-                        </h4>
-                        <p>
-                            Notre système de modération automatique a détecté que son contenu pourrait appartenir
-                            à l’une des catégories suivantes :
-                        <ul>
-                            {% for reason in offer.moderation.get_localized_reasons %}
-                                <li>- {{ reason }}</li>
-                            {% endfor %}
-                        </ul>
-                        <p class="mt-2">
-                            Nous vous invitons à modifier votre annonce afin de respecter nos règles de publication,
-                            puis à la soumettre de nouveau pour une nouvelle vérification.
-                        </p>
-                        </p>
-                    </div>
-                </div>
-            </div>
 
-            <div class="flex gap-2 flex-wrap mt-4">
-                <div class="grow">
-                    <a href="{% url 'update_offer' offer.id %}" class="btn btn-soft btn-block">
-                        <i class="fa-solid fa-pen"></i>
-                        <span class="ml-2">
-                    Modifier l'annonce
-                    </span>
-                    </a>
-                </div>
-            </div>
-            <div class="grow">
-                <a href="{% url 'delete_offer' offer.id %}" class="btn btn-error btn-block">
-                    <i class="fa-solid fa-trash"></i>
-                    <span class="ml-2">
-                    Supprimer l'annonce
-                    </span>
-                </a>
-            </div>
+<!-- Strip sombre (même style que offer.html sans image) -->
+<div class="relative overflow-hidden w-full"
+     style="min-height: 160px;
+        {% if offer.section == 'artists_groups' %}
+            background: linear-gradient(150deg, oklch(17% .065 265) 0%, oklch(25% .085 252) 100%);
+        {% elif offer.section == 'courses_training' %}
+            background: linear-gradient(150deg, oklch(16% .09 152) 0%, oklch(24% .11 158) 100%);
+        {% elif offer.section == 'calls_events' %}
+            background: linear-gradient(150deg, oklch(16% .115 12) 0%, oklch(26% .12 22) 100%);
+        {% elif offer.section == 'services_equipment' %}
+            background: linear-gradient(150deg, oklch(14% .03 50) 0%, oklch(22% .05 60) 100%);
         {% else %}
-            Le contenu de cette annonce a été modérée et n'est donc pas visible.
+            background: linear-gradient(150deg, #111 0%, #222 100%);
         {% endif %}
-        <a class="btn btn-primary w-fit" href="{% url 'index' %}">Retour a l'accueil</a>
+     ">
+    <div class="absolute inset-0 pointer-events-none"
+         style="background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 12px);"></div>
+
+    <div class="relative max-w-screen-xl mx-auto px-4 md:px-8 py-8 flex flex-col justify-between"
+         style="min-height: 160px;">
+        <div class="flex items-start justify-between gap-4">
+            <span class="text-white/35 text-[10px] font-bold uppercase tracking-[0.20em]">
+                {% if offer.section == "artists_groups" %}🎭&nbsp; Comédien·nes &amp; Troupes
+                {% elif offer.section == "courses_training" %}🎓&nbsp; Cours &amp; Formations
+                {% elif offer.section == "calls_events" %}📣&nbsp; Appels &amp; Événements
+                {% elif offer.section == "services_equipment" %}🛠️&nbsp; Services &amp; Matériel
+                {% endif %}
+            </span>
+            <time class="text-white/25 text-[10px] tracking-wide shrink-0"
+                  datetime="{{ offer.created_on|date:'Y-m-d' }}">
+                {{ offer.created_on|date:"d/m/Y" }}
+            </time>
+        </div>
+        <div class="mt-6">
+            <h1 class="font-display font-bold text-white text-2xl sm:text-3xl uppercase
+                        tracking-[0.04em] leading-tight max-w-3xl opacity-60">
+                {{ offer.title|capfirst }}
+            </h1>
+        </div>
     </div>
+</div>
+
+<!-- Contenu -->
+<div class="max-w-2xl mx-auto px-4 md:px-6 py-8 md:py-10">
+
+    <!-- Retour -->
+    <a href="{% url 'index' %}"
+       class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em]
+              text-ink-muted hover:text-ink transition-colors mb-8">
+        ← Toutes les annonces
+    </a>
+
+    <!-- Message principal -->
+    {% if offer.author == request.user %}
+    <div class="border-l-4 border-red-400 bg-red-50 px-4 py-4 mb-8">
+        <p class="text-sm font-bold text-red-700 mb-2">
+            <i class="fa-solid fa-circle-xmark mr-1.5"></i>Annonce non publiée
+        </p>
+        {% if offer.moderation and not offer.moderation.passed and offer.moderation.get_localized_reasons %}
+        <p class="text-sm text-red-600 mb-3">
+            Notre système de modération automatique a détecté un contenu potentiellement problématique :
+        </p>
+        <ul class="text-sm text-red-600 space-y-1 mb-3">
+            {% for reason in offer.moderation.get_localized_reasons %}
+            <li class="flex items-start gap-1.5">
+                <span class="mt-0.5 shrink-0 text-red-400">–</span>{{ reason }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% elif offer.moderation and offer.moderation.images_passed == False and offer.moderation.image_reasons %}
+        <p class="text-sm text-red-600 mb-3">
+            Notre système a détecté un contenu inapproprié dans les images de votre annonce.
+        </p>
+        {% else %}
+        <p class="text-sm text-red-600 mb-3">
+            Notre équipe a examiné votre annonce et a décidé de ne pas la publier.
+        </p>
+        {% endif %}
+        <p class="text-sm text-red-500">
+            Modifiez votre annonce pour respecter nos règles de publication, puis soumettez-la à nouveau.
+        </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="space-y-3 border-t border-ink/8 pt-8">
+        <a href="{% url 'update_offer' offer.id %}"
+           class="flex items-center justify-center gap-2 w-full py-3 px-6
+                  text-[11px] font-bold uppercase tracking-[0.14em]
+                  border border-ink/20 text-ink-soft hover:border-ink hover:text-ink transition-colors">
+            <i class="fa-solid fa-pen text-[10px]"></i>
+            Modifier l'annonce
+        </a>
+        <a href="{% url 'delete_offer' offer.id %}"
+           class="flex items-center justify-center gap-2 w-full py-3 px-6
+                  text-[11px] font-bold uppercase tracking-[0.14em]
+                  text-red-400 hover:text-red-600 hover:bg-red-50
+                  border border-transparent hover:border-red-200 transition-colors">
+            <i class="fa-solid fa-trash text-[10px]"></i>
+            Supprimer l'annonce
+        </a>
+    </div>
+
+    {% else %}
+    <!-- Visiteur non auteur (ne devrait pas arriver, mais par sécurité) -->
+    <div class="border-l-4 border-ink/15 bg-ink/3 px-4 py-3">
+        <p class="text-sm text-ink-muted">
+            Cette annonce n'est pas disponible.
+        </p>
+    </div>
+    {% endif %}
+
+</div>
 {% endblock main %}
