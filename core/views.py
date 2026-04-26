@@ -208,33 +208,37 @@ def update_offer(request, offer_id: int):
 
 @login_required
 def delete_offer(request, offer_id: int):
-    if request.user.id == Offer.objects.get(pk=offer_id).author.id:
-        Offer.objects.get(pk=offer_id).delete()
+    offer = get_object_or_404(Offer, pk=offer_id)
+    if request.user != offer.author:
         return redirect('index')
-    else:
-        return redirect('index')
+    if offer.moderation_status in (Offer.PENDING, Offer.UNDER_REVIEW):
+        return redirect('offer', offer_id=offer_id)
+    offer.delete()
+    return redirect('index')
 
 
 @login_required
 def fill_offer(request, offer_id: int):
-    if request.user.id == Offer.objects.get(pk=offer_id).author.id:
-        offer = get_object_or_404(Offer, pk=offer_id)
-        offer.filled = True
-        offer.save()
+    offer = get_object_or_404(Offer, pk=offer_id)
+    if request.user != offer.author:
         return redirect('offer', offer_id=offer_id)
-    else:
+    if offer.moderation_status in (Offer.PENDING, Offer.UNDER_REVIEW):
         return redirect('offer', offer_id=offer_id)
+    offer.filled = True
+    offer.save()
+    return redirect('offer', offer_id=offer_id)
 
 
 @login_required
 def unfill_offer(request, offer_id: int):
-    if request.user.id == Offer.objects.get(pk=offer_id).author.id:
-        offer = get_object_or_404(Offer, pk=offer_id)
-        offer.filled = False
-        offer.save()
+    offer = get_object_or_404(Offer, pk=offer_id)
+    if request.user != offer.author:
         return redirect('offer', offer_id=offer_id)
-    else:
+    if offer.moderation_status in (Offer.PENDING, Offer.UNDER_REVIEW):
         return redirect('offer', offer_id=offer_id)
+    offer.filled = False
+    offer.save()
+    return redirect('offer', offer_id=offer_id)
 
 
 

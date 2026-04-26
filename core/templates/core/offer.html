@@ -415,38 +415,43 @@
         </div>
         {% endif %}
 
+        {% with locked=offer.moderation_status == 'pending' or offer.moderation_status == 'under_review' %}
         <div class="flex flex-wrap gap-2">
-            <a href="{% url 'update_offer' offer.id %}"
+            <a href="{% if not locked %}{% url 'update_offer' offer.id %}{% else %}#{% endif %}"
                class="flex items-center gap-2 px-4 py-2
                       text-[11px] font-bold uppercase tracking-[0.12em]
-                      border border-ink/20 text-ink-soft hover:border-ink hover:text-ink transition-colors">
+                      border border-ink/20 text-ink-soft
+                      {% if locked %}pointer-events-none opacity-40 cursor-not-allowed{% else %}hover:border-ink hover:text-ink transition-colors{% endif %}">
                 <i class="fa-solid fa-pen text-[10px]"></i>Modifier
             </a>
 
             {% if not offer.filled %}
-            <a href="{% url 'fill_offer' offer.id %}"
+            <a href="{% if not locked %}{% url 'fill_offer' offer.id %}{% else %}#{% endif %}"
                class="flex items-center gap-2 px-4 py-2
                       text-[11px] font-bold uppercase tracking-[0.12em]
-                      bg-green-600 text-white hover:bg-green-700 transition-colors">
+                      bg-green-600 text-white
+                      {% if locked %}pointer-events-none opacity-40 cursor-not-allowed{% else %}hover:bg-green-700 transition-colors{% endif %}">
                 <i class="fa-solid fa-handshake-simple text-[10px]"></i>Marquer pourvue
             </a>
             {% else %}
-            <a href="{% url 'unfill_offer' offer.id %}"
+            <a href="{% if not locked %}{% url 'unfill_offer' offer.id %}{% else %}#{% endif %}"
                class="flex items-center gap-2 px-4 py-2
                       text-[11px] font-bold uppercase tracking-[0.12em]
-                      border border-amber-400/60 text-amber-600 hover:bg-amber-50 transition-colors">
+                      border border-amber-400/60 text-amber-600
+                      {% if locked %}pointer-events-none opacity-40 cursor-not-allowed{% else %}hover:bg-amber-50 transition-colors{% endif %}">
                 <i class="fa-solid fa-handshake-slash text-[10px]"></i>Marquer non pourvue
             </a>
             {% endif %}
 
-            <a href="{% url 'delete_offer' offer.id %}"
+            <a href="{% if not locked %}{% url 'delete_offer' offer.id %}{% else %}#{% endif %}"
                class="flex items-center gap-2 px-4 py-2
                       text-[11px] font-bold uppercase tracking-[0.12em]
-                      text-red-400 hover:text-red-600 hover:bg-red-50
-                      border border-transparent hover:border-red-200 transition-colors ml-auto">
+                      border border-transparent ml-auto
+                      {% if locked %}text-red-200 pointer-events-none opacity-40 cursor-not-allowed{% else %}text-red-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors{% endif %}">
                 <i class="fa-solid fa-trash text-[10px]"></i>Supprimer
             </a>
         </div>
+        {% endwith %}
     </div>
     {% endif %}
 
