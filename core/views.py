@@ -112,7 +112,16 @@ def index(request):
         .first()
     )
     if not promo:
-        promo = active_confirmed.filter(play__isnull=True).order_by('?').first()
+        # Pour les promos sans pièce, ne garder que celles dont le template existe
+        from django.template.loader import select_template
+        from django.template import TemplateDoesNotExist
+        for candidate in active_confirmed.filter(play__isnull=True).order_by('?'):
+            try:
+                select_template([f"promote/banner_{candidate.slug}.html"])
+                promo = candidate
+                break
+            except TemplateDoesNotExist:
+                pass
     if not promo:
         promo = Promote.objects.filter(slug__exact='your-ad').first()
 

@@ -60,7 +60,7 @@
         {% include "promote/banner_play.html" %}
     {% else %}
         {% with "promote/banner_"|add:promo.slug|add:".html" as template_name %}
-            {% include template_name ignore missing %}
+            {% include template_name %}
         {% endwith %}
     {% endif %}
     {% endif %}
