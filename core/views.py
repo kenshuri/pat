@@ -12,6 +12,7 @@ from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 
 
@@ -95,7 +96,6 @@ def index(request):
     if is_htmx:
         return render(request, 'core/partials/offers_partials.html', ctx)
 
-    from django.utils import timezone as _tz
     today = date.today()
 
     active_confirmed = Promote.objects.filter(
@@ -123,7 +123,7 @@ def index(request):
     if promo and promo.play_id:
         promo_next_rep = (
             promo.play.representations
-            .filter(datetime__gte=_tz.now())
+            .filter(datetime__gte=timezone.now())
             .order_by('datetime')
             .first()
         )
