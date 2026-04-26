@@ -376,6 +376,8 @@ def edit_play(request, pk):
                 or 'cover_image' in request.FILES
                 or request.POST.get("poster-clear") == "on"
                 or request.POST.get("cover-clear") == "on"
+                or bool(request.FILES.getlist('extra_photos'))
+                or any(k.startswith('delete_photo_') for k in request.POST)
             )
             if moderated_changed:
                 play.moderation_status = Play.PENDING
