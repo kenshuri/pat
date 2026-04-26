@@ -14,6 +14,8 @@ class ModerationStatus(models.TextChoices):
 class ModerationResult(models.Model):
     passed = models.BooleanField(default=False)
     reasons = models.TextField(blank=True, null=True)
+    images_passed = models.BooleanField(null=True, blank=True)
+    image_reasons = models.CharField(max_length=255, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
 
     manual_status = models.CharField(
