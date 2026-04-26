@@ -606,6 +606,7 @@ dependencies = [
     { name = "psycopg", extra = ["binary", "pool"] },
     { name = "python-dotenv" },
     { name = "pytz" },
+    { name = "requests" },
     { name = "whitenoise" },
 ]
 
@@ -634,6 +635,7 @@ requires-dist = [
     { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.2.5" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "pytz", specifier = ">=2025.1" },
+    { name = "requests", specifier = ">=2.32.5" },
     { name = "whitenoise", specifier = ">=6.9.0" },
 ]
 
