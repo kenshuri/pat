@@ -37,3 +37,57 @@ class PlayModerationStatusTests(TestCase):
             genre='theatre',
         )
         self.assertIsNone(play.moderation)
+
+
+from unittest.mock import patch, MagicMock
+
+
+class ModeratePlayImagesTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            email='tester2@example.com',
+            password='password123',
+        )
+
+    def test_no_images_returns_passed(self):
+        from core.services.image_moderation import moderate_play_images
+        play = Play.objects.create(
+            user=self.user, title='No Images', genre='theatre'
+        )
+        passed, reasons = moderate_play_images(play)
+        self.assertTrue(passed)
+        self.assertEqual(reasons, '')
+
+    @patch('core.services.image_moderation._download_to_temp')
+    @patch('core.services.image_moderation._analyze_image_file')
+    def test_safe_poster_returns_passed(self, mock_analyze, mock_download):
+        from core.services.image_moderation import moderate_play_images
+        mock_download.return_value = '/tmp/fake.webp'
+        mock_analyze.return_value = True
+
+        play = Play.objects.create(
+            user=self.user, title='Safe Poster', genre='theatre'
+        )
+        # Simuler un poster sans vraiment uploader
+        play.poster = MagicMock()
+        play.poster.name = 'poster.webp'
+
+        passed, reasons = moderate_play_images(play)
+        self.assertTrue(passed)
+
+    @patch('core.services.image_moderation._download_to_temp')
+    @patch('core.services.image_moderation._analyze_image_file')
+    def test_unsafe_poster_returns_failed(self, mock_analyze, mock_download):
+        from core.services.image_moderation import moderate_play_images
+        mock_download.return_value = '/tmp/fake.webp'
+        mock_analyze.return_value = False  # unsafe
+
+        play = Play.objects.create(
+            user=self.user, title='Unsafe Poster', genre='theatre'
+        )
+        play.poster = MagicMock()
+        play.poster.name = 'poster.webp'
+
+        passed, reasons = moderate_play_images(play)
+        self.assertFalse(passed)
+        self.assertIn('poster', reasons)

@@ -94,3 +94,39 @@ def moderate_images(offer) -> tuple[bool, str]:
     passed = len(flagged) == 0
     reasons = ",".join(flagged)
     return passed, reasons
+
+
+def moderate_play_images(play) -> tuple[bool, str]:
+    """
+    Analyzes poster and cover_image of a Play.
+    Returns (passed: bool, reasons: str).
+    """
+    flagged = []
+    temp_files = []
+
+    images_to_check = []
+    if play.poster:
+        images_to_check.append(("poster", play.poster))
+    if play.cover_image:
+        images_to_check.append(("cover_image", play.cover_image))
+
+    if not images_to_check:
+        return True, ""
+
+    try:
+        for label, image_field in images_to_check:
+            temp_path = _download_to_temp(image_field)
+            if temp_path:
+                temp_files.append(temp_path)
+                if not _analyze_image_file(temp_path):
+                    flagged.append(label)
+    finally:
+        for path in temp_files:
+            try:
+                os.unlink(path)
+            except OSError:
+                pass
+
+    passed = len(flagged) == 0
+    reasons = ",".join(flagged)
+    return passed, reasons
