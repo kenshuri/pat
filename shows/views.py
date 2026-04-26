@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import Q, Count, Min, Max, Subquery, OuterRef, Prefetch
-from django.http import HttpResponseForbidden, HttpResponse
+from django.http import HttpResponseForbidden, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -17,6 +17,7 @@ from datetime import datetime, time
 from accounts.models import CustomUser
 from .models import Play, PlayMembership, PlayPhoto, Representation, PublicationCredit
 from .forms import RepresentationForm, PlayForm, ContributorFormSet, ContributorForm
+from core.tasks import moderate_play
 
 logger = logging.getLogger(__name__)
 
@@ -193,6 +194,9 @@ def agenda_filter(request):
 
 def play_detail(request, pk):
     play = get_object_or_404(Play, pk=pk)
+    if play.moderation_status != Play.PUBLISHED:
+        if not request.user.is_authenticated or request.user != play.user:
+            raise Http404
     representations = play.representations.order_by('datetime')
     troupe_profile = getattr(play.user, 'troupe_profile', None) if play.user else None
     accepted_members = (
@@ -298,6 +302,7 @@ def add_play(request):
                 formset.save()
             _save_play_extra_photos(play, request.FILES.getlist('extra_photos'))
             _process_invitations(request, play)
+            moderate_play.delay(play.pk)
             return redirect("shows:play_detail", pk=play.pk)
     else:
         form = PlayForm()
@@ -333,6 +338,10 @@ def edit_play(request, pk):
         return HttpResponseForbidden("Vous n’avez pas la permission de modifier cette pièce.")
 
     if request.method == "POST":
+        old_title = play.title
+        old_desc = play.description
+        old_poster_name = play.poster.name if play.poster else None
+        old_cover_name = play.cover_image.name if play.cover_image else None
         form = PlayForm(request.POST, request.FILES, instance=play)
         formset = ContributorFormSet(request.POST, prefix="contributors", instance=play)
 
@@ -353,6 +362,20 @@ def edit_play(request, pk):
             _save_play_extra_photos(play, request.FILES.getlist('extra_photos'))
             _process_invitations(request, play)
             _update_membership_roles(request, play)
+            moderated_changed = (
+                play.title != old_title
+                or play.description != old_desc
+                or (play.poster.name if play.poster else None) != old_poster_name
+                or (play.cover_image.name if play.cover_image else None) != old_cover_name
+                or 'poster' in request.FILES
+                or 'cover_image' in request.FILES
+                or request.POST.get("poster-clear") == "on"
+                or request.POST.get("cover-clear") == "on"
+            )
+            if moderated_changed:
+                play.moderation_status = Play.PENDING
+                play.save(update_fields=['moderation_status'])
+                moderate_play.delay(play.pk)
             return redirect("shows:play_detail", pk=play.pk)
     else:
         form = PlayForm(instance=play)

@@ -153,3 +153,88 @@ class ModeratePlayTaskTests(TestCase):
         from core.tasks import moderate_play
         # Should log warning and return, not raise
         moderate_play(99999)
+
+
+from django.test import Client, override_settings
+from django.urls import reverse
+from unittest.mock import patch
+
+SIMPLE_STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
+
+
+@override_settings(STORAGES=SIMPLE_STORAGES)
+class PlayViewModerationTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.owner = CustomUser.objects.create_user(
+            email='owner@example.com', password='password123'
+        )
+        self.other = CustomUser.objects.create_user(
+            email='other@example.com', password='password123'
+        )
+
+    def _make_published_play(self):
+        return Play.objects.create(
+            user=self.owner, title='Published Play',
+            genre='theatre', moderation_status='published'
+        )
+
+    def _make_pending_play(self):
+        return Play.objects.create(
+            user=self.owner, title='Pending Play',
+            genre='theatre', moderation_status='pending'
+        )
+
+    def test_published_play_accessible_to_anyone(self):
+        play = self._make_published_play()
+        response = self.client.get(reverse('shows:play_detail', args=[play.pk]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_pending_play_returns_404_to_non_owner(self):
+        play = self._make_pending_play()
+        self.client.login(email='other@example.com', password='password123')
+        response = self.client.get(reverse('shows:play_detail', args=[play.pk]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_pending_play_accessible_to_owner(self):
+        play = self._make_pending_play()
+        self.client.login(email='owner@example.com', password='password123')
+        response = self.client.get(reverse('shows:play_detail', args=[play.pk]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_anonymous_gets_404_for_pending_play(self):
+        play = self._make_pending_play()
+        response = self.client.get(reverse('shows:play_detail', args=[play.pk]))
+        self.assertEqual(response.status_code, 404)
+
+    @patch('core.tasks.moderate_play.delay')
+    def test_add_play_triggers_moderation(self, mock_delay):
+        self.client.login(email='owner@example.com', password='password123')
+        response = self.client.post(reverse('shows:add_play'), {
+            'title': 'New Play',
+            'genre': 'theatre',
+            'description': '',
+            'contributors-TOTAL_FORMS': '0',
+            'contributors-INITIAL_FORMS': '0',
+            'contributors-MIN_NUM_FORMS': '0',
+            'contributors-MAX_NUM_FORMS': '1000',
+        })
+        self.assertTrue(mock_delay.called)
+
+    @patch('core.tasks.moderate_play.delay')
+    def test_edit_play_triggers_moderation_on_title_change(self, mock_delay):
+        play = self._make_published_play()
+        self.client.login(email='owner@example.com', password='password123')
+        self.client.post(reverse('shows:edit_play', args=[play.pk]), {
+            'title': 'Updated Title',
+            'genre': 'theatre',
+            'description': '',
+            'contributors-TOTAL_FORMS': '0',
+            'contributors-INITIAL_FORMS': '0',
+            'contributors-MIN_NUM_FORMS': '0',
+            'contributors-MAX_NUM_FORMS': '1000',
+        })
+        self.assertTrue(mock_delay.called)
