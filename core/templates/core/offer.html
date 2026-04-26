@@ -376,14 +376,14 @@
         <div class="border-l-4 border-amber-400 bg-ink/3 px-4 py-3">
             <p class="text-sm text-ink-soft">
                 <i class="fa-solid fa-circle-notch fa-spin text-amber-500 mr-1.5"></i>
-                Votre annonce est en cours de vérification automatique — elle sera en ligne dans quelques instants.
+                Votre annonce est en cours de vérification automatique — elle sera en ligne dans quelques instants. Elle ne peut pas être modifiée pendant cette période.
             </p>
         </div>
         {% elif offer.moderation_status == 'under_review' %}
         <div class="border-l-4 border-amber-400 bg-ink/3 px-4 py-3">
             <p class="text-sm text-ink-soft">
                 <i class="fa-solid fa-circle-exclamation text-amber-500 mr-1.5"></i>
-                Votre annonce est examinée par notre équipe. Elle n'est pas visible publiquement — vous serez notifié par email dès qu'elle sera traitée.
+                Votre annonce est examinée par notre équipe. Elle n'est pas visible publiquement et ne peut pas être modifiée — vous serez notifié par email dès qu'elle sera traitée.
             </p>
         </div>
         {% elif not offer.filled %}
@@ -417,37 +417,29 @@
 
         {% if offer.moderation_status == 'pending' or offer.moderation_status == 'under_review' %}
         <div class="flex flex-wrap gap-2">
-            <a href="#"
-               class="flex items-center gap-2 px-4 py-2
-                      text-[11px] font-bold uppercase tracking-[0.12em]
-                      border border-ink/20 text-ink-soft
-                      pointer-events-none opacity-40 cursor-not-allowed">
-                <i class="fa-solid fa-pen text-[10px]"></i>Modifier
-            </a>
+            <span class="flex items-center gap-2 px-4 py-2
+                         text-[11px] font-bold uppercase tracking-[0.12em]
+                         border border-ink/10 bg-ink/3 text-ink/25 cursor-not-allowed select-none">
+                <i class="fa-solid fa-lock text-[9px]"></i>Modifier
+            </span>
             {% if not offer.filled %}
-            <a href="#"
-               class="flex items-center gap-2 px-4 py-2
-                      text-[11px] font-bold uppercase tracking-[0.12em]
-                      bg-green-600 text-white
-                      pointer-events-none opacity-40 cursor-not-allowed">
-                <i class="fa-solid fa-handshake-simple text-[10px]"></i>Marquer pourvue
-            </a>
+            <span class="flex items-center gap-2 px-4 py-2
+                         text-[11px] font-bold uppercase tracking-[0.12em]
+                         border border-ink/10 bg-ink/3 text-ink/25 cursor-not-allowed select-none">
+                <i class="fa-solid fa-lock text-[9px]"></i>Marquer pourvue
+            </span>
             {% else %}
-            <a href="#"
-               class="flex items-center gap-2 px-4 py-2
-                      text-[11px] font-bold uppercase tracking-[0.12em]
-                      border border-amber-400/60 text-amber-600
-                      pointer-events-none opacity-40 cursor-not-allowed">
-                <i class="fa-solid fa-handshake-slash text-[10px]"></i>Marquer non pourvue
-            </a>
+            <span class="flex items-center gap-2 px-4 py-2
+                         text-[11px] font-bold uppercase tracking-[0.12em]
+                         border border-ink/10 bg-ink/3 text-ink/25 cursor-not-allowed select-none">
+                <i class="fa-solid fa-lock text-[9px]"></i>Marquer non pourvue
+            </span>
             {% endif %}
-            <a href="#"
-               class="flex items-center gap-2 px-4 py-2
-                      text-[11px] font-bold uppercase tracking-[0.12em]
-                      border border-transparent ml-auto
-                      text-red-200 pointer-events-none opacity-40 cursor-not-allowed">
-                <i class="fa-solid fa-trash text-[10px]"></i>Supprimer
-            </a>
+            <span class="flex items-center gap-2 px-4 py-2
+                         text-[11px] font-bold uppercase tracking-[0.12em]
+                         border border-ink/10 bg-ink/3 text-ink/25 cursor-not-allowed select-none ml-auto">
+                <i class="fa-solid fa-lock text-[9px]"></i>Supprimer
+            </span>
         </div>
         {% else %}
         <div class="flex flex-wrap gap-2">
