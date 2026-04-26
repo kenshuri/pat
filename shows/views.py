@@ -214,7 +214,7 @@ def play_detail(request, pk):
         from promote.models import Promote
         from datetime import date as _date
         _today = _date.today()
-        _promos = list(Promote.objects.filter(play=play).order_by('-start_date'))
+        _promos = list(Promote.objects.filter(play=play).order_by('start_date'))
         for p in _promos:
             if p.status == 'pending_payment':
                 p.display_status = 'pending_payment'
@@ -241,7 +241,7 @@ def play_owner_zone(request, pk):
     from datetime import date as _date
     play = get_object_or_404(Play, pk=pk, user=request.user)
     _today = _date.today()
-    _promos = list(Promote.objects.filter(play=play).order_by('-start_date'))
+    _promos = list(Promote.objects.filter(play=play).order_by('start_date'))
     for p in _promos:
         if p.status == 'pending_payment':
             p.display_status = 'pending_payment'

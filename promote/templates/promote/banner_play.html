@@ -1,5 +1,5 @@
 {% load static %}
-<a href="{% url 'shows:play_detail' promo.play.pk %}"
+<a href="{% url 'promote:banner_click' promo.slug %}"
    class="group flex items-stretch mb-6 bg-primary hover:opacity-90 transition-opacity">
 
     {% if promo.play.poster %}

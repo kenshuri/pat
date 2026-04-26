@@ -29,10 +29,11 @@ def banner_click(request, slug):
     promo = get_object_or_404(Promote, slug=slug)
 
     Promote.objects.filter(pk=promo.pk).update(
-        click_count = F("click_count") + 1
+        click_count=F("click_count") + 1
     )
 
-    # redirige vers la page détail
+    if promo.play_id:
+        return redirect("shows:play_detail", pk=promo.play_id)
     return redirect("promote:detail", slug=slug)
 
 class PromoteDetailView(DetailView):
