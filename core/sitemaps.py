@@ -1,5 +1,5 @@
 from django.contrib.sitemaps import Sitemap
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.urls import reverse
 from django.utils.text import slugify
 
@@ -11,8 +11,8 @@ class OfferSitemap(Sitemap):
     priority = 0.8
 
     def items(self):
-        return Offer.objects.filter(filled=False).filter(
-            Q(moderation__isnull=True) | Q(moderation__passed=True)
+        return Offer.objects.filter(
+            filled=False, moderation_status=Offer.PUBLISHED
         ).order_by('-created_on')
 
     def lastmod(self, obj):
@@ -31,9 +31,12 @@ class CitySitemap(Sitemap):
         six_months_ago = datetime.now() - timedelta(days=180)
         cities_qs = (
             Offer.objects
-            .filter(filled=False, created_on__gte=six_months_ago)
+            .filter(
+                filled=False,
+                created_on__gte=six_months_ago,
+                moderation_status=Offer.PUBLISHED,
+            )
             .exclude(city='')
-            .filter(Q(moderation__isnull=True) | Q(moderation__passed=True))
             .values('city')
             .annotate(count=Count('id'))
             .filter(count__gte=3)
@@ -54,9 +57,12 @@ class DepartmentSitemap(Sitemap):
         six_months_ago = datetime.now() - timedelta(days=180)
         cities = (
             Offer.objects
-            .filter(filled=False, created_on__gte=six_months_ago)
+            .filter(
+                filled=False,
+                created_on__gte=six_months_ago,
+                moderation_status=Offer.PUBLISHED,
+            )
             .exclude(city='')
-            .filter(Q(moderation__isnull=True) | Q(moderation__passed=True))
             .values_list('city', flat=True)
         )
         dept_counts = {}
