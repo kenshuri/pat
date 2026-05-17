@@ -3,7 +3,7 @@
    class="group flex items-stretch mb-6 bg-primary hover:opacity-90 transition-opacity">
 
     {% if promo.play.poster %}
-    <div class="shrink-0 p-2">
+    <div class="shrink-0 p-2 flex items-center justify-center">
         <div class="w-12 sm:w-14" style="aspect-ratio: 2/3;">
             <img src="{{ promo.play.poster.url }}"
                  alt="Affiche {{ promo.play.title }}"
@@ -35,7 +35,7 @@
             </p>
             {% endif %}
         </div>
-        <span class="shrink-0 font-display text-[10px] font-bold uppercase tracking-[0.12em]
+        <span class="hidden sm:inline-block shrink-0 font-display text-[10px] font-bold uppercase tracking-[0.12em]
                      border border-white/20 text-white/40 group-hover:border-white/50
                      group-hover:text-white px-3 py-1.5 transition-colors whitespace-nowrap">
             En savoir plus →
