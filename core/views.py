@@ -186,6 +186,7 @@ def _delete_extra_photos(offer, post_data):
             offer.photos.filter(pk=pk).delete()
 
 
+@login_required
 def add_offer(request):
     MAPBOX_ACCESS_TOKEN = os.environ.get("MAPBOX_ACCESS_TOKEN")
     # with open('blogApp/static/fr_cities.json') as f:
