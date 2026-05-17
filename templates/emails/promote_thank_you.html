@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f4f0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f4f0;padding:40px 16px;">
+  <tr><td align="center">
+    <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border:1px solid #e8e6e0;max-width:560px;width:100%;">
+
+      <!-- Header -->
+      <tr>
+        <td style="background:#1a1814;padding:28px 32px;">
+          <p style="margin:0;font-family:Georgia,serif;font-size:13px;font-weight:bold;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.5);">
+            Petites Annonces Théâtre
+          </p>
+        </td>
+      </tr>
+
+      <!-- Body -->
+      <tr>
+        <td style="padding:32px;">
+          <h1 style="margin:0 0 8px;font-size:20px;font-weight:bold;color:#1a1814;line-height:1.3;">
+            Merci pour votre soutien !
+          </h1>
+          <p style="margin:0 0 20px;font-size:13px;color:#8a8680;">
+            Bonjour,
+          </p>
+          <p style="margin:0 0 20px;font-size:14px;color:#4a4640;line-height:1.6;">
+            Votre paiement a bien été reçu. Votre bandeau promotionnel pour
+            <strong>«&nbsp;{{ promote.title }}&nbsp;»</strong> est confirmé et sera diffusé sur
+            la page d'accueil du site selon la période choisie.
+          </p>
+
+          <!-- Récapitulatif -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf9f6;border:1px solid #f0ede8;margin:0 0 24px;">
+            <tr>
+              <td style="padding:20px 24px;">
+                <p style="margin:0 0 12px;font-family:Georgia,serif;font-size:10px;font-weight:bold;letter-spacing:0.14em;text-transform:uppercase;color:#8a8680;">
+                  Récapitulatif
+                </p>
+                <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;color:#4a4640;line-height:1.8;">
+                  <tr>
+                    <td style="color:#8a8680;width:40%;">Titre</td>
+                    <td style="font-weight:bold;">{{ promote.title }}</td>
+                  </tr>
+                  <tr>
+                    <td style="color:#8a8680;">Formule</td>
+                    <td>{{ promote.get_formula_display }}</td>
+                  </tr>
+                  <tr>
+                    <td style="color:#8a8680;">Période</td>
+                    <td>du {{ promote.start_date|date:"d/m/Y" }} au {{ promote.end_date|date:"d/m/Y" }}</td>
+                  </tr>
+                  {% if promote.price_paid %}
+                  <tr>
+                    <td style="color:#8a8680;">Montant payé</td>
+                    <td style="font-weight:bold;">{{ promote.price_paid }} €</td>
+                  </tr>
+                  {% endif %}
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <!-- CTA principal -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">
+            <tr>
+              <td style="background:#1a1814;">
+                <a href="{{ stats_url }}"
+                   style="display:inline-block;padding:12px 24px;font-size:12px;font-weight:bold;letter-spacing:0.12em;text-transform:uppercase;color:#fff;text-decoration:none;">
+                  Voir mes bandeaux →
+                </a>
+              </td>
+            </tr>
+          </table>
+
+          {% if receipt_url %}
+          <!-- Lien reçu Stripe -->
+          <p style="margin:0 0 24px;font-size:12px;color:#8a8680;line-height:1.6;">
+            Besoin d'un justificatif comptable&nbsp;?
+            <a href="{{ receipt_url }}" style="color:#1a1814;text-decoration:underline;">
+              Télécharger mon reçu officiel
+            </a>
+          </p>
+          {% endif %}
+
+          <p style="margin:24px 0 0;font-size:13px;color:#8a8680;line-height:1.6;">
+            Une question&nbsp;? Écrivez-nous à
+            <a href="mailto:admin@petites-annonces-theatre.fr" style="color:#1a1814;">
+              admin@petites-annonces-theatre.fr
+            </a>.
+          </p>
+        </td>
+      </tr>
+
+      <!-- Footer -->
+      <tr>
+        <td style="border-top:1px solid #f0ede8;padding:20px 32px;">
+          <p style="margin:0;font-size:11px;color:#c0bdb8;line-height:1.6;">
+            Vous recevez cet email suite à votre achat sur
+            <a href="https://petites-annonces-theatre.fr" style="color:#8a8680;">petites-annonces-theatre.fr</a>.
+          </p>
+        </td>
+      </tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

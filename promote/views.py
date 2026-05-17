@@ -8,10 +8,11 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
 from django.http import HttpResponseBadRequest, JsonResponse, HttpResponse
+from django.core.mail import mail_admins, send_mail
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import DetailView
-from django.template.loader import select_template
+from django.template.loader import render_to_string, select_template
 
 import stripe
 
@@ -224,6 +225,98 @@ def sponsor_checkout(request, play_id):
     return redirect(session.url)
 
 
+def _get_stripe_receipt_url(session):
+    try:
+        pi_id = getattr(session, 'payment_intent', None)
+        if not pi_id:
+            return None
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        pi = stripe.PaymentIntent.retrieve(pi_id, expand=['latest_charge'])
+        charge = getattr(pi, 'latest_charge', None)
+        return getattr(charge, 'receipt_url', None) if charge else None
+    except Exception as e:
+        logger.warning("Could not fetch Stripe receipt URL: %s", e)
+        return None
+
+
+def _send_promote_notifications(promote, session):
+    site_url = getattr(settings, 'SITE_URL', 'https://petites-annonces-theatre.fr')
+    receipt_url = _get_stripe_receipt_url(session) if session else None
+
+    # Email client : merci stylé
+    html_body = render_to_string('emails/promote_thank_you.html', {
+        'promote': promote,
+        'receipt_url': receipt_url,
+        'stats_url': f"{site_url}{reverse('promote:my_promotions')}",
+    })
+    text_body = (
+        f"Merci pour votre soutien !\n\n"
+        f"Votre bandeau « {promote.title} » est confirmé.\n"
+        f"Période : du {promote.start_date:%d/%m/%Y} au {promote.end_date:%d/%m/%Y}\n"
+        f"Formule : {promote.get_formula_display()}\n"
+    )
+    if promote.price_paid:
+        text_body += f"Montant payé : {promote.price_paid} €\n"
+    if receipt_url:
+        text_body += f"\nReçu officiel : {receipt_url}\n"
+    text_body += "\nUne question ? admin@petites-annonces-theatre.fr"
+
+    try:
+        send_mail(
+            subject=f"Merci pour votre soutien — votre bandeau « {promote.title} »",
+            message=text_body,
+            html_message=html_body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[promote.user.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        logger.error("Failed to send thank-you email for promote %s: %s", promote.pk, e)
+
+    # Email admin
+    try:
+        admin_body = (
+            f"Utilisateur : {promote.user.email}\n"
+            f"Titre : {promote.title}\n"
+            f"Formule : {promote.get_formula_display()}\n"
+            f"Période : {promote.start_date:%d/%m/%Y} → {promote.end_date:%d/%m/%Y}\n"
+            f"Montant : {promote.price_paid or '?'} €\n"
+            f"Admin : {site_url}/admin/promote/promote/{promote.pk}/change/"
+        )
+        mail_admins(
+            f"[PAT] Nouveau bandeau payé — {promote.title}",
+            admin_body,
+            fail_silently=True,
+        )
+    except Exception as e:
+        logger.error("Failed to send admin notification for promote %s: %s", promote.pk, e)
+
+
+def _confirm_and_notify(promote, session):
+    """Confirme un Promote payé et déclenche les emails. Idempotent."""
+    if promote.status != 'confirmed':
+        overlap = Promote.objects.filter(
+            status='confirmed',
+            start_date__lte=promote.end_date,
+            end_date__gte=promote.start_date,
+        ).exclude(pk=promote.pk).exists()
+
+        if overlap:
+            logger.warning(
+                "Promote %s: overlapping confirmed slot, skipping confirm", promote.pk
+            )
+            return
+
+        promote.status = 'confirmed'
+        promote.price_paid = (getattr(session, 'amount_total', 0) or 0) / 100
+        promote.save(update_fields=['status', 'price_paid'])
+
+    if not promote.notifications_sent:
+        _send_promote_notifications(promote, session)
+        promote.notifications_sent = True
+        promote.save(update_fields=['notifications_sent'])
+
+
 def stripe_webhook(request):
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE', '')
@@ -244,22 +337,7 @@ def stripe_webhook(request):
         if promote_id:
             try:
                 promote = Promote.objects.get(pk=promote_id)
-
-                overlap = Promote.objects.filter(
-                    status='confirmed',
-                    start_date__lte=promote.end_date,
-                    end_date__gte=promote.start_date,
-                ).exclude(pk=promote.pk).exists()
-
-                if overlap:
-                    logger.warning(
-                        "Promote %s: overlapping confirmed slot, skipping confirm", promote_id
-                    )
-                else:
-                    promote.status = 'confirmed'
-                    promote.price_paid = (getattr(session, 'amount_total', 0) or 0) / 100
-                    promote.save(update_fields=['status', 'price_paid'])
-
+                _confirm_and_notify(promote, session)
             except Promote.DoesNotExist:
                 logger.error("Webhook: Promote %s not found", promote_id)
 
@@ -273,21 +351,12 @@ def sponsor_confirmation(request, session_id):
     )
 
     # If webhook hasn't fired yet, confirm directly via Stripe API
-    if promote.status == 'pending_payment':
+    if promote.status == 'pending_payment' or not promote.notifications_sent:
         try:
             stripe.api_key = settings.STRIPE_SECRET_KEY
             session = stripe.checkout.Session.retrieve(session_id)
             if getattr(session, 'payment_status', None) == 'paid':
-                overlap = Promote.objects.filter(
-                    status='confirmed',
-                    start_date__lte=promote.end_date,
-                    end_date__gte=promote.start_date,
-                ).exclude(pk=promote.pk).exists()
-                if not overlap:
-                    amount = getattr(session, 'amount_total', 0) or 0
-                    promote.status = 'confirmed'
-                    promote.price_paid = amount / 100
-                    promote.save(update_fields=['status', 'price_paid'])
+                _confirm_and_notify(promote, session)
         except Exception as e:
             logger.warning("Could not verify Stripe session %s: %s", session_id, e)
 
