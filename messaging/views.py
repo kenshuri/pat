@@ -2,7 +2,7 @@ import logging
 
 from django.contrib import messages as django_messages
 from django.contrib.auth.decorators import login_required
-from django.core.mail import mail_admins, send_mail
+from django.core.mail import send_mail
 from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 from core.models import Offer
 from .forms import MessageForm, ReportForm
 from .models import Conversation, Message
-from .moderation import check_external_links, check_financial_patterns
+from .moderation import get_flag_reason
 
 
 def _sender_display_name(user):
@@ -46,7 +46,13 @@ def _user_profile_url(request, user):
         return ''
 
 
-def _send_report_notification(request, msg, reason):
+def _send_report_notification(request, msg, reason, *, auto_label=None):
+    """Notifie les admins d'un message signalé.
+
+    Mode manuel (défaut) : signalé par request.user.
+    Mode auto (auto_label fourni) : flaggé par la détection regex.
+    """
+    auto = auto_label is not None
     conv = msg.conversation
     admin_emails = [email for _, email in settings.ADMINS]
     if not admin_emails:
@@ -61,15 +67,16 @@ def _send_report_notification(request, msg, reason):
         m.sender_display = _sender_display_name(m.sender) if m.sender else 'Utilisateur supprimé'
 
     context = {
-        'reporter_name': _sender_display_name(request.user),
-        'reporter_email': request.user.email,
+        'is_auto': auto,
+        'reporter_name': 'Détection automatique' if auto else _sender_display_name(request.user),
+        'reporter_email': '' if auto else request.user.email,
+        'reporter_profile_url': '' if auto else _user_profile_url(request, request.user),
         'sender_name': _sender_display_name(msg.sender),
         'sender_email': msg.sender.email if msg.sender else '—',
         'flag_reason': reason,
         'offer_title': offer.title if offer else '—',
         'offer_url': request.build_absolute_uri(f'/offer/{offer.pk}') if offer else '',
         'sender_profile_url': _user_profile_url(request, msg.sender),
-        'reporter_profile_url': _user_profile_url(request, request.user),
         'admin_url': f'{site_url}/admin/messaging/message/{msg.pk}/change/',
         'site_url': site_url,
         'messages': all_messages,
@@ -77,17 +84,29 @@ def _send_report_notification(request, msg, reason):
     }
 
     html_body = render_to_string('emails/report_notification.html', context)
-    text_body = (
-        f'Message signalé #{msg.pk}\n'
-        f'Signalé par : {context["reporter_name"]}\n'
-        f'Auteur : {context["sender_name"]}\n'
-        f'Raison : {reason or "Non précisée"}\n'
-        f'Annonce : {context["offer_title"]}\n\n'
-        f'Contenu :\n{msg.body}'
-    )
+    if auto:
+        subject = f'[PAT] 🤖 Détection auto — {auto_label} — {context["offer_title"]}'
+        text_body = (
+            f'Message flaggé automatiquement #{msg.pk}\n'
+            f'Détection : {auto_label}\n'
+            f'Auteur : {context["sender_name"]} ({context["sender_email"]})\n'
+            f'Raison : {reason}\n'
+            f'Annonce : {context["offer_title"]}\n\n'
+            f'Contenu :\n{msg.body}'
+        )
+    else:
+        subject = f'[PAT] 🚩 Message signalé — {context["offer_title"]}'
+        text_body = (
+            f'Message signalé #{msg.pk}\n'
+            f'Signalé par : {context["reporter_name"]}\n'
+            f'Auteur : {context["sender_name"]}\n'
+            f'Raison : {reason or "Non précisée"}\n'
+            f'Annonce : {context["offer_title"]}\n\n'
+            f'Contenu :\n{msg.body}'
+        )
     try:
         send_mail(
-            f'[PAT] 🚩 Message signalé — {context["offer_title"]}',
+            subject,
             text_body,
             settings.DEFAULT_FROM_EMAIL,
             admin_emails,
@@ -158,19 +177,14 @@ def _send_notification(request, conv, msg, recipient):
         logger.error('Échec envoi notification message (conv #%s) : %s', conv.pk, e)
 
 
-def _apply_moderation(msg, body, sender):
-    suspicious = check_financial_patterns(body) or check_external_links(body)
-    if suspicious:
+def _apply_moderation(msg, body):
+    """Flagge le message si suspect. Retourne (label, extrait) ou None."""
+    reason = get_flag_reason(body)
+    if reason:
+        label, snippet = reason
         msg.is_flagged = True
-        msg.flag_reason = 'Détection automatique (contenu suspect)'
-        try:
-            mail_admins(
-                f'Message signalé automatiquement — conversation #{msg.conversation_id}',
-                f'Utilisateur : {sender.email}\nContenu :\n{body}',
-                fail_silently=True,
-            )
-        except Exception:
-            pass
+        msg.flag_reason = f'Détection automatique — {label} : {snippet}'
+    return reason
 
 
 def _rate_limit_exceeded(user):
@@ -229,9 +243,11 @@ def conversation_detail(request, pk):
             if _is_duplicate(request.user, conv, body):
                 return redirect('messaging:conversation', pk=pk)
             msg = Message(conversation=conv, sender=request.user, body=body)
-            _apply_moderation(msg, body, request.user)
+            flag = _apply_moderation(msg, body)
             msg.save()
             conv.save()
+            if flag:
+                _send_report_notification(request, msg, msg.flag_reason, auto_label=flag[0])
             if other:
                 _send_notification(request, conv, msg, other)
             return redirect('messaging:conversation', pk=pk)
@@ -277,8 +293,10 @@ def new_conversation(request, offer_id):
             if offer.author:
                 conv.participants.add(offer.author)
             msg = Message(conversation=conv, sender=request.user, body=body)
-            _apply_moderation(msg, body, request.user)
+            flag = _apply_moderation(msg, body)
             msg.save()
+            if flag:
+                _send_report_notification(request, msg, msg.flag_reason, auto_label=flag[0])
             if offer.author:
                 _send_notification(request, conv, msg, offer.author)
             return redirect('messaging:conversation', pk=conv.pk)
