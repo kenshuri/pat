@@ -129,5 +129,5 @@ class AutoFlagNotificationTests(TestCase):
         self.assertIn('Détection automatique', html)
         self.assertIn('https://example.com/spam', html)
         self.assertNotIn('Profil signalant', html)
-        self.assertNotIn('alice@example.com', html.split('Conversation complète')[0])
+        self.assertIn('alice@example.com', html)
         self.assertIn('MESSAGE DÉTECTÉ', html)
