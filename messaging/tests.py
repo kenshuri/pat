@@ -118,3 +118,14 @@ class AutoFlagNotificationTests(TestCase):
         self.assertEqual(len(manual_mails), 1)
         html = manual_mails[0].alternatives[0][0]
         self.assertIn('alice@example.com', html)  # le signalant apparaît
+
+    def test_auto_email_html_shows_auto_detection(self):
+        self.client.post(
+            reverse('messaging:conversation', args=[self.conv.pk]),
+            {'body': 'lien https://example.com/spam'},
+        )
+        html = self._admin_mails()[0].alternatives[0][0]
+        self.assertIn('Message signalé automatiquement', html)
+        self.assertIn('Détection automatique', html)
+        self.assertIn('https://example.com/spam', html)
+        self.assertNotIn('Profil signalant', html)

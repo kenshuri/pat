@@ -13,7 +13,7 @@
             Petites Annonces Théâtre — Administration
           </p>
           <p style="margin:0;font-size:18px;font-weight:bold;color:#fff;">
-            🚩 Message signalé
+            {% if is_auto %}🤖 Message signalé automatiquement{% else %}🚩 Message signalé{% endif %}
           </p>
         </td>
       </tr>
@@ -30,7 +30,7 @@
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding:3px 0;font-size:12px;color:#6b7280;width:140px;">Signalé par</td>
-                    <td style="padding:3px 0;font-size:12px;color:#1a1814;font-weight:bold;">{{ reporter_name }} <span style="font-weight:normal;color:#6b7280;">({{ reporter_email }})</span></td>
+                    <td style="padding:3px 0;font-size:12px;color:#1a1814;font-weight:bold;">{{ reporter_name }}{% if not is_auto %} <span style="font-weight:normal;color:#6b7280;">({{ reporter_email }})</span>{% endif %}</td>
                   </tr>
                   <tr>
                     <td style="padding:3px 0;font-size:12px;color:#6b7280;">Auteur du message</td>
