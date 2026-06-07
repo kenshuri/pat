@@ -15,6 +15,10 @@ class GetFlagReasonTests(TestCase):
         self.assertEqual(label, 'Lien externe')
         self.assertEqual(snippet, 'http://example.com/page')
 
+    def test_link_trailing_punctuation_stripped(self):
+        _, snippet = get_flag_reason('mon profil : https://example.com/page.')
+        self.assertEqual(snippet, 'https://example.com/page')
+
     def test_financial_keyword(self):
         label, snippet = get_flag_reason('envoyez-moi un virement rapidement')
         self.assertEqual(label, 'Motif financier')

@@ -18,7 +18,7 @@ def check_external_links(text: str) -> bool:
     return bool(_LINK_PATTERN.search(text))
 
 
-def get_flag_reason(text):
+def get_flag_reason(text: str) -> tuple[str, str] | None:
     """Retourne (label, extrait matché) si le texte est suspect, sinon None.
 
     Le motif financier est testé en premier (plus grave qu'un simple lien).
@@ -28,5 +28,5 @@ def get_flag_reason(text):
         return ('Motif financier', match.group(0))
     match = _LINK_PATTERN.search(text)
     if match:
-        return ('Lien externe', match.group(0))
+        return ('Lien externe', match.group(0).rstrip('.,;:!?)»'))
     return None
