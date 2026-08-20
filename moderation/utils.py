@@ -1,3 +1,7 @@
+# Catégories signalées par Mistral qui ne bloquent pas la publication :
+# l'annonce est publiée, mais la raison reste enregistrée pour l'admin.
+NON_BLOCKING_CATEGORIES = {'pii'}
+
 CATEGORY_TRANSLATIONS = {
     'sexual': "Contenu sexuel explicite",
     'hate_and_discrimination': "Discours haineux ou discriminatoire",

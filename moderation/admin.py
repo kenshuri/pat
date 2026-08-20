@@ -119,7 +119,7 @@ class ModerationResultAdmin(admin.ModelAdmin):
 
     @admin.display(boolean=True, description=_("Texte OK"))
     def text_passed(self, obj):
-        return not obj.reasons
+        return not obj.has_blocking_reasons
 
     @admin.display(description=_("Raisons (localisées)"))
     def reasons_localized_display(self, obj):

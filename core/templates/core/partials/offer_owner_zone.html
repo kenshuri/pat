@@ -49,6 +49,21 @@
     </div>
     {% endif %}
 
+    {% if offer.moderation.has_pii %}
+    <div class="border-l-4 border-blue-400 bg-blue-50/60 px-4 py-3">
+        <p class="text-sm font-bold text-ink mb-1">
+            <i class="fa-solid fa-shield-halved text-blue-500 mr-1.5"></i>
+            Vos coordonnées sont visibles de tous
+        </p>
+        <p class="text-sm text-ink-soft">
+            Des informations personnelles (téléphone, email, adresse…) semblent figurer dans le texte
+            de votre annonce, où elles sont lisibles par tous — y compris par les robots collecteurs
+            d'adresses. Mieux vaut les déplacer dans la section <strong>Contact</strong> : elles n'y
+            sont affichées qu'aux personnes qui cliquent pour les demander.
+        </p>
+    </div>
+    {% endif %}
+
     {% if offer.moderation_status == 'pending' or offer.moderation_status == 'under_review' %}
     <div class="flex flex-wrap gap-2">
         <span class="flex items-center gap-2 px-4 py-2

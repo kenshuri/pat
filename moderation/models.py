@@ -1,6 +1,6 @@
 from django.db import models
 
-from moderation.utils import CATEGORY_TRANSLATIONS
+from moderation.utils import CATEGORY_TRANSLATIONS, NON_BLOCKING_CATEGORIES
 
 
 class ModerationResult(models.Model):
@@ -13,6 +13,19 @@ class ModerationResult(models.Model):
         if self.reasons:
             return [r.strip() for r in self.reasons.split(",")]
         return []
+
+    def blocking_reasons_list(self):
+        """Raisons qui empêchent la publication automatique."""
+        return [r for r in self.reasons_list() if r not in NON_BLOCKING_CATEGORIES]
+
+    @property
+    def has_blocking_reasons(self):
+        return bool(self.blocking_reasons_list())
+
+    @property
+    def has_pii(self):
+        """Des informations personnelles ont été repérées dans le texte."""
+        return 'pii' in self.reasons_list()
 
     def get_localized_reasons(self):
         raw_reasons = self.reasons_list()

@@ -162,6 +162,32 @@ class ModeratePlayTaskTests(TestCase):
 
     @patch('core.services.image_moderation.moderate_play_images')
     @patch('moderation.services.moderate_text')
+    def test_published_when_only_pii_is_flagged(self, mock_text, mock_images):
+        from core.tasks import moderate_play
+        mock_text.return_value = ModerationResult.objects.create(reasons='pii')
+        mock_images.return_value = (True, '')
+
+        play = self._make_play()
+        moderate_play(play.pk)
+
+        play.refresh_from_db()
+        self.assertEqual(play.moderation_status, 'published')
+
+    @patch('core.services.image_moderation.moderate_play_images')
+    @patch('moderation.services.moderate_text')
+    def test_under_review_when_pii_combined_with_another_category(self, mock_text, mock_images):
+        from core.tasks import moderate_play
+        mock_text.return_value = ModerationResult.objects.create(reasons='pii, violence_and_threats')
+        mock_images.return_value = (True, '')
+
+        play = self._make_play()
+        moderate_play(play.pk)
+
+        play.refresh_from_db()
+        self.assertEqual(play.moderation_status, 'under_review')
+
+    @patch('core.services.image_moderation.moderate_play_images')
+    @patch('moderation.services.moderate_text')
     def test_under_review_when_images_fail(self, mock_text, mock_images):
         from core.tasks import moderate_play
         mock_text.return_value = ModerationResult.objects.create(reasons=None)

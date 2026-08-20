@@ -46,7 +46,7 @@ def moderate_offer(offer_id: int):
         offer.moderation = text_result
 
         # 4. Décision finale
-        if not text_result.reasons and images_ok:
+        if not text_result.has_blocking_reasons and images_ok:
             offer.moderation_status = Offer.PUBLISHED
         else:
             offer.moderation_status = Offer.UNDER_REVIEW
@@ -94,7 +94,7 @@ def moderate_play(play_id: int):
 
         play.moderation = text_result
 
-        if not text_result.reasons and images_ok:
+        if not text_result.has_blocking_reasons and images_ok:
             play.moderation_status = Play.PUBLISHED
         else:
             play.moderation_status = Play.UNDER_REVIEW
