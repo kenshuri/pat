@@ -1,0 +1,18 @@
+{% if published %}{{ label|capfirst }} « {{ title }} » est en ligne.
+
+Après examen par notre équipe, elle est désormais visible publiquement sur le site.
+
+Voir en ligne : {{ url }}
+{% else %}{{ label|capfirst }} « {{ title }} » n'a pas été publiée.
+
+Après examen par notre équipe, elle n'a pas pu être publiée.
+{% if reasons %}
+Motif(s) :
+{% for reason in reasons %}- {{ reason }}
+{% endfor %}{% endif %}
+Vous pouvez la modifier pour qu'elle respecte les règles du site, puis la soumettre à nouveau.
+
+Modifier : {{ url }}
+{% endif %}
+--
+Email automatique — Petites Annonces Théâtre
