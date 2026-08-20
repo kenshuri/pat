@@ -72,6 +72,8 @@ if DEBUG:
 AUTH_USER_MODEL = 'accounts.CustomUser'
 ADMINS = [('Admin', os.environ.get('ADMIN_EMAIL', 'admin@petites-annonces-theatre.fr'))]
 SERVER_EMAIL = "Petites Annonces Théâtre <ne-pas-repondre@petites-annonces-theatre.fr>"
+# Masque aussi les URLs Redis/Celery/DB dans les rapports d'erreur envoyés aux ADMINS.
+DEFAULT_EXCEPTION_REPORTER_FILTER = 'config.exception_filter.RedactedSettingsReporterFilter'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 

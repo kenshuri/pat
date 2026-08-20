@@ -148,6 +148,60 @@ class ModerateOfferTaskTests(TestCase):
 
 
 @override_settings(STORAGES=_SIMPLE_STORAGE)
+class PageParamTests(TestCase):
+    """Un ?page= non numérique ne doit pas provoquer d'erreur 500."""
+
+    def setUp(self):
+        self.client = Client()
+        self.user = CustomUser.objects.create_user(
+            email='pager@example.com', password='password123',
+        )
+        Offer.objects.create(  # type: ignore[attr-defined]
+            title='Annonce', summary='Resume', author=self.user,
+            city='Nantes, Loire-Atlantique, France',
+            moderation_status=Offer.PUBLISHED,
+        )
+
+    def test_index_survives_a_non_numeric_page(self):
+        response = self.client.get('/', {'page': 'gravitysmtp-settings'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['page'], 1)
+
+    def test_index_survives_an_empty_page(self):
+        response = self.client.get('/', {'page': ''})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['page'], 1)
+
+    def test_index_clamps_a_negative_page(self):
+        response = self.client.get('/', {'page': '-5'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['page'], 1)
+
+    def test_index_still_honours_a_valid_page(self):
+        response = self.client.get('/', {'page': '3'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['page'], 3)
+
+    def test_city_offers_survives_a_non_numeric_page(self):
+        url = reverse('city_offers', args=['nantes-loire-atlantique-france'])
+
+        response = self.client.get(url, {'page': 'abc'})
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_department_offers_survives_a_non_numeric_page(self):
+        url = reverse('department_offers', args=['loire-atlantique'])
+
+        response = self.client.get(url, {'page': 'abc'})
+
+        self.assertEqual(response.status_code, 200)
+
+
+@override_settings(STORAGES=_SIMPLE_STORAGE)
 class PiiOwnerWarningTests(TestCase):
     """L'avertissement « déplacez vos coordonnées » n'est visible que par l'auteur."""
 

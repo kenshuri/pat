@@ -76,9 +76,21 @@ def _build_offer_queryset(get_params):
     return qs.order_by('-created_on')
 
 
+def _safe_page(get_params):
+    """Numéro de page tiré de la query string, sans faire confiance à l'entrée.
+
+    Les scanners et les liens mal formés envoient n'importe quoi dans ?page= :
+    on retombe sur la première page plutôt que de renvoyer une 500.
+    """
+    try:
+        return max(1, int(get_params.get('page', 1)))
+    except (TypeError, ValueError):
+        return 1
+
+
 def index(request):
     is_htmx = request.META.get('HTTP_HX_REQUEST') == 'true'
-    page     = max(1, int(request.GET.get('page', 1)))
+    page     = _safe_page(request.GET)
 
     qs          = _build_offer_queryset(request.GET)
     total       = qs.count()
@@ -498,7 +510,7 @@ def city_offers(request, city_slug):
         raise Http404
 
     is_htmx = request.META.get('HTTP_HX_REQUEST') == 'true'
-    page = max(1, int(request.GET.get('page', 1)))
+    page = _safe_page(request.GET)
 
     qs = (
         Offer.objects
@@ -608,7 +620,7 @@ def department_offers(request, dept_slug):
         raise Http404
 
     is_htmx = request.META.get('HTTP_HX_REQUEST') == 'true'
-    page = max(1, int(request.GET.get('page', 1)))
+    page = _safe_page(request.GET)
 
     qs = (
         Offer.objects
