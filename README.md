@@ -1,4 +1,4 @@
-# pat
+# Petites Annonces Théâtre
 Site web pour déposer des petites annonces en lien avec le théâtre
 
 ## Dev local
