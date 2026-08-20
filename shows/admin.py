@@ -1,6 +1,8 @@
 from django.contrib import admin, messages
 from django.utils.translation import gettext_lazy as _
 
+from moderation.admin_mixins import ModerationDecisionMixin
+from moderation.notifications import notify_play_decision
 from .models import Play, PlayMembership, Representation, Contributor, PublicationCredit, Transaction
 
 
@@ -22,7 +24,7 @@ class RepresentationInline(admin.TabularInline):
 
 
 @admin.register(Play)
-class PlayAdmin(admin.ModelAdmin):
+class PlayAdmin(ModerationDecisionMixin, admin.ModelAdmin):
     list_display = ("title", "company", "genre", "moderation_status", "user", "created_at")
     list_editable = ("moderation_status",)
     search_fields = ("title", "company", "author")
@@ -59,14 +61,17 @@ class PlayAdmin(admin.ModelAdmin):
             parts.append(f"Images : {obj.moderation.image_reasons}")
         return " | ".join(parts) if parts else "✅ Aucun problème détecté"
 
+    def notify_moderation_decision(self, obj, previous_status):
+        notify_play_decision(obj, previous_status)
+
     @admin.action(description=_("Valider les pièces sélectionnées"))
     def valider_pieces(self, request, queryset):
-        updated = queryset.update(moderation_status='published')
+        updated = self.apply_moderation_decision(queryset, 'published')
         self.message_user(request, _("%d pièce(s) validée(s).") % updated, level=messages.SUCCESS)
 
     @admin.action(description=_("Rejeter les pièces sélectionnées"))
     def rejeter_pieces(self, request, queryset):
-        updated = queryset.update(moderation_status='rejected')
+        updated = self.apply_moderation_decision(queryset, 'rejected')
         self.message_user(request, _("%d pièce(s) rejetée(s).") % updated, level=messages.WARNING)
 
 

@@ -5,6 +5,8 @@ from django.contrib import admin, messages
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
+from moderation.admin_mixins import ModerationDecisionMixin
+from moderation.notifications import notify_offer_decision
 from .models import Alert, Offer, OfferPhoto
 
 
@@ -65,7 +67,7 @@ class OfferPhotoInline(admin.TabularInline):
 
 
 @admin.register(Offer)
-class OfferAdmin(admin.ModelAdmin):
+class OfferAdmin(ModerationDecisionMixin, admin.ModelAdmin):
     save_on_top = True
     date_hierarchy = "created_on"
     ordering = ("-created_on",)
@@ -217,9 +219,12 @@ class OfferAdmin(admin.ModelAdmin):
             level=messages.SUCCESS,
         )
 
+    def notify_moderation_decision(self, obj, previous_status):
+        notify_offer_decision(obj, previous_status)
+
     @admin.action(description=_("Valider les annonces sélectionnées"))
     def valider_annonces(self, request, queryset):
-        updated = queryset.update(moderation_status='published')
+        updated = self.apply_moderation_decision(queryset, 'published')
         self.message_user(
             request,
             _("%d annonce(s) validée(s) et publiée(s).") % updated,
@@ -228,7 +233,7 @@ class OfferAdmin(admin.ModelAdmin):
 
     @admin.action(description=_("Rejeter les annonces sélectionnées"))
     def rejeter_annonces(self, request, queryset):
-        updated = queryset.update(moderation_status='rejected')
+        updated = self.apply_moderation_decision(queryset, 'rejected')
         self.message_user(
             request,
             _("%d annonce(s) rejetée(s).") % updated,
