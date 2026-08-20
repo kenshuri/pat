@@ -216,6 +216,32 @@ SIMPLE_STORAGES = {
 
 
 @override_settings(STORAGES=SIMPLE_STORAGES)
+class AgendaUserAccessTests(TestCase):
+    """« Mes pièces » n'a rien à montrer à un anonyme : redirection, pas 500."""
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse('shows:agenda-user')
+        self.user = CustomUser.objects.create_user(
+            email='member@example.com', password='password123',
+        )
+
+    def test_anonymous_is_redirected_to_login(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/accounts/login/', response['Location'])
+        self.assertIn(self.url, response['Location'])
+
+    def test_logged_in_user_sees_the_page(self):
+        self.client.login(email='member@example.com', password='password123')
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+
+
+@override_settings(STORAGES=SIMPLE_STORAGES)
 class PlayViewModerationTests(TestCase):
     def setUp(self):
         self.client = Client()

@@ -70,6 +70,7 @@ def agenda(request):
         "plays": plays
     })
 
+@login_required
 def agenda_user(request):
     all_reps_qs = Representation.objects.order_by("datetime")
 
